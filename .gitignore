@@ -1,0 +1,12 @@
+.env
+data/*
+!data/README.md
+!data/SHA256SUMS
+models/
+*.pcap
+*.pcap.gz
+*.parquet
+*.joblib
+__pycache__/
+.venv/
+.DS_Store
