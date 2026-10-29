@@ -1,3 +1,14 @@
+"""NFStream settings and flow-expiry plugin.
+
+The NFStreamer settings and FlowExpirationManager are adapted from the
+authors' notebook 3-NFS-2023-TE-1-analyse-dataset.ipynb:
+https://github.com/FlowFrontiers/CyberML-DataQuality/blob/main/4-NFS-2023/3-NFS-2023-TE-1-analyse-dataset.ipynb
+Copied on 2026-10-28. Values unchanged. Wrapped in build_streamer().
+
+Paper: "Evaluating ML-Based Anomaly Detection Across Datasets of Varied
+Integrity: A Case Study".
+"""
+
 from nfstream import NFPlugin, NFStreamer
 
 BPF = "ip and (ip proto \\tcp or \\udp)"  # IPv4 TCP and UDP only
