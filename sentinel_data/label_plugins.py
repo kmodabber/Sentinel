@@ -1,8 +1,8 @@
 """Plugins that label flows when regenerating the dataset.
 
 PayloadManager and FlowLabelManager are taken from the authors' notebook
-3-NFS-2023-TE-1-analyse-dataset.ipynb
-https://github.com/FlowFrontiers/CyberML-DataQuality/tree/main/4-NFS-2023/3-NFS-2023-TE-1-analyse-dataset.ipynb, 
+3-NFS-2023-TE-1-analyse-dataset.ipynb:
+https://github.com/FlowFrontiers/CyberML-DataQuality/tree/main/4-NFS-2023/3-NFS-2023-TE-1-analyse-dataset.ipynb 
 copied on 2026-10-28. Changes: import path only.
 
 labeller.py in this folder is the authors' labeller, copied unchanged.
