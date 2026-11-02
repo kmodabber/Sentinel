@@ -8,5 +8,8 @@ models/
 *.parquet
 *.joblib
 __pycache__/
+.pytest_cache/
+wandb/
+results/
 .venv/
 .DS_Store
