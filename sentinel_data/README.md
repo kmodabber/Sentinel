@@ -97,8 +97,7 @@ rows per class, the rare class merge, the feature list, the code commit that
 made the files, and each file's SHA-256 and row count.
 
 These files are too big for git, so they go in the shared Drive folder
-**Projects > Cyber > Sentinel > Data > processed-v1** (one folder per
-version, never overwrite an old one).
+**Sentinel > Data**. The version they belong to is in `data_card.json`.
 
 If you download them from Drive instead of running the scripts, put all four
 in `data/processed/` and check them:
