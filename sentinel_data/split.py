@@ -125,14 +125,24 @@ def window_counts(df):
     return counts
 
 
-def data_card(split_df, rows_before, gap_seconds):
-    """Summary of the split saved next to the Parquet files: version, date,
-    source, rows per class in each part, and the feature list."""
-    per_class = (
-        split_df.groupby([LABEL, "split"]).size()
+def per_split_counts(df, label_col):
+    """{label: {"train": n, "val": n, "test": n}} for the given label column."""
+    table = (
+        df.groupby([label_col, "split"]).size()
         .unstack("split", fill_value=0)
         .reindex(columns=list(SPLITS), fill_value=0)
     )
+    return {
+        label: {s: int(row[s]) for s in SPLITS}
+        for label, row in table.iterrows()
+    }
+
+
+def data_card(split_df, rows_before, gap_seconds, rare=(), rare_min_flows=RARE_MIN_FLOWS):
+    """Summary of the split saved next to the Parquet files: version, date,
+    source, rows per class in each part, which classes were merged into
+    Rare attack, and the feature list."""
+    merged = split_df[split_df[LABEL] == RARE_LABEL] if rare else split_df.iloc[0:0]
     return {
         "version": DATA_VERSION,
         "date": date.today().isoformat(),
@@ -143,9 +153,15 @@ def data_card(split_df, rows_before, gap_seconds):
         "rows_before_split": rows_before,
         "rows_dropped_in_gaps": rows_before - len(split_df),
         "rows": {s: int((split_df["split"] == s).sum()) for s in SPLITS},
-        "rows_per_class": {
-            label: {s: int(row[s]) for s in SPLITS}
-            for label, row in per_class.iterrows()
+        "rows_per_class": per_split_counts(split_df, LABEL),
+        # SEN-FR-05: the evaluation report should quote this section
+        "rare_classes": {
+            "rule": f"attack classes with fewer than {rare_min_flows} flows "
+                    f"after cleaning are merged into '{RARE_LABEL}'",
+            "min_flows": rare_min_flows,
+            "merged": list(rare),
+            "excluded": [],
+            "rows_per_original_class": per_split_counts(merged, ORIGINAL_LABEL),
         },
         "features": feature_columns(split_df.drop(columns="split")),
     }
@@ -174,7 +190,7 @@ def main(data_dir=DATA_DIR, gap_seconds=GAP_SECONDS, rare_min_flows=RARE_MIN_FLO
         part = out[out["split"] == s].drop(columns="split")
         part.to_parquet(data_dir / f"{s}.parquet", index=False)
 
-    card = data_card(out, len(df), gap_seconds)
+    card = data_card(out, len(df), gap_seconds, rare, rare_min_flows)
     (data_dir / "data_card.json").write_text(json.dumps(card, indent=2))
     print(f"\nRows: {card['rows']}  dropped in gaps: {card['rows_dropped_in_gaps']:,}")
     print(f"Saved train/val/test.parquet and data_card.json to {data_dir}")
