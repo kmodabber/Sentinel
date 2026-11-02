@@ -88,3 +88,24 @@ one by one. Nothing is excluded.
 Web Attack - Brute Force (147 flows) and Bot (736) stay as their own classes.
 The merged list and counts are written to `rare_classes` in
 `data/processed/data_card.json`; the evaluation report should quote it.
+
+## Sharing the processed data (SEN-FR-06)
+
+`split` saves `train.parquet`, `val.parquet`, `test.parquet` and
+`data_card.json` in `data/processed/`. The data card has the version, date,
+rows per class, the rare class merge, the feature list, the code commit that
+made the files, and each file's SHA-256 and row count.
+
+These files are too big for git, so they go in the shared Drive folder
+**Projects > Cyber > Sentinel > Data > processed-v1** (one folder per
+version, never overwrite an old one).
+
+If you download them from Drive instead of running the scripts, put all four
+in `data/processed/` and check them:
+
+```
+python -m sentinel_data.check_processed
+```
+
+It prints `OK` with the row counts, or names any file that doesn't match the
+data card.
