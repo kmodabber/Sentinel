@@ -68,7 +68,7 @@ def run_baselines(data_dir=DATA_DIR, eval_split=EVAL_SPLIT, use_wandb=USE_WANDB,
     if use_wandb:
         import wandb
         for r in results:
-            with wandb.init(project="sentinel", job_type="baseline", config={k: r[k] for k in ("model", "task", "dst_port")}, reinit=True) as run:
+            with wandb.init(entity="wcs-sentinel", project="Sentinel", job_type="baseline", config={k: r[k] for k in ("model", "task", "dst_port")}, reinit="finish_previous") as run:
                 run.log({"macro_f1": r["macro_f1"], "benign_fpr": r["benign_fpr"]})
 
     return results
