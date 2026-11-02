@@ -68,5 +68,23 @@ boundaries. Per-class counts are in `data/processed/data_card.json`.
 The output files are named the way `sentinel_ml/baselines.py` reads them
 (`data/processed/train.parquet`, `val.parquet`, `test.parquet`).
 
-Rare classes (Heartbleed 5/1/3, SQL injection 7/2/3, Infiltration 16/6/6,
-XSS 15/4/6) are split as-is. Merging them into "Rare attack" is SEN-FR-05.
+## Rare classes (SEN-FR-05)
+
+Attack classes with fewer than 100 flows after cleaning are merged into one
+**"Rare attack"** class (`--rare-min-flows` to change it). Each one is still
+split inside its own time window first, then relabelled, so every rare attack
+appears in train, val and test. The original label is kept in
+`label_original` (not a feature) in case the evaluation wants to look at them
+one by one. Nothing is excluded.
+
+| Merged class | train | val | test |
+|---|---|---|---|
+| Heartbleed | 5 | 1 | 3 |
+| Infiltration | 16 | 6 | 6 |
+| Web Attack - Sql Injection | 7 | 2 | 3 |
+| Web Attack - XSS | 15 | 4 | 6 |
+| **Rare attack (total)** | **43** | **13** | **18** |
+
+Web Attack - Brute Force (147 flows) and Bot (736) stay as their own classes.
+The merged list and counts are written to `rare_classes` in
+`data/processed/data_card.json`; the evaluation report should quote it.
