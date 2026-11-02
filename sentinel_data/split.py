@@ -25,12 +25,14 @@ PortScan) the middle 20% of flows can all start within two minutes, so a
 
 import argparse
 import json
+import subprocess
 from datetime import date
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
+from sentinel_data.check_processed import file_info
 from sentinel_data.clean import LABEL, TIME_COL, feature_columns
 
 DATA_DIR = Path("data/processed")
@@ -47,6 +49,18 @@ RARE_MIN_FLOWS = 100
 RARE_LABEL = "Rare attack"
 ORIGINAL_LABEL = "label_original"
 BENIGN = "BENIGN"
+
+
+def code_commit():
+    """Short hash of the git commit the code is on, ending in -dirty if there
+    were uncommitted changes. None outside a git repo."""
+    try:
+        return subprocess.run(
+            ["git", "describe", "--always", "--dirty"],
+            capture_output=True, text=True, check=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return None
 
 
 def find_rare_classes(df, min_flows=RARE_MIN_FLOWS):
@@ -191,6 +205,13 @@ def main(data_dir=DATA_DIR, gap_seconds=GAP_SECONDS, rare_min_flows=RARE_MIN_FLO
         part.to_parquet(data_dir / f"{s}.parquet", index=False)
 
     card = data_card(out, len(df), gap_seconds, rare, rare_min_flows)
+    # SEN-FR-06: record each file's checksum and row count, plus the commit
+    # that made them, so a copy from the shared Drive can be checked with
+    # python -m sentinel_data.check_processed
+    card["code_commit"] = code_commit()
+    card["files"] = {
+        f"{s}.parquet": file_info(data_dir / f"{s}.parquet") for s in SPLITS
+    }
     (data_dir / "data_card.json").write_text(json.dumps(card, indent=2))
     print(f"\nRows: {card['rows']}  dropped in gaps: {card['rows_dropped_in_gaps']:,}")
     print(f"Saved train/val/test.parquet and data_card.json to {data_dir}")
