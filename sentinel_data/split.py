@@ -40,6 +40,33 @@ DURATION_COL = "bidirectional_duration_ms"
 GAP_SECONDS = 1
 DATA_VERSION = "nfs2023te-v1"
 
+# SEN-FR-05: attack classes with fewer flows than this (in the cleaned data)
+# are merged into one "Rare attack" class. With a handful of flows a class
+# gets only 1-3 test rows, so its per-class scores would mean nothing.
+RARE_MIN_FLOWS = 100
+RARE_LABEL = "Rare attack"
+ORIGINAL_LABEL = "label_original"
+BENIGN = "BENIGN"
+
+
+def find_rare_classes(df, min_flows=RARE_MIN_FLOWS):
+    """Attack labels with fewer than min_flows rows. BENIGN is never rare."""
+    counts = df[LABEL].value_counts()
+    rare = counts[(counts < min_flows) & (counts.index != BENIGN)]
+    return sorted(rare.index)
+
+
+def merge_rare_classes(df, rare):
+    """Relabel the rare classes as RARE_LABEL.
+
+    The old label is kept in label_original so nothing is lost and the
+    evaluation can still look at each rare attack on its own.
+    """
+    out = df.copy()
+    out[ORIGINAL_LABEL] = out[LABEL]
+    out.loc[out[LABEL].isin(rare), LABEL] = RARE_LABEL
+    return out
+
 
 def assign_window(starts, ends, gap_ms, fractions=FRACTIONS):
     """Label each flow in one window as 'train', 'val', 'test' or 'gap'.
@@ -124,10 +151,13 @@ def data_card(split_df, rows_before, gap_seconds):
     }
 
 
-def main(data_dir=DATA_DIR, gap_seconds=GAP_SECONDS):
+def main(data_dir=DATA_DIR, gap_seconds=GAP_SECONDS, rare_min_flows=RARE_MIN_FLOWS):
     data_dir = Path(data_dir)
     df = pd.read_parquet(data_dir / "clean.parquet")
+    # windows use the original labels so each rare attack keeps its own
+    # time window, then the rare ones are merged after splitting
     out = split(df, gap_seconds)
+    rare = find_rare_classes(df, rare_min_flows)
 
     counts = window_counts(out)
     print(counts.to_string())
@@ -136,6 +166,9 @@ def main(data_dir=DATA_DIR, gap_seconds=GAP_SECONDS):
     if len(empty):
         print("\nWARNING: these windows have an empty part (see SEN-FR-05):")
         print(empty.to_string())
+
+    out = merge_rare_classes(out, rare)
+    print(f"\nMerged into '{RARE_LABEL}' (< {rare_min_flows} flows): {', '.join(rare) or 'none'}")
 
     for s in SPLITS:
         part = out[out["split"] == s].drop(columns="split")
@@ -150,4 +183,6 @@ def main(data_dir=DATA_DIR, gap_seconds=GAP_SECONDS):
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--gap-seconds", type=int, default=GAP_SECONDS)
-    main(gap_seconds=p.parse_args().gap_seconds)
+    p.add_argument("--rare-min-flows", type=int, default=RARE_MIN_FLOWS)
+    args = p.parse_args()
+    main(gap_seconds=args.gap_seconds, rare_min_flows=args.rare_min_flows)
