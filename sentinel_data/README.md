@@ -1,13 +1,14 @@
 # sentinel_data
 
-Download and clean NFS-2023-TE. Run from the repo root, in order:
+Download, clean and split NFS-2023-TE. Run from the repo root, in order:
 
 ```
 python -m sentinel_data.get_data   # SEN-FR-01  ~190 MB download, checksummed
 python -m sentinel_data.clean      # SEN-FR-03  ~1.5 min, writes data/processed/clean.parquet
+python -m sentinel_data.split      # SEN-FR-04  ~20 s, writes train/val/test.parquet + data_card.json
 ```
 
-Tests: `pytest` (TC-01 `test_get_data.py`, TC-02 `test_clean.py`).
+Tests: `pytest` (TC-01 `test_get_data.py`, TC-02 `test_clean.py`, TC-03 `test_split.py`).
 
 ## Cleaning rules (SEN-FR-03)
 
@@ -42,3 +43,30 @@ Constant columns dropped: `ip_version`, `vlan_id`, `bidirectional_urg_packets`,
 Note for modelling: 1.74M rows (55%) share their features and label with
 another row (different IPs/times). They're real repeated flows (scans, floods)
 so they're kept, but identical rows can sit in both train and test.
+
+## Split (SEN-FR-04)
+
+Each (day, label) is one window: one attack on one day, or one day's benign
+traffic. Inside each window, flows are sorted by start time and cut at the
+60% and 80% points (t1, t2):
+
+- train: flow ends before t1 - gap
+- val: flow starts at or after t1 and ends before t2 - gap
+- test: flow starts at or after t2
+
+Gap is 1 s by default (`--gap-seconds`). A flow that would be running across a
+boundary is dropped, so no connection lands in two parts. Same input always
+gives the same output.
+
+Why not a fixed gap on start times: dense attacks (PortScan, DoS GoldenEye)
+fit their middle 20% of flows into under two minutes, so a 120 s gap left
+them with no validation data at all.
+
+Result: train 1,887,703 / val 626,336 / test 630,181, 6,217 dropped at
+boundaries. Per-class counts are in `data/processed/data_card.json`.
+
+The output files are named the way `sentinel_ml/baselines.py` reads them
+(`data/processed/train.parquet`, `val.parquet`, `test.parquet`).
+
+Rare classes (Heartbleed 5/1/3, SQL injection 7/2/3, Infiltration 16/6/6,
+XSS 15/4/6) are split as-is. Merging them into "Rare attack" is SEN-FR-05.
