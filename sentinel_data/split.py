@@ -25,12 +25,14 @@ PortScan) the middle 20% of flows can all start within two minutes, so a
 
 import argparse
 import json
+import subprocess
 from datetime import date
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
+from sentinel_data.check_processed import file_info
 from sentinel_data.clean import LABEL, TIME_COL, feature_columns
 
 DATA_DIR = Path("data/processed")
@@ -39,6 +41,45 @@ FRACTIONS = (0.6, 0.2, 0.2)
 DURATION_COL = "bidirectional_duration_ms"
 GAP_SECONDS = 1
 DATA_VERSION = "nfs2023te-v1"
+
+# SEN-FR-05: attack classes with fewer flows than this (in the cleaned data)
+# are merged into one "Rare attack" class. With a handful of flows a class
+# gets only 1-3 test rows, so its per-class scores would mean nothing.
+RARE_MIN_FLOWS = 100
+RARE_LABEL = "Rare attack"
+ORIGINAL_LABEL = "label_original"
+BENIGN = "BENIGN"
+
+
+def code_commit():
+    """Short hash of the git commit the code is on, ending in -dirty if there
+    were uncommitted changes. None outside a git repo."""
+    try:
+        return subprocess.run(
+            ["git", "describe", "--always", "--dirty"],
+            capture_output=True, text=True, check=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError):
+        return None
+
+
+def find_rare_classes(df, min_flows=RARE_MIN_FLOWS):
+    """Attack labels with fewer than min_flows rows. BENIGN is never rare."""
+    counts = df[LABEL].value_counts()
+    rare = counts[(counts < min_flows) & (counts.index != BENIGN)]
+    return sorted(rare.index)
+
+
+def merge_rare_classes(df, rare):
+    """Relabel the rare classes as RARE_LABEL.
+
+    The old label is kept in label_original so nothing is lost and the
+    evaluation can still look at each rare attack on its own.
+    """
+    out = df.copy()
+    out[ORIGINAL_LABEL] = out[LABEL]
+    out.loc[out[LABEL].isin(rare), LABEL] = RARE_LABEL
+    return out
 
 
 def assign_window(starts, ends, gap_ms, fractions=FRACTIONS):
@@ -98,14 +139,24 @@ def window_counts(df):
     return counts
 
 
-def data_card(split_df, rows_before, gap_seconds):
-    """Summary of the split saved next to the Parquet files: version, date,
-    source, rows per class in each part, and the feature list."""
-    per_class = (
-        split_df.groupby([LABEL, "split"]).size()
+def per_split_counts(df, label_col):
+    """{label: {"train": n, "val": n, "test": n}} for the given label column."""
+    table = (
+        df.groupby([label_col, "split"]).size()
         .unstack("split", fill_value=0)
         .reindex(columns=list(SPLITS), fill_value=0)
     )
+    return {
+        label: {s: int(row[s]) for s in SPLITS}
+        for label, row in table.iterrows()
+    }
+
+
+def data_card(split_df, rows_before, gap_seconds, rare=(), rare_min_flows=RARE_MIN_FLOWS):
+    """Summary of the split saved next to the Parquet files: version, date,
+    source, rows per class in each part, which classes were merged into
+    Rare attack, and the feature list."""
+    merged = split_df[split_df[LABEL] == RARE_LABEL] if rare else split_df.iloc[0:0]
     return {
         "version": DATA_VERSION,
         "date": date.today().isoformat(),
@@ -116,18 +167,27 @@ def data_card(split_df, rows_before, gap_seconds):
         "rows_before_split": rows_before,
         "rows_dropped_in_gaps": rows_before - len(split_df),
         "rows": {s: int((split_df["split"] == s).sum()) for s in SPLITS},
-        "rows_per_class": {
-            label: {s: int(row[s]) for s in SPLITS}
-            for label, row in per_class.iterrows()
+        "rows_per_class": per_split_counts(split_df, LABEL),
+        # SEN-FR-05: the evaluation report should quote this section
+        "rare_classes": {
+            "rule": f"attack classes with fewer than {rare_min_flows} flows "
+                    f"after cleaning are merged into '{RARE_LABEL}'",
+            "min_flows": rare_min_flows,
+            "merged": list(rare),
+            "excluded": [],
+            "rows_per_original_class": per_split_counts(merged, ORIGINAL_LABEL),
         },
         "features": feature_columns(split_df.drop(columns="split")),
     }
 
 
-def main(data_dir=DATA_DIR, gap_seconds=GAP_SECONDS):
+def main(data_dir=DATA_DIR, gap_seconds=GAP_SECONDS, rare_min_flows=RARE_MIN_FLOWS):
     data_dir = Path(data_dir)
     df = pd.read_parquet(data_dir / "clean.parquet")
+    # windows use the original labels so each rare attack keeps its own
+    # time window, then the rare ones are merged after splitting
     out = split(df, gap_seconds)
+    rare = find_rare_classes(df, rare_min_flows)
 
     counts = window_counts(out)
     print(counts.to_string())
@@ -137,11 +197,21 @@ def main(data_dir=DATA_DIR, gap_seconds=GAP_SECONDS):
         print("\nWARNING: these windows have an empty part (see SEN-FR-05):")
         print(empty.to_string())
 
+    out = merge_rare_classes(out, rare)
+    print(f"\nMerged into '{RARE_LABEL}' (< {rare_min_flows} flows): {', '.join(rare) or 'none'}")
+
     for s in SPLITS:
         part = out[out["split"] == s].drop(columns="split")
         part.to_parquet(data_dir / f"{s}.parquet", index=False)
 
-    card = data_card(out, len(df), gap_seconds)
+    card = data_card(out, len(df), gap_seconds, rare, rare_min_flows)
+    # SEN-FR-06: record each file's checksum and row count, plus the commit
+    # that made them, so a copy from the shared Drive can be checked with
+    # python -m sentinel_data.check_processed
+    card["code_commit"] = code_commit()
+    card["files"] = {
+        f"{s}.parquet": file_info(data_dir / f"{s}.parquet") for s in SPLITS
+    }
     (data_dir / "data_card.json").write_text(json.dumps(card, indent=2))
     print(f"\nRows: {card['rows']}  dropped in gaps: {card['rows_dropped_in_gaps']:,}")
     print(f"Saved train/val/test.parquet and data_card.json to {data_dir}")
@@ -150,4 +220,6 @@ def main(data_dir=DATA_DIR, gap_seconds=GAP_SECONDS):
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--gap-seconds", type=int, default=GAP_SECONDS)
-    main(gap_seconds=p.parse_args().gap_seconds)
+    p.add_argument("--rare-min-flows", type=int, default=RARE_MIN_FLOWS)
+    args = p.parse_args()
+    main(gap_seconds=args.gap_seconds, rare_min_flows=args.rare_min_flows)

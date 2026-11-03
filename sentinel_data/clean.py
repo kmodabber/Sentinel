@@ -22,8 +22,9 @@ LABEL = "label"
 TIME_COL = "bidirectional_first_seen_ms"
 
 # Kept in the output so the split can order flows by time, but they are
-# not model features
-META_COLS = ["day", TIME_COL]
+# not model features. label_original is added by the split when rare
+# classes are merged (SEN-FR-05).
+META_COLS = ["day", TIME_COL, "label_original"]
 
 # Columns that identify a host, a connection or a point in time instead of
 # describing how the traffic behaves. A model trained on these can learn
