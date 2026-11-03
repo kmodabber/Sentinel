@@ -1,0 +1,12 @@
+slice_name,attack_type,label,date,pcap_file,start,end,attacker_ip,victim_ip,sub_windows
+FTP-Patator,brute_force,FTP-Patator,2017-07-04,Tuesday-WorkingHours.pcap,09:20,10:20,172.16.0.1,192.168.10.50,,
+SSH-Patator,brute_force,SSH-Patator,2017-07-04,Tuesday-WorkingHours.pcap,14:00,15:00,172.16.0.1,192.168.10.50,,
+DoS-slowloris,dos,DoS slowloris,2017-07-05,Wednesday-workingHours.pcap,09:47,10:10,172.16.0.1,192.168.10.50,,
+DoS-Slowhttptest,dos,DoS Slowhttptest,2017-07-05,Wednesday-workingHours.pcap,10:14,10:35,172.16.0.1,192.168.10.50,,
+DoS-Hulk,dos,DoS Hulk,2017-07-05,Wednesday-workingHours.pcap,10:43,11:00,172.16.0.1,192.168.10.50,,
+DoS-GoldenEye,dos,DoS GoldenEye,2017-07-05,Wednesday-workingHours.pcap,11:10,11:23,172.16.0.1,192.168.10.50,,
+WebAttack-BruteForce,web_attack,Web Attack - Brute Force,2017-07-06,Thursday-WorkingHours.pcap,09:20,10:00,172.16.0.1,192.168.10.50,,
+WebAttack-XSS,web_attack,Web Attack - XSS,2017-07-06,Thursday-WorkingHours.pcap,10:15,10:35,172.16.0.1,192.168.10.50,,
+WebAttack-SQLi,web_attack,Web Attack - Sql Injection,2017-07-06,Thursday-WorkingHours.pcap,10:40,10:42,172.16.0.1,192.168.10.50,,
+PortScan-firewall-on,port_scan,PortScan,2017-07-07,Friday-WorkingHours.pcap,13:55,14:35,172.16.0.1,192.168.10.50,13:55-13:57; 13:58-14:00; 14:01-14:04; 14:05-14:07; 14:08-14:10; 14:11-14:13; 14:14-14:16; 14:17-14:19; 14:20-14:21; 14:22-14:24; 14:33-14:33; 14:35-14:35,
+PortScan-firewall-off,port_scan,PortScan,2017-07-07,Friday-WorkingHours.pcap,14:51,15:29,172.16.0.1,192.168.10.50,sS 14:51-14:53; sT 14:54-14:56; sF 14:57-14:59; sX 15:00-15:02; sN 15:03-15:05; sP 15:06-15:07; sV 15:08-15:10; sU 15:11-15:12; sO 15:13-15:15; sA 15:16-15:18; sW 15:19-15:21; sR 15:22-15:24; sL 15:25-15:25; sI 15:26-15:27; b 15:28-15:29,
