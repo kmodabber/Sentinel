@@ -13,3 +13,5 @@ wandb/
 results/
 .venv/
 .DS_Store
+
+.env
