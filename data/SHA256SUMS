@@ -1,0 +1,7 @@
+# NFS-2023-TE, FlowFrontiers/CyberML-DataQuality @ c6e0191b2c5c058abb6c9de68aad555d59944879
+# Check by hand from data/raw/NFS-2023-TE/: shasum -a 256 -c ../../SHA256SUMS
+9a49a3f539e239f62dc6d5130f52b0dccd62e0163b68af12e3acdba242cee6f6  Friday.csv.zip
+c784332c8cedde18476010517feb91c942da07af0df0ed5890494984e1a7e270  Monday.csv.zip
+e9c76f20e1c5db2012aa62a3a343ada5d7e0221356cc63825bf3efac5769d4be  Thursday.csv.zip
+f13374d411c3438abbff51b3a27bf1397aedb1613939ff273464b1186c36018a  Tuesday.csv.zip
+5914fbd496bbbb9259e30b52d4e1b4a73358274955e58f30c8ae50f642c2a39f  Wednesday.csv.zip
