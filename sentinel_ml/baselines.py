@@ -42,7 +42,7 @@ def run_baselines(data_dir=DATA_DIR, eval_split=EVAL_SPLIT, use_wandb=USE_WANDB,
 
         models = {
             "majority": DummyClassifier(strategy="most_frequent"),
-            "logreg": make_pipeline(StandardScaler(), LogisticRegression(class_weight="balanced", max_iter=2000, random_state=42)),
+            "logreg": make_pipeline(StandardScaler(), LogisticRegression(class_weight="balanced", max_iter=2000, random_state=42, solver="saga", n_jobs=-1)),
         }
 
         for name, model in models.items():
