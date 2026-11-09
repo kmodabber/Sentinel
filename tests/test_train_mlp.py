@@ -1,5 +1,4 @@
 """Unit tests for SEN-FR-13 MLP trainer. Uses only the synthetic fixture."""
-
 from pathlib import Path
 
 import numpy as np
@@ -11,8 +10,6 @@ from sentinel_ml.make_synthetic import generate_parquet_splits
 from sentinel_ml.train_mlp import (
     build_preprocessor,
     class_weights_from_train,
-)
-from sentinel_ml.train_mlp import (
     main as train_main,
 )
 
