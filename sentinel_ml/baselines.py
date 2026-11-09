@@ -24,13 +24,21 @@ ID_COLS = [
 ]
 
 
-def run_baselines(data_dir=DATA_DIR, eval_split=EVAL_SPLIT, use_wandb=USE_WANDB, out_dir=Path("results")):
+def run_baselines(data_dir=DATA_DIR, eval_split=EVAL_SPLIT, use_wandb=USE_WANDB, out_dir=Path("results"), train_sample=None):
+    import time
+    print(f"Loading train split...", flush=True)
     train_df = pd.read_parquet(data_dir / "train.parquet")
+    if train_sample is not None:
+        train_df = train_df.sample(n=min(train_sample, len(train_df)), random_state=42)
+    print(f"  train rows: {len(train_df):,}", flush=True)
+    print(f"Loading {eval_split} split...", flush=True)
     eval_df = pd.read_parquet(data_dir / f"{eval_split}.parquet")
+    print(f"  {eval_split} rows: {len(eval_df):,}", flush=True)
 
+    combos = list(product(["binary", "multiclass"], [True, False]))
     results = []
     # Evaluate all combinations of task (binary vs. multiclass) and destination port inclusion
-    for task, use_port in product(["binary", "multiclass"], [True, False]):
+    for combo_i, (task, use_port) in enumerate(combos, 1):
         drop_cols = ID_COLS + ([] if use_port else ["dst_port"])
         X_tr = train_df.drop(columns=drop_cols, errors="ignore").select_dtypes("number")
         X_ev = eval_df.drop(columns=drop_cols, errors="ignore").select_dtypes("number")
@@ -42,11 +50,15 @@ def run_baselines(data_dir=DATA_DIR, eval_split=EVAL_SPLIT, use_wandb=USE_WANDB,
 
         models = {
             "majority": DummyClassifier(strategy="most_frequent"),
-            "logreg": make_pipeline(StandardScaler(), LogisticRegression(class_weight="balanced", max_iter=2000, random_state=42)),
+            "logreg": make_pipeline(StandardScaler(), LogisticRegression(class_weight="balanced", max_iter=2000, random_state=42, solver="saga", verbose=1)),
         }
 
         for name, model in models.items():
+            print(f"[{combo_i}/{len(combos)}] Fitting {name} | task={task} | port={use_port} | {X_tr.shape[0]:,} rows x {X_tr.shape[1]} features...", flush=True)
+            t0 = time.time()
             preds = model.fit(X_tr, y_tr).predict(X_ev)
+            elapsed = time.time() - t0
+            print(f"  done in {elapsed:.1f}s", flush=True)
             labels = sorted(pd.unique(y_ev))
             f1 = float(f1_score(y_ev, preds, average="macro", zero_division=0))
             # False positive rate: fraction of true benign flows misclassified as an attack
