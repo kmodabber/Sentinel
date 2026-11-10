@@ -16,7 +16,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from sentinel_ml.eval_template import ID_COLS, evaluate_single, prep_xy
+from sentinel_ml.eval_template import ID_COLS, evaluate_single, prep_xy  # noqa: F401
 
 DATA_DIR = Path("data/processed")
 EVAL_SPLIT = "test"
@@ -82,9 +82,49 @@ def _build_models():
     }
 
 
-def run_baselines(data_dir=DATA_DIR, eval_split=EVAL_SPLIT, use_wandb=USE_WANDB, out_dir=Path("results"), train_sample=None):
-    import time
-    print("Loading train split...", flush=True)
+def _write_markdown(out_path: Path, metadata: dict, results: list[dict], flags: list[str]) -> None:
+    lines = [
+        f"# SEN-109 Sanity Baselines — data {metadata['data']['version']} (test split)",
+        "",
+        f"- Git commit: `{metadata['git_commit'][:12]}`",
+        f"- Seed: {metadata['seed']}",
+        f"- Rare-class policy: {metadata['data']['rare_class_policy']}",
+        f"- Evaluated split: **{metadata['split_evaluated']}**",
+        "",
+        "| model | task | dst_port | macro_f1 | benign_fpr | n_features |",
+        "|---|---|---|---:|---:|---:|",
+    ]
+    for r in results:
+        lines.append(
+            f"| {r['model']} | {r['task']} | {r['dst_port']} | "
+            f"{r['macro_f1']:.4f} | {r['benign_fpr']:.4f} | {r['n_features']} |"
+        )
+    lines.append("")
+    if flags:
+        lines.append("## Leakage flags")
+        lines.append("")
+        lines.extend(f"- {f}" for f in flags)
+    else:
+        lines.append("_No leakage thresholds crossed._")
+    lines.append("")
+    out_path.write_text("\n".join(lines))
+
+
+def run_baselines(
+    data_dir: Path = DATA_DIR,
+    eval_split: str = EVAL_SPLIT,
+    use_wandb: bool = False,
+    out_dir: Path = Path("results"),
+    train_sample: int | None = None,
+    wandb_entity: str = WANDB_ENTITY,
+    wandb_project: str = WANDB_PROJECT,
+    drop_duplicates: bool = False,
+) -> list[dict]:
+    """Run majority + logreg baselines across binary/multiclass and with/without dst_port.
+
+    Metric computation uses sentinel_ml.eval_template.evaluate_single so results match
+    the team template format consumed by SEN-108.
+    """
     train_df = pd.read_parquet(data_dir / "train.parquet")
     if train_sample is not None:
         train_df = train_df.sample(n=min(train_sample, len(train_df)), random_state=SEED)
