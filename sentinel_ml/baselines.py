@@ -76,7 +76,7 @@ def _build_models():
                 class_weight="balanced",
                 max_iter=2000,
                 random_state=SEED,
-                solver="saga",
+                solver="lbfgs",
             ),
         ),
     }
@@ -163,6 +163,11 @@ def run_baselines(
             )
             t0 = time.time()
             model.fit(X_tr, y_tr)
+            if name == "majority":
+                # DummyClassifier has no coef_/feature_importances_, so evaluate_single
+                # would fall back to a very slow permutation_importance pass. Feature
+                # importance for a constant predictor is meaningless; short-circuit it.
+                model.feature_importances_ = np.zeros(X_ev.shape[1])
             metrics = evaluate_single(model, X_ev, y_ev, benign_name)
             metrics.update({
                 "model": name,
