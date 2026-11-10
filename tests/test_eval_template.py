@@ -7,7 +7,12 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from sentinel_ml.eval_template import evaluate_single, get_top_features, prep_xy, run_eval_template
+from sentinel_ml.eval_template import (
+    evaluate_single,
+    get_top_features,
+    prep_xy,
+    run_eval_template,
+)
 from sentinel_ml.make_synthetic import generate_parquet_splits
 
 

@@ -3,7 +3,11 @@ import pandas as pd
 
 from sentinel_data.clean import feature_columns
 from sentinel_data.split import (
-    RARE_LABEL, data_card, find_rare_classes, merge_rare_classes, split,
+    RARE_LABEL,
+    data_card,
+    find_rare_classes,
+    merge_rare_classes,
+    split,
 )
 
 

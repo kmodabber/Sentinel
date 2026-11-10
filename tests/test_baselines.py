@@ -1,5 +1,6 @@
 """Unit tests for SEN-FR-07 sanity baselines and synthetic data generation."""
 import pandas as pd
+
 from sentinel_ml.baselines import ID_COLS, run_baselines
 from sentinel_ml.make_synthetic import generate_parquet_splits
 

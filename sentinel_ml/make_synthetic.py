@@ -1,5 +1,6 @@
 """Synthetic network flow generator for local testing before real Parquet splits exist."""
 from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
