@@ -14,3 +14,7 @@ results/
 logs/
 .venv/
 .DS_Store
+
+.env
+*.csv
+.venv-old39/
