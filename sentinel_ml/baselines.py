@@ -21,7 +21,7 @@ from sentinel_ml.eval_template import ID_COLS, evaluate_single, prep_xy
 DATA_DIR = Path("data/processed")
 EVAL_SPLIT = "test"
 SEED = 42
-WANDB_ENTITY = "sentinel-ml"
+WANDB_ENTITY = "wcs-sentinel"
 WANDB_PROJECT = "baselines-v1"
 
 LEAK_LOGREG_THRESHOLD = 0.95
