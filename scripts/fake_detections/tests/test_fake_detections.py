@@ -1,8 +1,10 @@
 import random
 import unittest
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch
-from fake_detections import generate_event, insert_event, register_model, MODEL_VERSION
+from unittest.mock import MagicMock
+
+from fake_detections import MODEL_VERSION, generate_event, insert_event, register_model
+
 
 class FakeDetectionsTests(unittest.TestCase):
     def test_benign_event_matches_c2_constraints(self):
