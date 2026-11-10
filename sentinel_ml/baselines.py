@@ -3,6 +3,7 @@
 import json
 from itertools import product
 from pathlib import Path
+
 import numpy as np
 import pandas as pd
 from sklearn.dummy import DummyClassifier
@@ -26,7 +27,7 @@ ID_COLS = [
 
 def run_baselines(data_dir=DATA_DIR, eval_split=EVAL_SPLIT, use_wandb=USE_WANDB, out_dir=Path("results"), train_sample=None):
     import time
-    print(f"Loading train split...", flush=True)
+    print("Loading train split...", flush=True)
     train_df = pd.read_parquet(data_dir / "train.parquet")
     if train_sample is not None:
         train_df = train_df.sample(n=min(train_sample, len(train_df)), random_state=42)
