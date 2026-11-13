@@ -39,8 +39,8 @@ def test_columns_must_match_in_order():
     assert not same_columns(["a", "b"], ["b", "a"])
 
 
-REGEN =r"C:\Users\Hossane\Desktop\test_pcap\NFS-2023-TE\datasets\Tuesday_Regen.csv"
-PUBLISHED = r"C:\Users\Hossane\Desktop\test_pcap\NFS-2023-TE\datasets\CyberML-DataQuality-Tuesday.csv"
+REGEN = os.environ.get("SENTINEL_REGEN_CSV")
+PUBLISHED = os.environ.get("SENTINEL_PUBLISHED_CSV")
 
 
 @pytest.mark.skipif(

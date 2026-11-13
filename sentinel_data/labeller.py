@@ -1,5 +1,6 @@
 from datetime import datetime
-from time import mktime
+from zoneinfo import ZoneInfo
+LABELLER_TZ = ZoneInfo("Europe/Berlin")
 
 MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY = (
     "Monday",
@@ -68,7 +69,7 @@ def rcicids2017(day, flow, signal_reversed=False):
 
 def utime(YYYY, MM, DD, hh, mm):
     time_shift = 5  # Shifting hours because of different timezones.
-    return mktime(datetime(YYYY, MM, DD, hh + time_shift, mm).timetuple()) * 1000
+    return datetime(YYYY, MM, DD, hh + time_shift, mm, tzinfo=LABELLER_TZ).timestamp() * 1000
 
 
 def monday(flow):
