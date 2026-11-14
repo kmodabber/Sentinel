@@ -320,7 +320,7 @@
     "n_features": 55
   },
   {
-    "macro_f1": 0.0607,
+    "macro_f1": 0.0759,
     "benign_fpr": 0.0,
     "per_class": {
       "BENIGN": {
@@ -371,23 +371,17 @@
         "f1-score": 0.0,
         "support": 1593.0
       },
-      "Heartbleed": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1-score": 0.0,
-        "support": 3.0
-      },
-      "Infiltration": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1-score": 0.0,
-        "support": 6.0
-      },
       "PortScan": {
         "precision": 0.0,
         "recall": 0.0,
         "f1-score": 0.0,
         "support": 46343.0
+      },
+      "Rare attack": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 18.0
       },
       "SSH-Patator": {
         "precision": 0.0,
@@ -400,18 +394,6 @@
         "recall": 0.0,
         "f1-score": 0.0,
         "support": 31.0
-      },
-      "Web Attack - Sql Injection": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1-score": 0.0,
-        "support": 3.0
-      },
-      "Web Attack - XSS": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1-score": 0.0,
-        "support": 6.0
       }
     },
     "confusion_matrix": {
@@ -424,20 +406,14 @@
         "DoS Slowhttptest",
         "DoS slowloris",
         "FTP-Patator",
-        "Heartbleed",
-        "Infiltration",
         "PortScan",
+        "Rare attack",
         "SSH-Patator",
-        "Web Attack - Brute Force",
-        "Web Attack - Sql Injection",
-        "Web Attack - XSS"
+        "Web Attack - Brute Force"
       ],
       "matrix": [
         [
           527384,
-          0,
-          0,
-          0,
           0,
           0,
           0,
@@ -462,16 +438,10 @@
           0,
           0,
           0,
-          0,
-          0,
-          0,
           0
         ],
         [
           19139,
-          0,
-          0,
-          0,
           0,
           0,
           0,
@@ -496,16 +466,10 @@
           0,
           0,
           0,
-          0,
-          0,
-          0,
           0
         ],
         [
           31711,
-          0,
-          0,
-          0,
           0,
           0,
           0,
@@ -530,16 +494,10 @@
           0,
           0,
           0,
-          0,
-          0,
-          0,
           0
         ],
         [
           1039,
-          0,
-          0,
-          0,
           0,
           0,
           0,
@@ -564,43 +522,6 @@
           0,
           0,
           0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          3,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          6,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
           0
         ],
         [
@@ -608,6 +529,17 @@
           0,
           0,
           0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          18,
           0,
           0,
           0,
@@ -632,50 +564,10 @@
           0,
           0,
           0,
-          0,
-          0,
-          0,
           0
         ],
         [
           31,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          3,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          6,
-          0,
-          0,
-          0,
           0,
           0,
           0,
@@ -738,98 +630,80 @@
     "n_features": 56
   },
   {
-    "macro_f1": 0.4674,
-    "benign_fpr": 0.0396,
+    "macro_f1": 0.5569,
+    "benign_fpr": 0.037,
     "per_class": {
       "BENIGN": {
         "precision": 0.9962,
-        "recall": 0.9604,
-        "f1-score": 0.978,
+        "recall": 0.963,
+        "f1-score": 0.9793,
         "support": 527384.0
       },
       "Bot": {
-        "precision": 0.0907,
+        "precision": 0.0741,
         "recall": 0.9932,
-        "f1-score": 0.1663,
+        "f1-score": 0.1379,
         "support": 148.0
       },
       "DDoS": {
-        "precision": 0.9915,
+        "precision": 0.988,
         "recall": 0.9987,
-        "f1-score": 0.9951,
+        "f1-score": 0.9933,
         "support": 19139.0
       },
       "DoS GoldenEye": {
-        "precision": 0.5602,
-        "recall": 0.9312,
-        "f1-score": 0.6995,
+        "precision": 0.5345,
+        "recall": 0.9249,
+        "f1-score": 0.6774,
         "support": 1585.0
       },
       "DoS Hulk": {
-        "precision": 0.9924,
+        "precision": 0.9913,
         "recall": 0.9994,
-        "f1-score": 0.9959,
+        "f1-score": 0.9954,
         "support": 31711.0
       },
       "DoS Slowhttptest": {
-        "precision": 0.2281,
+        "precision": 0.2204,
         "recall": 0.5354,
-        "f1-score": 0.3199,
+        "f1-score": 0.3122,
         "support": 594.0
       },
       "DoS slowloris": {
-        "precision": 0.1978,
-        "recall": 0.7623,
-        "f1-score": 0.314,
+        "precision": 0.215,
+        "recall": 0.7575,
+        "f1-score": 0.3349,
         "support": 1039.0
       },
       "FTP-Patator": {
-        "precision": 0.2346,
+        "precision": 0.2627,
         "recall": 1.0,
-        "f1-score": 0.38,
+        "f1-score": 0.416,
         "support": 1593.0
       },
-      "Heartbleed": {
-        "precision": 0.2222,
-        "recall": 0.6667,
-        "f1-score": 0.3333,
-        "support": 3.0
-      },
-      "Infiltration": {
-        "precision": 0.0068,
-        "recall": 0.8333,
-        "f1-score": 0.0134,
-        "support": 6.0
-      },
       "PortScan": {
-        "precision": 0.9652,
-        "recall": 0.9578,
-        "f1-score": 0.9615,
+        "precision": 0.968,
+        "recall": 0.9581,
+        "f1-score": 0.9631,
         "support": 46343.0
       },
+      "Rare attack": {
+        "precision": 0.004,
+        "recall": 0.5556,
+        "f1-score": 0.0079,
+        "support": 18.0
+      },
       "SSH-Patator": {
-        "precision": 0.7693,
+        "precision": 0.7928,
         "recall": 0.9178,
-        "f1-score": 0.837,
+        "f1-score": 0.8507,
         "support": 596.0
       },
       "Web Attack - Brute Force": {
-        "precision": 0.007,
+        "precision": 0.0076,
         "recall": 1.0,
-        "f1-score": 0.014,
+        "f1-score": 0.0151,
         "support": 31.0
-      },
-      "Web Attack - Sql Injection": {
-        "precision": 0.0012,
-        "recall": 0.3333,
-        "f1-score": 0.0023,
-        "support": 3.0
-      },
-      "Web Attack - XSS": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1-score": 0.0,
-        "support": 6.0
       }
     },
     "confusion_matrix": {
@@ -842,31 +716,25 @@
         "DoS Slowhttptest",
         "DoS slowloris",
         "FTP-Patator",
-        "Heartbleed",
-        "Infiltration",
         "PortScan",
+        "Rare attack",
         "SSH-Patator",
-        "Web Attack - Brute Force",
-        "Web Attack - Sql Injection",
-        "Web Attack - XSS"
+        "Web Attack - Brute Force"
       ],
       "matrix": [
         [
-          506506,
-          1465,
-          163,
-          1107,
-          205,
-          771,
-          3044,
-          5073,
-          7,
-          733,
-          1585,
-          164,
-          4363,
-          830,
-          1368
+          507873,
+          1831,
+          232,
+          1236,
+          238,
+          837,
+          2745,
+          4313,
+          1443,
+          2460,
+          143,
+          4033
         ],
         [
           1,
@@ -880,54 +748,42 @@
           0,
           0,
           0,
-          0,
-          0,
-          0,
           0
         ],
         [
-          8,
+          1,
           0,
           19114,
           0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          17,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
           1,
-          0,
-          0,
-          1476,
-          1,
-          73,
-          0,
-          0,
-          0,
-          0,
           0,
           0,
           0,
           23,
-          11
+          0,
+          0,
+          0
         ],
         [
-          7,
-          2,
-          0,
-          10,
-          31692,
+          1,
           0,
           0,
+          1466,
+          1,
+          75,
           0,
+          0,
+          0,
+          42,
+          0,
+          0
+        ],
+        [
+          6,
+          0,
+          0,
+          12,
+          31693,
           0,
           0,
           0,
@@ -940,35 +796,29 @@
           153,
           5,
           0,
-          16,
+          17,
           0,
           318,
-          71,
+          70,
           31,
-          0,
-          0,
-          0,
           0,
           0,
           0,
           0
         ],
         [
-          9,
+          32,
           0,
           0,
           1,
           0,
-          232,
-          792,
-          3,
+          213,
+          787,
+          2,
           0,
+          2,
           0,
-          0,
-          0,
-          1,
-          0,
-          1
+          2
         ],
         [
           0,
@@ -982,61 +832,35 @@
           0,
           0,
           0,
-          0,
-          0,
-          0,
           0
         ],
         [
-          1,
+          1728,
           0,
           0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          2,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          0,
-          5,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          1725,
-          0,
-          0,
-          22,
+          8,
           37,
           0,
-          97,
-          75,
-          0,
-          0,
-          44387,
-          0,
+          58,
+          110,
+          44402,
           0,
           0,
           0
+        ],
+        [
+          0,
+          1,
+          0,
+          3,
+          0,
+          0,
+          0,
+          0,
+          0,
+          10,
+          0,
+          4
         ],
         [
           32,
@@ -1049,10 +873,7 @@
           16,
           0,
           0,
-          0,
           547,
-          0,
-          0,
           0
         ],
         [
@@ -1067,87 +888,50 @@
           0,
           0,
           0,
-          0,
-          31,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          1,
-          1,
-          0
-        ],
-        [
-          0,
-          1,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          4,
-          0,
-          0
+          31
         ]
       ]
     },
     "top_features": [
       {
-        "feature": "src2dst_psh_packets",
-        "importance": 10.61251
+        "feature": "dst2src_psh_packets",
+        "importance": 12.85614
       },
       {
-        "feature": "dst2src_psh_packets",
-        "importance": 10.48438
+        "feature": "src2dst_psh_packets",
+        "importance": 12.82782
       },
       {
         "feature": "dst_port",
-        "importance": 9.00326
-      },
-      {
-        "feature": "src2dst_max_ps",
-        "importance": 8.98516
+        "importance": 10.42486
       },
       {
         "feature": "bidirectional_min_ps",
-        "importance": 8.62498
+        "importance": 10.33894
       },
       {
-        "feature": "bidirectional_mean_ps",
-        "importance": 7.84882
-      },
-      {
-        "feature": "bidirectional_stddev_ps",
-        "importance": 7.38223
+        "feature": "src2dst_max_ps",
+        "importance": 9.17884
       },
       {
         "feature": "protocol",
-        "importance": 7.34338
+        "importance": 8.99236
       },
       {
         "feature": "src2dst_min_ps",
-        "importance": 6.73622
+        "importance": 8.36722
       },
       {
-        "feature": "dst2src_max_ps",
-        "importance": 6.42179
+        "feature": "bidirectional_mean_ps",
+        "importance": 8.34125
+      },
+      {
+        "feature": "bidirectional_stddev_ps",
+        "importance": 7.91889
+      },
+      {
+        "feature": "bidirectional_psh_packets",
+        "importance": 6.54228
       }
     ],
     "model": "logreg",
@@ -1156,7 +940,7 @@
     "n_features": 56
   },
   {
-    "macro_f1": 0.0607,
+    "macro_f1": 0.0759,
     "benign_fpr": 0.0,
     "per_class": {
       "BENIGN": {
@@ -1207,23 +991,17 @@
         "f1-score": 0.0,
         "support": 1593.0
       },
-      "Heartbleed": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1-score": 0.0,
-        "support": 3.0
-      },
-      "Infiltration": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1-score": 0.0,
-        "support": 6.0
-      },
       "PortScan": {
         "precision": 0.0,
         "recall": 0.0,
         "f1-score": 0.0,
         "support": 46343.0
+      },
+      "Rare attack": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 18.0
       },
       "SSH-Patator": {
         "precision": 0.0,
@@ -1236,18 +1014,6 @@
         "recall": 0.0,
         "f1-score": 0.0,
         "support": 31.0
-      },
-      "Web Attack - Sql Injection": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1-score": 0.0,
-        "support": 3.0
-      },
-      "Web Attack - XSS": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1-score": 0.0,
-        "support": 6.0
       }
     },
     "confusion_matrix": {
@@ -1260,20 +1026,14 @@
         "DoS Slowhttptest",
         "DoS slowloris",
         "FTP-Patator",
-        "Heartbleed",
-        "Infiltration",
         "PortScan",
+        "Rare attack",
         "SSH-Patator",
-        "Web Attack - Brute Force",
-        "Web Attack - Sql Injection",
-        "Web Attack - XSS"
+        "Web Attack - Brute Force"
       ],
       "matrix": [
         [
           527384,
-          0,
-          0,
-          0,
           0,
           0,
           0,
@@ -1298,16 +1058,10 @@
           0,
           0,
           0,
-          0,
-          0,
-          0,
           0
         ],
         [
           19139,
-          0,
-          0,
-          0,
           0,
           0,
           0,
@@ -1332,16 +1086,10 @@
           0,
           0,
           0,
-          0,
-          0,
-          0,
           0
         ],
         [
           31711,
-          0,
-          0,
-          0,
           0,
           0,
           0,
@@ -1366,16 +1114,10 @@
           0,
           0,
           0,
-          0,
-          0,
-          0,
           0
         ],
         [
           1039,
-          0,
-          0,
-          0,
           0,
           0,
           0,
@@ -1400,43 +1142,6 @@
           0,
           0,
           0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          3,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          6,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
           0
         ],
         [
@@ -1444,6 +1149,17 @@
           0,
           0,
           0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          18,
           0,
           0,
           0,
@@ -1468,50 +1184,10 @@
           0,
           0,
           0,
-          0,
-          0,
-          0,
           0
         ],
         [
           31,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          3,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          6,
-          0,
-          0,
-          0,
           0,
           0,
           0,
@@ -1574,98 +1250,80 @@
     "n_features": 55
   },
   {
-    "macro_f1": 0.4324,
-    "benign_fpr": 0.0668,
+    "macro_f1": 0.514,
+    "benign_fpr": 0.0623,
     "per_class": {
       "BENIGN": {
-        "precision": 0.9957,
-        "recall": 0.9332,
-        "f1-score": 0.9634,
+        "precision": 0.9958,
+        "recall": 0.9377,
+        "f1-score": 0.9659,
         "support": 527384.0
       },
       "Bot": {
-        "precision": 0.0678,
+        "precision": 0.076,
         "recall": 0.9932,
-        "f1-score": 0.1269,
+        "f1-score": 0.1412,
         "support": 148.0
       },
       "DDoS": {
-        "precision": 0.9893,
+        "precision": 0.9914,
         "recall": 0.9987,
-        "f1-score": 0.994,
+        "f1-score": 0.9951,
         "support": 19139.0
       },
       "DoS GoldenEye": {
-        "precision": 0.5921,
-        "recall": 0.8662,
-        "f1-score": 0.7034,
+        "precision": 0.5676,
+        "recall": 0.882,
+        "f1-score": 0.6907,
         "support": 1585.0
       },
       "DoS Hulk": {
-        "precision": 0.9894,
-        "recall": 0.9991,
-        "f1-score": 0.9943,
+        "precision": 0.9905,
+        "recall": 0.9993,
+        "f1-score": 0.9949,
         "support": 31711.0
       },
       "DoS Slowhttptest": {
-        "precision": 0.1489,
-        "recall": 0.5421,
-        "f1-score": 0.2336,
+        "precision": 0.1453,
+        "recall": 0.537,
+        "f1-score": 0.2287,
         "support": 594.0
       },
       "DoS slowloris": {
-        "precision": 0.1248,
+        "precision": 0.1262,
         "recall": 0.7652,
-        "f1-score": 0.2146,
+        "f1-score": 0.2167,
         "support": 1039.0
       },
       "FTP-Patator": {
-        "precision": 0.1009,
+        "precision": 0.1014,
         "recall": 1.0,
-        "f1-score": 0.1833,
+        "f1-score": 0.1842,
         "support": 1593.0
       },
-      "Heartbleed": {
-        "precision": 0.1538,
-        "recall": 0.6667,
-        "f1-score": 0.25,
-        "support": 3.0
-      },
-      "Infiltration": {
-        "precision": 0.0033,
-        "recall": 1.0,
-        "f1-score": 0.0066,
-        "support": 6.0
-      },
       "PortScan": {
-        "precision": 0.9654,
-        "recall": 0.9581,
-        "f1-score": 0.9617,
+        "precision": 0.9731,
+        "recall": 0.958,
+        "f1-score": 0.9655,
         "support": 46343.0
       },
+      "Rare attack": {
+        "precision": 0.0033,
+        "recall": 0.6111,
+        "f1-score": 0.0066,
+        "support": 18.0
+      },
       "SSH-Patator": {
-        "precision": 0.7726,
+        "precision": 0.6527,
         "recall": 0.9178,
-        "f1-score": 0.839,
+        "f1-score": 0.7629,
         "support": 596.0
       },
       "Web Attack - Brute Force": {
-        "precision": 0.0063,
+        "precision": 0.008,
         "recall": 1.0,
-        "f1-score": 0.0125,
+        "f1-score": 0.0159,
         "support": 31.0
-      },
-      "Web Attack - Sql Injection": {
-        "precision": 0.0012,
-        "recall": 0.3333,
-        "f1-score": 0.0024,
-        "support": 3.0
-      },
-      "Web Attack - XSS": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1-score": 0.0,
-        "support": 6.0
       }
     },
     "confusion_matrix": {
@@ -1678,31 +1336,25 @@
         "DoS Slowhttptest",
         "DoS slowloris",
         "FTP-Patator",
-        "Heartbleed",
-        "Infiltration",
         "PortScan",
+        "Rare attack",
         "SSH-Patator",
-        "Web Attack - Brute Force",
-        "Web Attack - Sql Injection",
-        "Web Attack - XSS"
+        "Web Attack - Brute Force"
       ],
       "matrix": [
         [
-          492158,
-          2020,
-          206,
-          937,
-          300,
-          1552,
-          5410,
-          14105,
-          11,
-          1802,
-          1571,
-          161,
-          4884,
-          817,
-          1450
+          494549,
+          1785,
+          165,
+          1059,
+          252,
+          1601,
+          5351,
+          14018,
+          1203,
+          3272,
+          291,
+          3838
         ],
         [
           1,
@@ -1716,13 +1368,10 @@
           0,
           0,
           0,
-          0,
-          0,
-          0,
           0
         ],
         [
-          5,
+          1,
           0,
           19115,
           0,
@@ -1730,40 +1379,31 @@
           0,
           0,
           0,
-          0,
-          0,
-          19,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          111,
-          0,
-          0,
-          1373,
-          1,
-          67,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          2,
           23,
-          8
+          0,
+          0,
+          0
         ],
         [
-          22,
+          85,
           0,
           0,
-          5,
-          31684,
+          1398,
+          1,
+          60,
           0,
           0,
           0,
+          41,
+          0,
+          0
+        ],
+        [
+          18,
+          1,
+          0,
+          3,
+          31689,
           0,
           0,
           0,
@@ -1773,38 +1413,32 @@
           0
         ],
         [
-          169,
+          173,
+          0,
+          0,
+          0,
+          0,
+          319,
+          101,
           0,
           0,
           1,
-          0,
-          322,
-          102,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
           0,
           0
         ],
         [
-          20,
+          17,
           0,
           0,
           1,
           0,
-          222,
+          216,
           795,
           0,
           0,
+          8,
           0,
-          0,
-          0,
-          0,
-          0,
-          1
+          2
         ],
         [
           0,
@@ -1818,19 +1452,25 @@
           0,
           0,
           0,
+          0
+        ],
+        [
+          1767,
           0,
+          0,
+          0,
+          51,
+          0,
+          50,
+          78,
+          44397,
           0,
           0,
           0
         ],
         [
+          0,
           1,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
           0,
           2,
           0,
@@ -1838,44 +1478,12 @@
           0,
           0,
           0,
-          0
+          11,
+          0,
+          4
         ],
         [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          6,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          1766,
-          0,
-          0,
-          0,
-          37,
-          0,
-          61,
-          78,
-          0,
-          0,
-          44401,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          32,
+          33,
           0,
           0,
           0,
@@ -1884,11 +1492,8 @@
           1,
           15,
           0,
-          1,
           0,
           547,
-          0,
-          0,
           0
         ],
         [
@@ -1903,87 +1508,50 @@
           0,
           0,
           0,
-          0,
-          31,
-          0,
-          0
-        ],
-        [
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          1,
-          1,
-          0
-        ],
-        [
-          0,
-          1,
-          0,
-          1,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          4,
-          0,
-          0
+          31
         ]
       ]
     },
     "top_features": [
       {
-        "feature": "src2dst_psh_packets",
-        "importance": 14.19333
+        "feature": "dst2src_psh_packets",
+        "importance": 18.9737
       },
       {
-        "feature": "dst2src_psh_packets",
-        "importance": 13.89516
+        "feature": "src2dst_psh_packets",
+        "importance": 18.78395
       },
       {
         "feature": "bidirectional_min_ps",
-        "importance": 9.25723
-      },
-      {
-        "feature": "src2dst_max_ps",
-        "importance": 8.41549
-      },
-      {
-        "feature": "bidirectional_mean_ps",
-        "importance": 8.09433
-      },
-      {
-        "feature": "bidirectional_stddev_ps",
-        "importance": 7.42504
+        "importance": 10.92099
       },
       {
         "feature": "protocol",
-        "importance": 7.14609
+        "importance": 9.31413
+      },
+      {
+        "feature": "src2dst_max_ps",
+        "importance": 8.92752
       },
       {
         "feature": "src2dst_min_ps",
-        "importance": 6.87813
+        "importance": 8.64068
       },
       {
-        "feature": "dst2src_max_ps",
-        "importance": 6.73409
+        "feature": "bidirectional_mean_ps",
+        "importance": 8.6091
+      },
+      {
+        "feature": "bidirectional_stddev_ps",
+        "importance": 8.06701
       },
       {
         "feature": "bidirectional_psh_packets",
-        "importance": 6.60237
+        "importance": 8.05728
+      },
+      {
+        "feature": "dst2src_max_ps",
+        "importance": 7.65601
       }
     ],
     "model": "logreg",
