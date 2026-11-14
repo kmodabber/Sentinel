@@ -14,6 +14,7 @@ from sentinel_ml.baselines import (
 from sentinel_ml.make_synthetic import generate_parquet_splits
 from tests.fixtures import (
     CANONICAL_12,
+    CANONICAL_COUNTS_MIMICS_DATA_V1,
     make_cicids_frame,
     write_splits,
 )
@@ -88,9 +89,8 @@ def test_leakage_flags_fires_at_thresholds():
 
 
 # SEN-109 (reopened): the canonical 12-class set per sentinel_features.features.LABELS
-# must be enforced after the SEN-FR-05 rare-class merge. The committed
-# train.parquet still has 15 raw CICIDS labels, so without a merge-and-assert
-# step the baseline reports 15 classes.
+# is enforced by sentinel_data.split; baselines.canonicalize_labels is a strict
+# guard that refuses stale parquet containing raw CICIDS labels.
 RAW_COUNTS_MIMICS_DATA_V1 = {
     "BENIGN": 200,
     "Bot": 150,
@@ -103,7 +103,8 @@ RAW_COUNTS_MIMICS_DATA_V1 = {
     "PortScan": 150,
     "SSH-Patator": 150,
     "Web Attack - Brute Force": 150,
-    # Rare (<100 train flows) - should be merged into "Rare attack"
+    # Rare (<100 flows) - must have been merged into "Rare attack" by split.py.
+    # Their presence here simulates stale parquet.
     "Heartbleed": 10,
     "Infiltration": 20,
     "Web Attack - Sql Injection": 15,
@@ -111,34 +112,25 @@ RAW_COUNTS_MIMICS_DATA_V1 = {
 }
 
 
-def test_canonicalize_merges_four_rare_classes_into_rare_attack():
+def test_canonicalize_raises_on_stale_parquet_with_raw_labels():
+    """If raw CICIDS labels are present, the parquet predates the SEN-FR-05
+    merge in split.py. The guard must refuse and tell the user to re-run."""
     df = make_cicids_frame(RAW_COUNTS_MIMICS_DATA_V1, seed=0)
-    out = canonicalize_labels(df)
-    assert set(out["label"].unique()) == set(CANONICAL_12)
-    assert len(set(out["label"].unique())) == 12
-    expected_rare = 10 + 20 + 15 + 25
-    assert (out["label"] == "Rare attack").sum() == expected_rare
+    with pytest.raises(ValueError, match=r"Heartbleed|re-run"):
+        canonicalize_labels(df)
 
 
 def test_canonicalize_raises_on_extra_class_naming_it():
-    counts = dict(RAW_COUNTS_MIMICS_DATA_V1)
-    counts["FooAttack"] = 500  # unknown class, caller did not declare it as rare
+    counts = dict(CANONICAL_COUNTS_MIMICS_DATA_V1)
+    counts["FooAttack"] = 500
     df = make_cicids_frame(counts, seed=0)
-    # Explicit rare list (the real 4 from data v1) does not contain FooAttack,
-    # so FooAttack remains after the merge and must fail the canonical check.
-    real_rare = [
-        "Heartbleed",
-        "Infiltration",
-        "Web Attack - Sql Injection",
-        "Web Attack - XSS",
-    ]
     with pytest.raises(ValueError, match=r"FooAttack"):
-        canonicalize_labels(df, rare_class_list=real_rare)
+        canonicalize_labels(df)
 
 
 def test_canonicalize_raises_on_missing_canonical_class_naming_it():
-    counts = dict(RAW_COUNTS_MIMICS_DATA_V1)
-    del counts["PortScan"]  # missing a canonical class
+    counts = dict(CANONICAL_COUNTS_MIMICS_DATA_V1)
+    del counts["PortScan"]
     df = make_cicids_frame(counts, seed=0)
     with pytest.raises(ValueError, match=r"PortScan"):
         canonicalize_labels(df)
@@ -152,7 +144,7 @@ def test_canonicalize_is_idempotent_when_already_canonical():
 
 
 def test_run_baselines_produces_results_for_every_canonical_class(tmp_path):
-    write_splits(tmp_path, RAW_COUNTS_MIMICS_DATA_V1, seed=0)
+    write_splits(tmp_path, CANONICAL_COUNTS_MIMICS_DATA_V1, seed=0)
     (tmp_path / "data_card.json").write_text(json.dumps({"version": "test-v1"}))
     results = run_baselines(
         data_dir=tmp_path,
@@ -169,8 +161,7 @@ def test_run_baselines_produces_results_for_every_canonical_class(tmp_path):
 
 
 def test_run_baselines_identifier_cols_never_in_feature_matrix(tmp_path):
-    # Strengthen: run end-to-end and inspect the models' trained feature names.
-    write_splits(tmp_path, RAW_COUNTS_MIMICS_DATA_V1, seed=0)
+    write_splits(tmp_path, CANONICAL_COUNTS_MIMICS_DATA_V1, seed=0)
     (tmp_path / "data_card.json").write_text(json.dumps({"version": "test-v1"}))
     results = run_baselines(
         data_dir=tmp_path,
@@ -187,7 +178,7 @@ def test_run_baselines_identifier_cols_never_in_feature_matrix(tmp_path):
 
 
 def test_results_meta_records_data_version_commit_seed_nclasses(tmp_path):
-    write_splits(tmp_path, RAW_COUNTS_MIMICS_DATA_V1, seed=0)
+    write_splits(tmp_path, CANONICAL_COUNTS_MIMICS_DATA_V1, seed=0)
     (tmp_path / "data_card.json").write_text(json.dumps({"version": "test-v1"}))
     run_baselines(
         data_dir=tmp_path,
@@ -201,3 +192,17 @@ def test_results_meta_records_data_version_commit_seed_nclasses(tmp_path):
     assert meta["git_commit"]  # non-empty
     assert meta["n_classes_multiclass"] == 12
     assert meta["dst_port_settings"] == [True, False]
+
+
+def test_run_baselines_refuses_stale_15_label_parquet(tmp_path):
+    """End-to-end: if the parquet still has raw CICIDS labels, the strict
+    guard inside run_baselines raises with a 're-run' instruction."""
+    write_splits(tmp_path, RAW_COUNTS_MIMICS_DATA_V1, seed=0)
+    (tmp_path / "data_card.json").write_text(json.dumps({"version": "test-v1"}))
+    with pytest.raises(ValueError, match=r"re-run"):
+        run_baselines(
+            data_dir=tmp_path,
+            eval_split="test",
+            use_wandb=False,
+            out_dir=tmp_path / "results",
+        )

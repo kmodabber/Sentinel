@@ -17,7 +17,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from sentinel_data.split import RARE_LABEL, merge_rare_classes
+from sentinel_data.split import RARE_LABEL
 from sentinel_features.features import LABELS as CANONICAL_LABELS
 from sentinel_ml.eval_template import ID_COLS, evaluate_single, prep_xy  # noqa: F401
 
@@ -40,53 +40,35 @@ def _git_commit() -> str:
         return "unknown"
 
 
-def _data_metadata(data_dir: Path, rare_class_list: list[str] | None = None) -> dict:
+def _data_metadata(data_dir: Path) -> dict:
     card = data_dir / "data_card.json"
     if not card.exists():
         return {"version": "unknown", "rare_class_policy": "unknown"}
     d = json.loads(card.read_text())
-    rare = d.get("rare_classes", {}).get("merged") or rare_class_list or []
+    rare = d.get("rare_classes", {}).get("merged") or []
     return {
         "version": d.get("version", "unknown"),
         "rare_class_policy": (
-            f"raw labels not in sentinel_features.LABELS are merged into "
-            f"'{RARE_LABEL}' (SEN-FR-05)"
+            f"raw labels with <{d.get('rare_classes', {}).get('min_flows', '?')} "
+            f"flows merged into '{RARE_LABEL}' by sentinel_data.split (SEN-FR-05)"
         ),
         "rare_classes_merged": sorted(rare),
     }
 
 
-def _rare_from_canonical(df: pd.DataFrame, canonical_labels: list[str]) -> list[str]:
-    """Raw labels that are present in df but not in the canonical class set.
-
-    These are the labels that must be relabelled as ``RARE_LABEL`` for the
-    output to match ``canonical_labels``. Using the canonical list as the
-    source of truth sidesteps the min_flows threshold mismatch between
-    ``split.RARE_MIN_FLOWS`` and what ``sentinel_features.LABELS`` actually
-    kept separate (e.g. 'Web Attack - Brute Force' has 88 train flows but is
-    a canonical class).
-    """
-    present = set(df["label"].astype(str).unique())
-    return sorted(present - set(canonical_labels) - {RARE_LABEL})
-
-
 def canonicalize_labels(
     df: pd.DataFrame,
-    rare_class_list: list[str] | None = None,
     canonical_labels: list[str] = CANONICAL_LABELS,
 ) -> pd.DataFrame:
-    """Apply the SEN-FR-05 rare-class merge, then assert the result matches the
-    canonical class set from ``sentinel_features.features.LABELS``.
+    """Guard: verify ``df['label']`` matches the canonical class set exactly.
 
-    If ``rare_class_list`` is ``None``, any raw label in ``df`` that is not in
-    ``canonical_labels`` is merged into ``RARE_LABEL``. Pass an explicit list
-    to override (e.g. the data card's ``rare_classes.merged`` field, or an
-    empty list to disable the merge for a test).
+    The rare-class merge is owned by ``sentinel_data.split`` (SEN-FR-05); this
+    function does not merge. If any raw (unmerged) label from CICIDS is
+    present, the parquet was written before ``split.merge_rare_classes`` ran
+    and must be regenerated. In that case we raise with instructions, rather
+    than silently merging and masking stale data.
     """
-    if rare_class_list is None:
-        rare_class_list = _rare_from_canonical(df, canonical_labels)
-    out = merge_rare_classes(df, rare_class_list) if rare_class_list else df.copy()
-    actual = set(out["label"].astype(str).unique())
+    actual = set(df["label"].astype(str).unique())
     expected = set(canonical_labels)
     extra = sorted(actual - expected)
     missing = sorted(expected - actual)
@@ -94,9 +76,12 @@ def canonicalize_labels(
         raise ValueError(
             f"Multi-class label set does not match canonical "
             f"({len(canonical_labels)} classes). "
-            f"Extra: {extra or 'none'}. Missing: {missing or 'none'}."
+            f"Extra: {extra or 'none'}. Missing: {missing or 'none'}. "
+            f"If 'Extra' lists raw CICIDS labels (e.g. Heartbleed, "
+            f"Web Attack - XSS), the parquet is stale: re-run "
+            f"`python -m sentinel_data.split`."
         )
-    return out
+    return df
 
 
 def leakage_flags(results: list[dict]) -> list[str]:
@@ -186,20 +171,14 @@ def run_baselines(
         )
     eval_df = pd.read_parquet(data_dir / f"{eval_split}.parquet")
 
-    # SEN-FR-05: enforce the canonical 12-class set from sentinel_features.LABELS
-    # by relabelling any raw label not in that set as 'Rare attack', then
-    # asserting train/eval labels match the canonical set exactly.
+    # SEN-FR-05: the rare-class merge is done by sentinel_data.split. Here we
+    # only *verify* train/eval already match the canonical 12 classes; stale
+    # parquet with raw CICIDS labels raises instead of being silently merged.
     labels = canonical_labels if canonical_labels is not None else CANONICAL_LABELS
-    rare_from_train = _rare_from_canonical(train_df, labels)
-    train_df = canonicalize_labels(
-        train_df, rare_class_list=rare_from_train, canonical_labels=labels
-    )
-    eval_df = canonicalize_labels(
-        eval_df, rare_class_list=rare_from_train, canonical_labels=labels
-    )
+    canonicalize_labels(train_df, canonical_labels=labels)
+    canonicalize_labels(eval_df, canonical_labels=labels)
     print(
-        f"canonicalized labels: {len(labels)} classes, merged rare -> "
-        f"'{RARE_LABEL}': {rare_from_train or 'none'}",
+        f"label-set guard passed: {len(labels)} canonical classes",
         flush=True,
     )
 
@@ -273,7 +252,7 @@ def run_baselines(
         "sen_ticket": "SEN-109",
         "seed": SEED,
         "git_commit": _git_commit(),
-        "data": _data_metadata(data_dir, rare_class_list=rare_from_train),
+        "data": _data_metadata(data_dir),
         "split_evaluated": eval_split,
         "drop_duplicates": drop_duplicates,
         "dedup_stats": dedup_stats,
