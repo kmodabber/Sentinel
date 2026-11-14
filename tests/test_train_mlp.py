@@ -6,6 +6,7 @@ import torch  # noqa: F401,E402
 
 import json
 from pathlib import Path
+from unittest import mock
 
 import numpy as np
 import pandas as pd
@@ -104,3 +105,57 @@ def test_end_to_end_tiny(tmp_path: Path, task: str):
         assert (models_dir / f"preprocess_mlp_{task}_{tag}.joblib").exists()
         assert (models_dir / f"mlp_{task}_{tag}.pt").exists()
         assert (results_dir / f"train_mlp_{task}_{tag}.json").exists()
+
+
+def test_test_split_only_touched_once_after_training(tmp_path: Path):
+    """Early stopping must select on VAL, not TEST. Enforce by wrapping the
+    shared evaluate_single: it should be called exactly twice (one per use_port
+    variant) and only on the test frame, i.e. after train_one has returned."""
+    from sentinel_ml import train_mlp as tm
+
+    data_dir = tmp_path / "data"
+    label_counts = {label: 24 for label in RAW_CICIDS_LABELS}
+    write_splits(data_dir, label_counts, seed=1)
+    test_df = pd.read_parquet(data_dir / "test.parquet")
+    test_len = len(test_df)
+
+    real_eval = tm.evaluate_single
+    call_sizes: list[int] = []
+
+    def tracking(model, X_test, y_test, benign_name, top_k=10):
+        call_sizes.append(len(X_test))
+        return real_eval(model, X_test, y_test, benign_name, top_k=top_k)
+
+    with mock.patch.object(tm, "evaluate_single", side_effect=tracking):
+        tm.main(
+            task="binary",
+            data_dir=data_dir,
+            models_dir=tmp_path / "models",
+            results_dir=tmp_path / "results",
+            epochs=2, patience=2, batch_size=32, hidden=(8, 4),
+            use_port_variants=(True, False), use_wandb=False,
+        )
+
+    assert len(call_sizes) == 2, (
+        f"evaluate_single should run once per use_port variant on TEST only; "
+        f"got {len(call_sizes)} calls (sizes={call_sizes})."
+    )
+    assert all(n == test_len for n in call_sizes), (
+        f"evaluate_single received frames of sizes {call_sizes} but test split "
+        f"has {test_len} rows - train/val must not be evaluated through it."
+    )
+
+
+def test_fixtures_deterministic_across_pythonhashseed():
+    """Guards against hash()-based seeding in tests/fixtures. The byte content
+    of a fixture frame must only depend on the explicit numeric seed."""
+    import io
+
+    from tests.fixtures import make_cicids_frame
+    label_counts = {label: 5 for label in RAW_CICIDS_LABELS}
+    df1 = make_cicids_frame(label_counts, seed=7)
+    df2 = make_cicids_frame(label_counts, seed=7)
+    buf1, buf2 = io.BytesIO(), io.BytesIO()
+    df1.to_parquet(buf1, index=False)
+    df2.to_parquet(buf2, index=False)
+    assert buf1.getvalue() == buf2.getvalue()

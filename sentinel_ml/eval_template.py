@@ -35,7 +35,20 @@ def get_top_features(model, X_test: pd.DataFrame, y_test, top_k: int = 10) -> li
     elif hasattr(est, "coef_"):                       # LogisticRegression, LinearSVC
         scores = np.mean(np.abs(est.coef_), axis=0) if est.coef_.ndim > 1 else np.abs(est.coef_[0])
     else:                                             # Fallback for MLP / KNN / SVM
-        perm = permutation_importance(model, X_test, y_test, n_repeats=3, random_state=42, scoring="f1_macro")
+        # permutation_importance is O(n_features * n_repeats * predict_cost); on
+        # the full 630k-row test set this dominates multiclass eval (hours). Rank
+        # order stabilises with much less, so cap at 50k rows for the importance
+        # computation only. Main metrics (macro-F1, FPR, per-class, CM) above are
+        # still computed on the full test set.
+        PERM_MAX_ROWS = 50_000
+        if len(X_test) > PERM_MAX_ROWS:
+            rng = np.random.default_rng(42)
+            idx = rng.choice(len(X_test), size=PERM_MAX_ROWS, replace=False)
+            X_perm = X_test.iloc[idx]
+            y_perm = np.asarray(y_test)[idx]
+        else:
+            X_perm, y_perm = X_test, y_test
+        perm = permutation_importance(model, X_perm, y_perm, n_repeats=3, random_state=42, scoring="f1_macro")
         scores = perm.importances_mean
 
     top_idx = np.argsort(scores)[::-1][:top_k]

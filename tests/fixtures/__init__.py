@@ -4,12 +4,18 @@ Small in-memory DataFrames that mimic data/processed/ layout for baseline tests,
 so tests never depend on the real Parquet (which is multi-GB and not committed).
 """
 
+import hashlib
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 from sentinel_features.features import FEATURES
+
+
+def _stable_int(s: str) -> int:
+    """Deterministic non-negative int from a string, independent of PYTHONHASHSEED."""
+    return int.from_bytes(hashlib.md5(s.encode("utf-8")).digest()[:4], "big")
 
 # All 15 raw CICIDS labels as they appear in train.parquet before SEN-FR-05 merge.
 RAW_CICIDS_LABELS = [
@@ -59,7 +65,7 @@ def make_cicids_frame(label_counts: dict[str, int], seed: int = 0) -> pd.DataFra
     rows = []
     row_i = 0
     for label, n in label_counts.items():
-        shift = (hash(label) % 7) + 1
+        shift = (_stable_int(label) % 7) + 1
         for _ in range(n):
             row = {col: float(rng.normal(shift, 1.0)) for col in FEATURES}
             row["dst_port"] = int(rng.integers(1, 65535))
@@ -94,5 +100,5 @@ def write_splits(out_dir: Path, label_counts: dict[str, int], seed: int = 0) -> 
     """Write train/val/test parquet with the same label distribution to out_dir."""
     out_dir.mkdir(parents=True, exist_ok=True)
     for split in ("train", "val", "test"):
-        df = make_cicids_frame(label_counts, seed=seed + hash(split) % 100)
+        df = make_cicids_frame(label_counts, seed=seed + _stable_int(split) % 100)
         df.to_parquet(out_dir / f"{split}.parquet", index=False)
