@@ -9,15 +9,18 @@ import json
 from pathlib import Path
 
 import joblib
+import nfstream
 import pandas as pd
 
 from sentinel_features.features import FEATURES
+from sentinel_features.nfstream_settings import SETTINGS
 
 PACKAGE_FILES = [
     "model.joblib", "preprocess.joblib", "features.json", "labels.json",
     "nfstream_settings.json", "thresholds.json", "metrics.json", "MODEL_CARD.md",
 ]
 
+PINNED_NFSTREAM = "6.6.0"
 
 class PackageError(Exception):
     """The model package is missing files or doesn't match the sensor."""
@@ -41,6 +44,26 @@ def check_features(package_features, expected=FEATURES):
     raise PackageError("features.json doesn't match the sensor: " + "; ".join(problems))
 
 
+def check_nfstream_settings(recorded, expected=SETTINGS):
+    """Raise PackageError listing every NFStream setting that differs."""
+    diffs = []
+    for key in sorted(set(recorded) | set(expected)):
+        if key not in recorded:
+            diffs.append(f"{key}: missing from package")
+        elif key not in expected:
+            diffs.append(f"{key}: package has it, sensor doesn't")
+        elif recorded[key] != expected[key]:
+            diffs.append(f"{key}: package {recorded[key]!r} vs sensor {expected[key]!r}")
+    if diffs:
+        raise PackageError("nfstream_settings.json doesn't match the sensor: " + "; ".join(diffs))
+
+
+def check_nfstream_version(pinned=PINNED_NFSTREAM):
+    """Raise PackageError if the installed nfstream isn't the pinned version."""
+    if nfstream.__version__ != pinned:
+        raise PackageError(f"nfstream {nfstream.__version__} installed, sensor needs {pinned}")
+
+
 def load_package(path):
     """Load every file in the package folder into a dict.
 
@@ -58,6 +81,10 @@ def load_package(path):
     except (json.JSONDecodeError, KeyError, TypeError) as e:
         raise PackageError(f"features.json in {path} isn't in the C1 format: {e!r}") from e
     check_features(names)
+
+    nf_settings = json.loads((path / "nfstream_settings.json").read_text())
+    check_nfstream_settings(nf_settings)
+    check_nfstream_version()
 
     return {
         "version": version,
