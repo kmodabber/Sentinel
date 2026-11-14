@@ -1,4 +1,10 @@
-"""Unit tests for SEN-FR-13 MLP trainer. Uses only the synthetic fixture."""
+"""Unit tests for SEN-FR-13 MLP trainer."""
+# isort: off
+# torch must import before numpy on Windows (OpenMP clash: c10.dll WinError 1114).
+import torch  # noqa: F401,E402
+# isort: on
+
+import json
 from pathlib import Path
 
 import numpy as np
@@ -6,20 +12,19 @@ import pandas as pd
 import pytest
 from sklearn.utils.class_weight import compute_class_weight
 
-from sentinel_ml.make_synthetic import generate_parquet_splits
+from sentinel_features.features import LABELS as CANONICAL_LABELS
 from sentinel_ml.train_mlp import (
+    BINARY_LABELS,
     build_preprocessor,
     class_weights_from_train,
-    main as train_main,
+    task_label_set,
 )
+from sentinel_ml.train_mlp import main as train_main
+from tests.fixtures import CANONICAL_12, RAW_CICIDS_LABELS, write_splits
 
 
 def test_preprocessor_fits_on_train_and_handles_negatives():
-    """QuantileTransformer+StandardScaler is fitted on TRAIN only, produces finite
-    outputs even with negative inputs (NFStream features can be negative), and
-    its stats are frozen at transform time."""
     rng = np.random.default_rng(0)
-    # Deliberately include negative values and heavy tails in the "train" set.
     X_train = pd.DataFrame({
         "a": rng.normal(0, 5, size=800),
         "b": rng.normal(-3, 2, size=800),
@@ -29,11 +34,9 @@ def test_preprocessor_fits_on_train_and_handles_negatives():
     Xt = pre.transform(X_train)
     assert np.all(np.isfinite(Xt))
     assert Xt.shape == X_train.shape
-    # StandardScaler fitted on the quantile output: train columns ~0 mean, ~1 std.
     assert np.allclose(Xt.mean(axis=0), 0.0, atol=0.1)
     assert np.allclose(Xt.std(axis=0), 1.0, atol=0.1)
 
-    # A very different second dataset must NOT retrain the transformer.
     X_other = pd.DataFrame({
         "a": rng.normal(100, 1, size=400),
         "b": rng.normal(-100, 1, size=400),
@@ -54,14 +57,25 @@ def test_class_weights_match_sklearn():
     assert np.allclose(got, expected)
 
 
+def test_mlp_classes_match_baselines_canonical():
+    """The MLP's multiclass label set must be the canonical 12 classes from
+    sentinel_features.features.LABELS, not whatever happens to be in train.
+    Keeps comparison with baselines meaningful (SEN-FR-07 / SEN-109)."""
+    assert task_label_set("multiclass") == list(CANONICAL_LABELS)
+    assert task_label_set("multiclass") == CANONICAL_12
+    assert task_label_set("binary") == BINARY_LABELS
+    assert set(task_label_set("binary")) == {"benign", "attack"}
+
+
 @pytest.mark.parametrize("task", ["binary", "multiclass"])
 def test_end_to_end_tiny(tmp_path: Path, task: str):
-    """Train on a 500-row synthetic fixture for a couple of epochs, both port
-    variants; check the eval-template output is produced with sane metrics."""
+    """Small CICIDS-shaped fixture covering all 15 raw labels (so rare classes
+    exist and get merged). Checks end-to-end run produces canonical results."""
     data_dir = tmp_path / "data"
     models_dir = tmp_path / "models"
     results_dir = tmp_path / "results"
-    generate_parquet_splits(out_dir=data_dir, n=500, seed=0)
+    label_counts = {label: 30 for label in RAW_CICIDS_LABELS}
+    write_splits(data_dir, label_counts, seed=0)
 
     train_main(
         task=task,
@@ -78,15 +92,14 @@ def test_end_to_end_tiny(tmp_path: Path, task: str):
 
     eval_file = results_dir / f"eval_mlp_{task}.json"
     assert eval_file.exists(), f"missing {eval_file}"
-    import json
     rows = json.loads(eval_file.read_text())
     assert len(rows) == 2  # with and without dst_port
+    expected_classes = set(task_label_set(task))
     for r in rows:
         assert 0.0 <= r["macro_f1"] <= 1.0
         assert 0.0 <= r["benign_fpr"] <= 1.0
-        assert len(r["per_class"]) > 0
+        assert set(r["per_class"].keys()) == expected_classes
 
-    # Per-variant training artefacts and metadata are present.
     for tag in ("with_port", "no_port"):
         assert (models_dir / f"preprocess_mlp_{task}_{tag}.joblib").exists()
         assert (models_dir / f"mlp_{task}_{tag}.pt").exists()

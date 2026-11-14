@@ -27,23 +27,31 @@ import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
+# torch must be imported before numpy/joblib on Windows to avoid an OpenMP
+# runtime clash (c10.dll WinError 1114 when numpy's OpenBLAS loads first).
+# isort: off
+import torch
+import torch.nn as nn
 import joblib
 import numpy as np
 import pandas as pd
-import torch
-import torch.nn as nn
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder, QuantileTransformer, StandardScaler
 from sklearn.utils.class_weight import compute_class_weight
 from torch.utils.data import DataLoader, TensorDataset
+# isort: on
 
-from sentinel_ml.eval_template import prep_xy, run_eval_template
+from sentinel_features.features import LABELS as CANONICAL_LABELS
+from sentinel_ml.baselines import canonicalize_labels
+from sentinel_ml.eval_template import evaluate_single, prep_xy
 
 DATA_DIR = Path("data/processed")
 MODELS_DIR = Path("models")
 RESULTS_DIR = Path("results")
+
+BINARY_LABELS = ["attack", "benign"]
 
 DEFAULT_HIDDEN = (128, 64)
 DEFAULT_DROPOUT = 0.2
@@ -299,10 +307,18 @@ def _logreg_test_f1(results_dir: Path, task: str, use_port: bool) -> float | Non
     return None
 
 
+def task_label_set(task: str) -> list[str]:
+    """Fixed class list used to pin the LabelEncoder. Independent of what
+    happens to be present in train/val/test, so the MLP's class contract
+    matches the baselines exactly (SEN-FR-07 / SEN-109)."""
+    return list(BINARY_LABELS) if task == "binary" else list(CANONICAL_LABELS)
+
+
 def train_task(
     task: str,
     train_df: pd.DataFrame,
     val_df: pd.DataFrame,
+    test_df: pd.DataFrame,
     *, data_dir: Path, models_dir: Path, results_dir: Path,
     use_port_variants: tuple[bool, ...] = (True, False),
     train_sample: int | None = None,
@@ -330,14 +346,15 @@ def train_task(
         if subsampled:
             print(f"    stratified sub-sample of TRAIN to {len(X_tr_df):,} rows (val/test untouched)", flush=True)
 
-        le = LabelEncoder().fit(y_tr_raw)
-        # Val labels unseen at train time (shouldn't happen after FR-05, but guard anyway).
-        known = np.isin(y_val_raw, le.classes_)
-        if not known.all():
-            dropped = int((~known).sum())
-            print(f"    dropping {dropped} val rows with labels unseen in train", flush=True)
-            X_val_df = X_val_df.loc[known].reset_index(drop=True)
-            y_val_raw = y_val_raw[known]
+        # LabelEncoder pinned to the canonical class set so MLP matches baselines (SEN-109).
+        label_set = task_label_set(task)
+        le = LabelEncoder().fit(np.array(label_set))
+        for name, y in (("train", y_tr_raw), ("val", y_val_raw)):
+            unknown = sorted(set(y.tolist()) - set(label_set))
+            if unknown:
+                raise ValueError(
+                    f"{name} contains labels outside the canonical set for task={task}: {unknown}"
+                )
         y_tr = le.transform(y_tr_raw).astype(np.int64)
         y_val = le.transform(y_val_raw).astype(np.int64)
         n_classes = len(le.classes_)
@@ -384,15 +401,32 @@ def train_task(
             "artefacts": {"preprocessor": str(pre_path), "model": str(model_path)},
         }
 
-    # Final test evaluation through the shared template (same metrics as trees/logreg).
-    test_results = run_eval_template(
-        per_variant,
-        data_dir=data_dir,
-        task=task,
-        model_name="mlp",
-        out_dir=results_dir,
-        use_wandb=False,  # W&B handled below so we can log train hyper-params too.
-    )
+    # Final test evaluation: same metrics as baselines, using evaluate_single
+    # directly on a canonicalized test_df. We can't use run_eval_template here
+    # because it re-reads the raw parquet and would bypass canonicalization.
+    test_results: list[dict] = []
+    for use_port in use_port_variants:
+        tag = "with_port" if use_port else "no_port"
+        X_te, y_te, benign_name = prep_xy(test_df, use_port=use_port, task=task)
+        unknown = sorted(set(y_te.tolist()) - set(task_label_set(task)))
+        if unknown:
+            raise ValueError(f"test contains non-canonical labels for task={task}: {unknown}")
+        t_inf0 = time.time()
+        metrics = evaluate_single(per_variant[tag], X_te, y_te, benign_name)
+        inference_time_s = time.time() - t_inf0
+        metrics.update({
+            "model": "mlp", "task": task, "dst_port": use_port,
+            "n_features": int(X_te.shape[1]),
+            "n_test_rows": int(len(X_te)),
+            "inference_eval_time_s": round(inference_time_s, 2),
+        })
+        test_results.append(metrics)
+        top_3 = ", ".join(f"{f['feature']} ({f['importance']:.3f})" for f in metrics["top_features"][:3])
+        print(f"    mlp | {task:10} | port={str(use_port):5} | "
+              f"Macro-F1={metrics['macro_f1']:.4f} | FPR={metrics['benign_fpr']:.4f} | Top: {top_3}", flush=True)
+    results_dir.mkdir(parents=True, exist_ok=True)
+    (results_dir / f"eval_mlp_{task}.json").write_text(json.dumps(test_results, indent=2))
+    print(f"Saved full report to {results_dir / f'eval_mlp_{task}.json'}\n", flush=True)
 
     alarms: list[str] = []
     for r in test_results:
@@ -465,12 +499,22 @@ def main(
     tasks = ["binary", "multiclass"] if task == "both" else [task]
     train_df = pd.read_parquet(data_dir / "train.parquet")
     val_df = pd.read_parquet(data_dir / "val.parquet")
-    print(f"train={len(train_df):,} rows   val={len(val_df):,} rows", flush=True)
+    test_df = pd.read_parquet(data_dir / "test.parquet")
+    # SEN-109: enforce the canonical 12-class set across all splits so the MLP
+    # trains and evaluates on the exact same labels as baselines. _rare_from_canonical
+    # from the train split is used consistently for val/test.
+    from sentinel_ml.baselines import _rare_from_canonical
+    rare_from_train = _rare_from_canonical(train_df, CANONICAL_LABELS)
+    train_df = canonicalize_labels(train_df, rare_class_list=rare_from_train)
+    val_df = canonicalize_labels(val_df, rare_class_list=rare_from_train)
+    test_df = canonicalize_labels(test_df, rare_class_list=rare_from_train)
+    print(f"train={len(train_df):,} rows   val={len(val_df):,} rows   test={len(test_df):,} rows", flush=True)
+    print(f"canonicalized labels: {len(CANONICAL_LABELS)} classes, merged rare: {rare_from_train or 'none'}", flush=True)
 
     out = []
     for t in tasks:
         out.append(train_task(
-            t, train_df, val_df,
+            t, train_df, val_df, test_df,
             data_dir=data_dir, models_dir=models_dir, results_dir=results_dir,
             use_port_variants=use_port_variants,
             train_sample=train_sample,
