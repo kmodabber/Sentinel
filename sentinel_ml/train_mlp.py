@@ -500,16 +500,14 @@ def main(
     train_df = pd.read_parquet(data_dir / "train.parquet")
     val_df = pd.read_parquet(data_dir / "val.parquet")
     test_df = pd.read_parquet(data_dir / "test.parquet")
-    # SEN-109: enforce the canonical 12-class set across all splits so the MLP
-    # trains and evaluates on the exact same labels as baselines. _rare_from_canonical
-    # from the train split is used consistently for val/test.
-    from sentinel_ml.baselines import _rare_from_canonical
-    rare_from_train = _rare_from_canonical(train_df, CANONICAL_LABELS)
-    train_df = canonicalize_labels(train_df, rare_class_list=rare_from_train)
-    val_df = canonicalize_labels(val_df, rare_class_list=rare_from_train)
-    test_df = canonicalize_labels(test_df, rare_class_list=rare_from_train)
+    # SEN-109 strict guard: data must already be canonical (rare-class merge is
+    # owned by sentinel_data.split). canonicalize_labels now validates instead
+    # of merging; stale parquet raises with a clear "re-run split" message.
+    train_df = canonicalize_labels(train_df, canonical_labels=list(CANONICAL_LABELS))
+    val_df = canonicalize_labels(val_df, canonical_labels=list(CANONICAL_LABELS))
+    test_df = canonicalize_labels(test_df, canonical_labels=list(CANONICAL_LABELS))
     print(f"train={len(train_df):,} rows   val={len(val_df):,} rows   test={len(test_df):,} rows", flush=True)
-    print(f"canonicalized labels: {len(CANONICAL_LABELS)} classes, merged rare: {rare_from_train or 'none'}", flush=True)
+    print(f"canonical labels verified: {len(CANONICAL_LABELS)} classes", flush=True)
 
     out = []
     for t in tasks:

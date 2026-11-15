@@ -4,18 +4,13 @@ Small in-memory DataFrames that mimic data/processed/ layout for baseline tests,
 so tests never depend on the real Parquet (which is multi-GB and not committed).
 """
 
-import hashlib
+import zlib
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 from sentinel_features.features import FEATURES
-
-
-def _stable_int(s: str) -> int:
-    """Deterministic non-negative int from a string, independent of PYTHONHASHSEED."""
-    return int.from_bytes(hashlib.md5(s.encode("utf-8")).digest()[:4], "big")
 
 # All 15 raw CICIDS labels as they appear in train.parquet before SEN-FR-05 merge.
 RAW_CICIDS_LABELS = [
@@ -53,6 +48,26 @@ CANONICAL_12 = [
     "Web Attack - Brute Force",
 ]
 
+# Pre-merged counts shaped like data v1 after sentinel_data.split ran: the 4
+# rare raw labels are already rolled up into "Rare attack". Use this when a
+# test writes parquet via write_splits() and then runs the strict-guard
+# canonicalize_labels (which no longer merges). Counts stay above
+# RARE_MIN_FLOWS=100 so nothing re-triggers a merge.
+CANONICAL_COUNTS_MIMICS_DATA_V1 = {
+    "BENIGN": 200,
+    "Bot": 150,
+    "DDoS": 150,
+    "DoS GoldenEye": 150,
+    "DoS Hulk": 150,
+    "DoS Slowhttptest": 150,
+    "DoS slowloris": 150,
+    "FTP-Patator": 150,
+    "PortScan": 150,
+    "SSH-Patator": 150,
+    "Web Attack - Brute Force": 150,
+    "Rare attack": 150,  # 10+20+15+25 rolled up, padded above threshold
+}
+
 
 def make_cicids_frame(label_counts: dict[str, int], seed: int = 0) -> pd.DataFrame:
     """Build a tiny DataFrame shaped like data/processed/*.parquet.
@@ -65,7 +80,8 @@ def make_cicids_frame(label_counts: dict[str, int], seed: int = 0) -> pd.DataFra
     rows = []
     row_i = 0
     for label, n in label_counts.items():
-        shift = (_stable_int(label) % 7) + 1
+        # zlib.crc32 is stable across PYTHONHASHSEED values; builtin hash() is not
+        shift = (zlib.crc32(label.encode()) % 7) + 1
         for _ in range(n):
             row = {col: float(rng.normal(shift, 1.0)) for col in FEATURES}
             row["dst_port"] = int(rng.integers(1, 65535))
@@ -100,5 +116,5 @@ def write_splits(out_dir: Path, label_counts: dict[str, int], seed: int = 0) -> 
     """Write train/val/test parquet with the same label distribution to out_dir."""
     out_dir.mkdir(parents=True, exist_ok=True)
     for split in ("train", "val", "test"):
-        df = make_cicids_frame(label_counts, seed=seed + _stable_int(split) % 100)
+        df = make_cicids_frame(label_counts, seed=seed + zlib.crc32(split.encode()) % 100)
         df.to_parquet(out_dir / f"{split}.parquet", index=False)

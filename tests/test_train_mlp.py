@@ -21,7 +21,11 @@ from sentinel_ml.train_mlp import (
     task_label_set,
 )
 from sentinel_ml.train_mlp import main as train_main
-from tests.fixtures import CANONICAL_12, RAW_CICIDS_LABELS, write_splits
+from tests.fixtures import (
+    CANONICAL_12,
+    CANONICAL_COUNTS_MIMICS_DATA_V1,
+    write_splits,
+)
 
 
 def test_preprocessor_fits_on_train_and_handles_negatives():
@@ -70,13 +74,12 @@ def test_mlp_classes_match_baselines_canonical():
 
 @pytest.mark.parametrize("task", ["binary", "multiclass"])
 def test_end_to_end_tiny(tmp_path: Path, task: str):
-    """Small CICIDS-shaped fixture covering all 15 raw labels (so rare classes
-    exist and get merged). Checks end-to-end run produces canonical results."""
+    """Small canonical-shaped fixture (mimics data v1 post-SEN-FR-05 merge).
+    Checks end-to-end run produces canonical results."""
     data_dir = tmp_path / "data"
     models_dir = tmp_path / "models"
     results_dir = tmp_path / "results"
-    label_counts = {label: 30 for label in RAW_CICIDS_LABELS}
-    write_splits(data_dir, label_counts, seed=0)
+    write_splits(data_dir, CANONICAL_COUNTS_MIMICS_DATA_V1, seed=0)
 
     train_main(
         task=task,
@@ -114,8 +117,7 @@ def test_test_split_only_touched_once_after_training(tmp_path: Path):
     from sentinel_ml import train_mlp as tm
 
     data_dir = tmp_path / "data"
-    label_counts = {label: 24 for label in RAW_CICIDS_LABELS}
-    write_splits(data_dir, label_counts, seed=1)
+    write_splits(data_dir, CANONICAL_COUNTS_MIMICS_DATA_V1, seed=1)
     test_df = pd.read_parquet(data_dir / "test.parquet")
     test_len = len(test_df)
 
@@ -152,7 +154,7 @@ def test_fixtures_deterministic_across_pythonhashseed():
     import io
 
     from tests.fixtures import make_cicids_frame
-    label_counts = {label: 5 for label in RAW_CICIDS_LABELS}
+    label_counts = {label: 5 for label in CANONICAL_12}
     df1 = make_cicids_frame(label_counts, seed=7)
     df2 = make_cicids_frame(label_counts, seed=7)
     buf1, buf2 = io.BytesIO(), io.BytesIO()

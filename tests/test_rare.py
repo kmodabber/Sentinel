@@ -4,11 +4,13 @@ import pandas as pd
 from sentinel_data.clean import feature_columns
 from sentinel_data.split import (
     RARE_LABEL,
+    RARE_MIN_FLOWS,
     data_card,
     find_rare_classes,
     merge_rare_classes,
     split,
 )
+from sentinel_features.features import LABELS as CANONICAL_LABELS
 
 
 def fixture_frame():
@@ -73,3 +75,56 @@ def test_no_rare_classes_means_no_change():
     df = fixture_frame()
     out = merge_rare_classes(df, [])
     assert (out["label"] == df["label"]).all()
+
+
+# --- Contract: RARE_MIN_FLOWS threshold and sentinel_features.LABELS cannot
+# drift apart. If someone changes the threshold or the canonical list, this
+# test is what should catch it. Counts match the real data v1 clean.parquet.
+DATA_V1_CLEAN_COUNTS = {
+    "BENIGN": 2628851,
+    "Bot": 737,
+    "DDoS": 95443,
+    "DoS GoldenEye": 7504,
+    "DoS Hulk": 156498,
+    "DoS Slowhttptest": 2584,
+    "DoS slowloris": 4871,
+    "FTP-Patator": 7940,
+    "Heartbleed": 9,
+    "Infiltration": 28,
+    "PortScan": 230624,
+    "SSH-Patator": 2960,
+    "Web Attack - Brute Force": 147,  # above RARE_MIN_FLOWS=100 -> its own class
+    "Web Attack - Sql Injection": 12,
+    "Web Attack - XSS": 25,
+}
+
+
+def _data_v1_shaped_frame():
+    """One row per (label, i) with just the fields find_rare_classes needs."""
+    rows = []
+    for label, n in DATA_V1_CLEAN_COUNTS.items():
+        rows.extend({"label": label} for _ in range(n))
+    return pd.DataFrame(rows)
+
+
+def test_threshold_and_canonical_labels_agree():
+    """The RARE_MIN_FLOWS=100 threshold applied to data v1 counts produces
+    exactly the 12 classes in sentinel_features.features.LABELS. If this
+    fails, split.py and the canonical contract have drifted apart."""
+    df = _data_v1_shaped_frame()
+    rare = find_rare_classes(df, min_flows=RARE_MIN_FLOWS)
+    merged = merge_rare_classes(df, rare)
+    assert set(merged["label"].unique()) == set(CANONICAL_LABELS), (
+        f"threshold-derived classes {sorted(set(merged['label'].unique()))} "
+        f"!= canonical {sorted(CANONICAL_LABELS)}"
+    )
+
+
+def test_web_attack_brute_force_is_above_threshold():
+    """Explicit check against the 'off by one at 100' question raised in review:
+    Web Attack - Brute Force has 147 flows on the full clean data, so it stays
+    as its own class and is not merged into Rare attack."""
+    df = _data_v1_shaped_frame()
+    assert (df["label"] == "Web Attack - Brute Force").sum() == 147
+    rare = find_rare_classes(df, min_flows=RARE_MIN_FLOWS)
+    assert "Web Attack - Brute Force" not in rare
