@@ -1,5 +1,5 @@
 import pandas as pd
-from features import FEATURES
+from sentinel_features import FEATURES
 
 
 class MissingFeaturesError(ValueError):
