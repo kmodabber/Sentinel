@@ -1,4 +1,5 @@
 import json
+import subprocess
 from pathlib import Path
 
 import numpy as np
@@ -7,6 +8,8 @@ from sklearn.base import clone
 from sklearn.inspection import permutation_importance
 from sklearn.metrics import classification_report, confusion_matrix, f1_score
 
+SEED = 42
+
 # Identifier and metadata columns excluded to prevent data leakage (SEN-FR-03)
 ID_COLS = [
     "id", "expiration_id", "flow_id", "src_ip", "dst_ip", "src_mac", "dst_mac",
@@ -14,6 +17,25 @@ ID_COLS = [
     "src2dst_first_seen_ms", "src2dst_last_seen_ms", "dst2src_first_seen_ms",
     "dst2src_last_seen_ms", "timestamp", "label"
 ]
+
+
+def _code_commit() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], text=True, stderr=subprocess.DEVNULL
+        ).strip()
+    except Exception:
+        return "unknown"
+
+
+def _data_version(data_dir: Path) -> str:
+    card = Path(data_dir) / "data_card.json"
+    if not card.exists():
+        return "unknown"
+    try:
+        return json.loads(card.read_text()).get("version", "unknown")
+    except Exception:
+        return "unknown"
 
 
 def prep_xy(df: pd.DataFrame, use_port: bool, task: str, benign_raw: str = "BENIGN"):
@@ -75,6 +97,7 @@ def run_eval_template(
     model_name: str = "custom_model",
     out_dir: Path = Path("results"),
     use_wandb: bool = False,
+    seed: int = SEED,
 ) -> list[dict]:
     """
     Runs the full evaluation suite with and without dst_port.
@@ -83,6 +106,8 @@ def run_eval_template(
     """
     train_df = pd.read_parquet(data_dir / "train.parquet")
     test_df = pd.read_parquet(data_dir / "test.parquet")
+    commit = _code_commit()
+    version = _data_version(data_dir)
 
     results = []
     for use_port in (True, False):
@@ -96,7 +121,15 @@ def run_eval_template(
             model = clone(model_or_pair).fit(X_tr, y_tr)
 
         metrics = evaluate_single(model, X_te, y_te, benign_name)
-        metrics.update({"model": model_name, "task": task, "dst_port": use_port, "n_features": X_te.shape[1]})
+        metrics.update({
+            "model": model_name,
+            "task": task,
+            "dst_port": use_port,
+            "n_features": X_te.shape[1],
+            "code_commit": commit,
+            "data_version": version,
+            "seed": seed,
+        })
         results.append(metrics)
 
         top_3 = ", ".join(f"{f['feature']} ({f['importance']:.3f})" for f in metrics["top_features"][:3])
@@ -115,7 +148,18 @@ def run_eval_template(
                 entity="wcs-sentinel",
                 project="Sentinel",
                 job_type="eval",
-                config={k: r[k] for k in ("model", "task", "dst_port", "n_features")},
+                config={
+                    k: r[k]
+                    for k in (
+                        "model",
+                        "task",
+                        "dst_port",
+                        "n_features",
+                        "code_commit",
+                        "data_version",
+                        "seed",
+                    )
+                },
                 reinit="finish_previous",
             ) as run:
                 run.log({"macro_f1": r["macro_f1"], "benign_fpr": r["benign_fpr"]})

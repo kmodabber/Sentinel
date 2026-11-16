@@ -1,4 +1,8 @@
 """Unit tests for the universal evaluation template (eval_template.py)."""
+import json
+import sys
+import types
+
 import joblib
 import pandas as pd
 from sklearn.dummy import DummyClassifier
@@ -8,6 +12,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
 from sentinel_ml.eval_template import (
+    SEED,
     evaluate_single,
     get_top_features,
     prep_xy,
@@ -36,6 +41,9 @@ def test_blueprint_auto_fits_with_and_without_port(tmp_path):
         assert 0 <= r["macro_f1"] <= 1
         assert 0 <= r["benign_fpr"] <= 1
         assert len(r["top_features"]) > 0
+        assert r["seed"] == SEED == 42
+        assert r["code_commit"]
+        assert "data_version" in r
 
 
 def test_pretrained_pair_inference_only(tmp_path):
@@ -80,3 +88,43 @@ def test_three_tier_feature_importance_fallback(tmp_path):
 
     metrics = evaluate_single(dummy, X, y, benign_name, top_k=3)
     assert metrics["benign_fpr"] == 0.0
+
+
+def test_run_eval_template_records_and_logs_commit_data_version_seed(tmp_path, monkeypatch):
+    """Verify run_eval_template logs code_commit, data_version, and seed=42 to W&B project 'Sentinel'."""
+    generate_parquet_splits(out_dir=tmp_path, n=400, seed=0)
+    (tmp_path / "data_card.json").write_text(json.dumps({"version": "nfs2023te-v1"}))
+
+    init_calls = []
+
+    class DummyRun:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def log(self, payload):
+            pass
+
+    fake_wandb = types.SimpleNamespace(
+        init=lambda **kwargs: (init_calls.append(kwargs), DummyRun())[1]
+    )
+    monkeypatch.setitem(sys.modules, "wandb", fake_wandb)
+
+    dummy = DummyClassifier(strategy="most_frequent")
+    results = run_eval_template(
+        dummy,
+        data_dir=tmp_path,
+        task="binary",
+        model_name="dummy",
+        out_dir=tmp_path / "results",
+        use_wandb=True,
+    )
+    assert len(init_calls) == 2
+    for call, r in zip(init_calls, results):
+        assert call["project"] == "Sentinel"
+        cfg = call["config"]
+        assert cfg["code_commit"] == r["code_commit"]
+        assert cfg["data_version"] == "nfs2023te-v1"
+        assert cfg["seed"] == 42
