@@ -90,6 +90,60 @@ def evaluate_single(model, X_test: pd.DataFrame, y_test, benign_name: str, top_k
     }
 
 
+def _json_safe(val):
+    if val is None or isinstance(val, (bool, int, str)):
+        return val
+    if isinstance(val, float):
+        return val if np.isfinite(val) else None
+    if isinstance(val, np.generic):
+        return _json_safe(val.item())
+    if isinstance(val, np.ndarray):
+        return [_json_safe(x) for x in val.tolist()]
+    if isinstance(val, (list, tuple)):
+        return [_json_safe(x) for x in val]
+    if isinstance(val, dict):
+        return {str(k): _json_safe(v) for k, v in val.items()}
+    return repr(val)
+
+
+def _model_params(model) -> dict:
+    """Extracts JSON-safe hyperparameters from an estimator or Pipeline via get_params()."""
+    est = model.steps[-1][1] if hasattr(model, "steps") else model
+    if isinstance(getattr(est, "hyperparams", None), dict) and est.hyperparams:
+        raw = {**est.hyperparams, "seed": getattr(est, "seed", SEED)}
+    else:
+        raw = est.get_params(deep=False) if hasattr(est, "get_params") else {}
+    return {str(k): _json_safe(v) for k, v in raw.items()}
+
+
+def _resolve_seed(model, seed: int | None) -> int:
+    """Returns an explicit seed if provided, else the model's random_state/seed, else SEED (42)."""
+    if seed is not None:
+        return int(seed)
+    candidates = (
+        [s for _, s in reversed(model.steps)] + [model]
+        if hasattr(model, "steps")
+        else [model]
+    )
+    for candidate in candidates:
+        for attr in ("random_state", "seed"):
+            val = getattr(candidate, attr, None)
+            if isinstance(val, (int, np.integer)) and not isinstance(val, bool):
+                return int(val)
+    if hasattr(model, "get_params"):
+        params = model.get_params()
+        for key in ("random_state", "seed"):
+            val = params.get(key)
+            if isinstance(val, (int, np.integer)) and not isinstance(val, bool):
+                return int(val)
+        for key, val in reversed(list(params.items())):
+            if key.endswith(("__random_state", "__seed")) and isinstance(
+                val, (int, np.integer)
+            ) and not isinstance(val, bool):
+                return int(val)
+    return SEED
+
+
 def run_eval_template(
     model_or_pair,
     data_dir: Path = Path("data/processed"),
@@ -97,7 +151,7 @@ def run_eval_template(
     model_name: str = "custom_model",
     out_dir: Path = Path("results"),
     use_wandb: bool = False,
-    seed: int = SEED,
+    seed: int | None = None,
 ) -> list[dict]:
     """
     Runs the full evaluation suite with and without dst_port.
@@ -120,6 +174,9 @@ def run_eval_template(
         else:
             model = clone(model_or_pair).fit(X_tr, y_tr)
 
+        resolved_seed = _resolve_seed(model, seed)
+        params = _model_params(model)
+
         metrics = evaluate_single(model, X_te, y_te, benign_name)
         metrics.update({
             "model": model_name,
@@ -128,7 +185,8 @@ def run_eval_template(
             "n_features": X_te.shape[1],
             "code_commit": commit,
             "data_version": version,
-            "seed": seed,
+            "seed": resolved_seed,
+            "model_params": params,
         })
         results.append(metrics)
 
@@ -149,16 +207,20 @@ def run_eval_template(
                 project="Sentinel",
                 job_type="eval",
                 config={
-                    k: r[k]
-                    for k in (
-                        "model",
-                        "task",
-                        "dst_port",
-                        "n_features",
-                        "code_commit",
-                        "data_version",
-                        "seed",
-                    )
+                    **r["model_params"],
+                    "model_params": r["model_params"],
+                    **{
+                        k: r[k]
+                        for k in (
+                            "model",
+                            "task",
+                            "dst_port",
+                            "n_features",
+                            "code_commit",
+                            "data_version",
+                            "seed",
+                        )
+                    },
                 },
                 reinit="finish_previous",
             ) as run:

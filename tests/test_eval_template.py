@@ -91,7 +91,7 @@ def test_three_tier_feature_importance_fallback(tmp_path):
 
 
 def test_run_eval_template_records_and_logs_commit_data_version_seed(tmp_path, monkeypatch):
-    """Verify run_eval_template logs code_commit, data_version, and seed=42 to W&B project 'Sentinel'."""
+    """Verify run_eval_template logs code_commit, data_version, seed, and model.get_params() to W&B project 'Sentinel'."""
     generate_parquet_splits(out_dir=tmp_path, n=400, seed=0)
     (tmp_path / "data_card.json").write_text(json.dumps({"version": "nfs2023te-v1"}))
 
@@ -128,3 +128,107 @@ def test_run_eval_template_records_and_logs_commit_data_version_seed(tmp_path, m
         assert cfg["code_commit"] == r["code_commit"]
         assert cfg["data_version"] == "nfs2023te-v1"
         assert cfg["seed"] == 42
+        assert cfg["strategy"] == "most_frequent"
+        assert cfg["model_params"]["strategy"] == "most_frequent"
+
+
+def test_run_eval_template_extracts_random_state_and_model_params(tmp_path, monkeypatch):
+    """Verify run_eval_template pulls random_state from estimators/pipelines and logs model hyperparameters."""
+    generate_parquet_splits(out_dir=tmp_path, n=400, seed=0)
+
+    init_calls = []
+
+    class DummyRun:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def log(self, payload):
+            pass
+
+    fake_wandb = types.SimpleNamespace(
+        init=lambda **kwargs: (init_calls.append(kwargs), DummyRun())[1]
+    )
+    monkeypatch.setitem(sys.modules, "wandb", fake_wandb)
+
+    rf = RandomForestClassifier(n_estimators=15, max_depth=4, random_state=7)
+    results = run_eval_template(
+        rf,
+        data_dir=tmp_path,
+        task="binary",
+        model_name="rf",
+        out_dir=tmp_path / "results",
+        use_wandb=True,
+    )
+    for call, r in zip(init_calls, results):
+        assert r["seed"] == 7
+        assert r["model_params"]["n_estimators"] == 15
+        assert r["model_params"]["max_depth"] == 4
+        assert r["model_params"]["random_state"] == 7
+        assert call["config"]["seed"] == 7
+        assert call["config"]["n_estimators"] == 15
+        assert call["config"]["max_depth"] == 4
+
+    # Verify Pipeline random_state resolution as well
+    pipe = make_pipeline(StandardScaler(), LogisticRegression(max_iter=500, random_state=13))
+    pipe_results = run_eval_template(
+        pipe,
+        data_dir=tmp_path,
+        task="binary",
+        model_name="logreg_pipe",
+        out_dir=tmp_path / "results",
+    )
+    for r in pipe_results:
+        assert r["seed"] == 13
+        assert r["model_params"]["max_iter"] == 500
+        assert r["model_params"]["random_state"] == 13
+
+
+def test_find_twin_mask_identifies_exact_feature_and_label_twins(tmp_path):
+    """Verify scripts/check_train_test_twins.py detects exact (features, label) twins across splits."""
+    from scripts.check_train_test_twins import find_twin_mask
+
+    generate_parquet_splits(out_dir=tmp_path, n=300, seed=0)
+    train_df = pd.read_parquet(tmp_path / "train.parquet")
+    test_df = pd.read_parquet(tmp_path / "test.parquet").copy()
+
+    # Copy 5 train rows into test_df with different IDs/timestamps so only features+label match
+    injected = train_df.iloc[:5].copy()
+    if "bidirectional_first_seen_ms" in injected.columns:
+        injected["bidirectional_first_seen_ms"] += 999_999
+    test_with_twins = pd.concat([injected, test_df], ignore_index=True)
+
+    mask, feat_cols = find_twin_mask(train_df, test_with_twins, use_port=True)
+    assert "dst_port" in feat_cols
+    assert mask[:5].all()
+
+
+def test_train_mlp_propagates_custom_seed_to_eval_json(tmp_path):
+    """Verify train_mlp --seed 7 writes seed=7 to eval_mlp_binary.json via run_eval_template."""
+    from sentinel_ml.train_mlp import main as train_main
+
+    data_dir = tmp_path / "data"
+    models_dir = tmp_path / "models"
+    results_dir = tmp_path / "results"
+    generate_parquet_splits(out_dir=data_dir, n=300, seed=0)
+
+    train_main(
+        task="binary",
+        data_dir=data_dir,
+        models_dir=models_dir,
+        results_dir=results_dir,
+        epochs=1,
+        patience=1,
+        batch_size=64,
+        hidden=(8, 4),
+        seed=7,
+        use_wandb=False,
+    )
+    rows = json.loads((results_dir / "eval_mlp_binary.json").read_text())
+    assert len(rows) == 2
+    for r in rows:
+        assert r["seed"] == 7
+        assert r["model_params"]["hidden"] == [8, 4]
+        assert r["model_params"]["seed"] == 7

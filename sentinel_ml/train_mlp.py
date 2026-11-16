@@ -85,7 +85,7 @@ def data_version(data_dir: Path) -> str | None:
         return None
 
 
-def build_preprocessor(n_train_rows: int) -> Pipeline:
+def build_preprocessor(n_train_rows: int, seed: int = DEFAULT_SEED) -> Pipeline:
     """QuantileTransformer handles the negative values NFStream can emit, then
     StandardScaler keeps the inputs neural-friendly. Fitted on train only."""
     n_quantiles = int(min(1000, max(10, n_train_rows)))
@@ -94,7 +94,7 @@ def build_preprocessor(n_train_rows: int) -> Pipeline:
             output_distribution="normal",
             n_quantiles=n_quantiles,
             subsample=200_000,
-            random_state=DEFAULT_SEED,
+            random_state=seed,
         )),
         ("scaler", StandardScaler()),
     ])
@@ -129,11 +129,22 @@ class SklearnMLPWrapper(ClassifierMixin, BaseEstimator):
     sentinel_ml.eval_template.evaluate_single. Inherits from BaseEstimator so
     permutation_importance (and anything else sklearn-side) is happy."""
 
-    def __init__(self, model: MLP, preprocessor: Pipeline, label_encoder: LabelEncoder, feature_names: list[str]):
+    def __init__(
+        self,
+        model: MLP,
+        preprocessor: Pipeline,
+        label_encoder: LabelEncoder,
+        feature_names: list[str],
+        seed: int = DEFAULT_SEED,
+        hyperparams: dict | None = None,
+    ):
         self.model = model.eval()
         self.preprocessor = preprocessor
         self.label_encoder = label_encoder
         self.feature_names = list(feature_names)
+        self.seed = seed
+        self.random_state = seed
+        self.hyperparams = hyperparams
         self.classes_ = np.array(label_encoder.classes_)
 
     def fit(self, X=None, y=None):  # no-op; model is already trained
@@ -342,7 +353,7 @@ def train_task(
         y_val = le.transform(y_val_raw).astype(np.int64)
         n_classes = len(le.classes_)
 
-        pre = build_preprocessor(len(X_tr_df)).fit(X_tr_df.to_numpy(dtype=np.float32))
+        pre = build_preprocessor(len(X_tr_df), seed=seed).fit(X_tr_df.to_numpy(dtype=np.float32))
         X_tr = pre.transform(X_tr_df.to_numpy(dtype=np.float32)).astype(np.float32)
         X_val = pre.transform(X_val_df.to_numpy(dtype=np.float32)).astype(np.float32)
 
@@ -368,7 +379,21 @@ def train_task(
             "dropout": dropout,
         }, model_path)
 
-        wrapper = SklearnMLPWrapper(model, pre, le, list(X_tr_df.columns))
+        wrapper = SklearnMLPWrapper(
+            model,
+            pre,
+            le,
+            list(X_tr_df.columns),
+            seed=seed,
+            hyperparams={
+                "hidden": list(hidden),
+                "dropout": dropout,
+                "lr": lr,
+                "batch_size": batch_size,
+                "epochs": epochs,
+                "patience": patience,
+            },
+        )
         per_variant[tag] = wrapper
         meta_by_variant[tag] = {
             "best_epoch": outcome.best_epoch,
@@ -392,6 +417,7 @@ def train_task(
         model_name="mlp",
         out_dir=results_dir,
         use_wandb=False,  # W&B handled below so we can log train hyper-params too.
+        seed=seed,
     )
 
     alarms: list[str] = []
