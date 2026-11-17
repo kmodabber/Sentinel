@@ -1,4 +1,5 @@
 import json
+import subprocess
 from pathlib import Path
 
 import numpy as np
@@ -7,6 +8,8 @@ from sklearn.base import clone
 from sklearn.inspection import permutation_importance
 from sklearn.metrics import classification_report, confusion_matrix, f1_score
 
+SEED = 42
+
 # Identifier and metadata columns excluded to prevent data leakage (SEN-FR-03)
 ID_COLS = [
     "id", "expiration_id", "flow_id", "src_ip", "dst_ip", "src_mac", "dst_mac",
@@ -14,6 +17,25 @@ ID_COLS = [
     "src2dst_first_seen_ms", "src2dst_last_seen_ms", "dst2src_first_seen_ms",
     "dst2src_last_seen_ms", "timestamp", "label"
 ]
+
+
+def _code_commit() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], text=True, stderr=subprocess.DEVNULL
+        ).strip()
+    except Exception:
+        return "unknown"
+
+
+def _data_version(data_dir: Path) -> str:
+    card = Path(data_dir) / "data_card.json"
+    if not card.exists():
+        return "unknown"
+    try:
+        return json.loads(card.read_text()).get("version", "unknown")
+    except Exception:
+        return "unknown"
 
 
 def prep_xy(df: pd.DataFrame, use_port: bool, task: str, benign_raw: str = "BENIGN"):
@@ -68,6 +90,60 @@ def evaluate_single(model, X_test: pd.DataFrame, y_test, benign_name: str, top_k
     }
 
 
+def _json_safe(val):
+    if val is None or isinstance(val, (bool, int, str)):
+        return val
+    if isinstance(val, float):
+        return val if np.isfinite(val) else None
+    if isinstance(val, np.generic):
+        return _json_safe(val.item())
+    if isinstance(val, np.ndarray):
+        return [_json_safe(x) for x in val.tolist()]
+    if isinstance(val, (list, tuple)):
+        return [_json_safe(x) for x in val]
+    if isinstance(val, dict):
+        return {str(k): _json_safe(v) for k, v in val.items()}
+    return repr(val)
+
+
+def _model_params(model) -> dict:
+    """Extracts JSON-safe hyperparameters from an estimator or Pipeline via get_params()."""
+    est = model.steps[-1][1] if hasattr(model, "steps") else model
+    if isinstance(getattr(est, "hyperparams", None), dict) and est.hyperparams:
+        raw = {**est.hyperparams, "seed": getattr(est, "seed", SEED)}
+    else:
+        raw = est.get_params(deep=False) if hasattr(est, "get_params") else {}
+    return {str(k): _json_safe(v) for k, v in raw.items()}
+
+
+def _resolve_seed(model, seed: int | None) -> int:
+    """Returns an explicit seed if provided, else the model's random_state/seed, else SEED (42)."""
+    if seed is not None:
+        return int(seed)
+    candidates = (
+        [s for _, s in reversed(model.steps)] + [model]
+        if hasattr(model, "steps")
+        else [model]
+    )
+    for candidate in candidates:
+        for attr in ("random_state", "seed"):
+            val = getattr(candidate, attr, None)
+            if isinstance(val, (int, np.integer)) and not isinstance(val, bool):
+                return int(val)
+    if hasattr(model, "get_params"):
+        params = model.get_params()
+        for key in ("random_state", "seed"):
+            val = params.get(key)
+            if isinstance(val, (int, np.integer)) and not isinstance(val, bool):
+                return int(val)
+        for key, val in reversed(list(params.items())):
+            if key.endswith(("__random_state", "__seed")) and isinstance(
+                val, (int, np.integer)
+            ) and not isinstance(val, bool):
+                return int(val)
+    return SEED
+
+
 def run_eval_template(
     model_or_pair,
     data_dir: Path = Path("data/processed"),
@@ -75,6 +151,7 @@ def run_eval_template(
     model_name: str = "custom_model",
     out_dir: Path = Path("results"),
     use_wandb: bool = False,
+    seed: int | None = None,
 ) -> list[dict]:
     """
     Runs the full evaluation suite with and without dst_port.
@@ -83,6 +160,8 @@ def run_eval_template(
     """
     train_df = pd.read_parquet(data_dir / "train.parquet")
     test_df = pd.read_parquet(data_dir / "test.parquet")
+    commit = _code_commit()
+    version = _data_version(data_dir)
 
     results = []
     for use_port in (True, False):
@@ -95,8 +174,20 @@ def run_eval_template(
         else:
             model = clone(model_or_pair).fit(X_tr, y_tr)
 
+        resolved_seed = _resolve_seed(model, seed)
+        params = _model_params(model)
+
         metrics = evaluate_single(model, X_te, y_te, benign_name)
-        metrics.update({"model": model_name, "task": task, "dst_port": use_port, "n_features": X_te.shape[1]})
+        metrics.update({
+            "model": model_name,
+            "task": task,
+            "dst_port": use_port,
+            "n_features": X_te.shape[1],
+            "code_commit": commit,
+            "data_version": version,
+            "seed": resolved_seed,
+            "model_params": params,
+        })
         results.append(metrics)
 
         top_3 = ", ".join(f"{f['feature']} ({f['importance']:.3f})" for f in metrics["top_features"][:3])
@@ -115,7 +206,22 @@ def run_eval_template(
                 entity="wcs-sentinel",
                 project="Sentinel",
                 job_type="eval",
-                config={k: r[k] for k in ("model", "task", "dst_port", "n_features")},
+                config={
+                    **r["model_params"],
+                    "model_params": r["model_params"],
+                    **{
+                        k: r[k]
+                        for k in (
+                            "model",
+                            "task",
+                            "dst_port",
+                            "n_features",
+                            "code_commit",
+                            "data_version",
+                            "seed",
+                        )
+                    },
+                },
                 reinit="finish_previous",
             ) as run:
                 run.log({"macro_f1": r["macro_f1"], "benign_fpr": r["benign_fpr"]})
