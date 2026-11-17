@@ -1,8 +1,10 @@
+
 """SEN-FR-20 synthetic database feed for Sentinel C2 v0.
 
 Writes to existing flows, model_versions and detections tables.
 For development/test databases ONLY; never run against a live capture store.
 """
+
 import argparse
 import logging
 import os
@@ -14,23 +16,30 @@ from datetime import datetime, timezone
 from ipaddress import IPv4Address
 from pathlib import Path
 
-# Allow `python scripts/fake_detections/fake_detections.py` from the repo root.
+# Allow running this script directly from the repository root.
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from sentinel_features.labels import (  # noqa: E402
-    BENIGN,
-    DDOS,
-    PORT_SCAN,
-    SSH_PATATOR,
-    WEB_ATTACKS,
-)
+from sentinel_features.features import BENIGN, LABELS  # noqa: E402
 
 LOG = logging.getLogger("fake_detections")
 STOP = False
 MODEL_VERSION = "synthetic-fr20-v1"
+
+# Use the canonical class labels from sentinel_features.features.
+# These strings must exactly match the labels used by the model.
+DDOS = next(label for label in LABELS if label == "DDoS")
+PORT_SCAN = next(label for label in LABELS if label == "PortScan")
+SSH_PATATOR = next(label for label in LABELS if label == "SSH-Patator")
+
+WEB_ATTACKS = tuple(
+    label for label in LABELS
+    if label == "Web Attack - Brute Force"
+)
+
 CLASSES = (PORT_SCAN, SSH_PATATOR, DDOS, *WEB_ATTACKS)
-# C2's source CHECK does not permit "synthetic". Use "replay" as a
-# development-only stand-in, and identify fake records by model_version.
+
+# C2's source CHECK does not permit "synthetic".
+# Use "replay" as a development-only stand-in.
 SOURCE = "replay"
 
 
@@ -42,8 +51,10 @@ def on_stop(*_):
 def generate_event(rng, timestamp=None, attack_probability=0.25):
     if not 0 <= attack_probability <= 1:
         raise ValueError("attack_probability must be between 0 and 1")
+
     attack = rng.random() < attack_probability
     label = rng.choice(CLASSES) if attack else BENIGN
+
     if label == SSH_PATATOR:
         port = 22
     elif label in WEB_ATTACKS:
@@ -52,21 +63,44 @@ def generate_event(rng, timestamp=None, attack_probability=0.25):
         port = 80
     else:
         port = rng.choice([22, 53, 80, 443, 8080])
-    src = str(IPv4Address(rng.randint(int(IPv4Address("198.18.0.1")),
-                                     int(IPv4Address("198.19.255.254")))))
+
+    src = str(
+        IPv4Address(
+            rng.randint(
+                int(IPv4Address("198.18.0.1")),
+                int(IPv4Address("198.19.255.254")),
+            )
+        )
+    )
+
     dst = f"10.0.0.{rng.randint(1, 254)}"
-    packets = (rng.randint(1000, 20000) if label == DDOS
-               else rng.randint(2, 30) if label == PORT_SCAN
-               else rng.randint(5, 400))
+
+    packets = (
+        rng.randint(1000, 20000)
+        if label == DDOS
+        else rng.randint(2, 30)
+        if label == PORT_SCAN
+        else rng.randint(5, 400)
+    )
+
     byte_count = packets * rng.randint(60, 1400)
-    confidence = round(rng.uniform(0.80, 0.99), 4) if attack else round(rng.uniform(0.60, 0.99), 4)
+
+    confidence = (
+        round(rng.uniform(0.80, 0.99), 4)
+        if attack
+        else round(rng.uniform(0.60, 0.99), 4)
+    )
+
     return {
         "seen_at": timestamp or datetime.now(timezone.utc),
-        "src_ip": src, "dst_ip": dst,
-        "src_port": rng.randint(1024, 65535), "dst_port": port,
+        "src_ip": src,
+        "dst_ip": dst,
+        "src_port": rng.randint(1024, 65535),
+        "dst_port": port,
         "protocol": "UDP" if port == 53 else "TCP",
         "duration_ms": round(rng.uniform(10, 20000), 2),
-        "packets": packets, "bytes": byte_count,
+        "packets": packets,
+        "bytes": byte_count,
         "source": SOURCE,
         "predicted_class": label,
         "confidence": confidence,
@@ -77,104 +111,219 @@ def generate_event(rng, timestamp=None, attack_probability=0.25):
 
 def verify_schema(conn):
     required = {
-        "flows": {"id", "seen_at", "src_ip", "dst_ip", "src_port", "dst_port",
-                  "protocol", "duration_ms", "packets", "bytes", "source"},
-        "model_versions": {"version", "created_at", "metrics", "active"},
-        "detections": {"id", "flow_id", "model_version", "predicted_class",
-                       "confidence", "is_alert", "top_reasons", "created_at"},
+        "flows": {
+            "id", "seen_at", "src_ip", "dst_ip",
+            "src_port", "dst_port", "protocol",
+            "duration_ms", "packets", "bytes", "source",
+        },
+        "model_versions": {
+            "version", "created_at", "metrics", "active",
+        },
+        "detections": {
+            "id", "flow_id", "model_version",
+            "predicted_class", "confidence",
+            "is_alert", "top_reasons", "created_at",
+        },
     }
+
     for table, expected in required.items():
         rows = conn.execute(
-            """SELECT column_name FROM information_schema.columns
-               WHERE table_schema = current_schema() AND table_name = %s""",
+            """SELECT column_name
+               FROM information_schema.columns
+               WHERE table_schema = current_schema()
+               AND table_name = %s""",
             (table,),
         ).fetchall()
+
         missing = expected - {row[0] for row in rows}
+
         if missing:
-            raise RuntimeError(f"C2 schema mismatch in {table}: missing {sorted(missing)}")
+            raise RuntimeError(
+                f"C2 schema mismatch in {table}: missing {sorted(missing)}"
+            )
 
 
 def register_model(conn):
-    # FK target must exist before detection insert.
+    """Register the synthetic model before inserting detections."""
     conn.execute(
         """INSERT INTO model_versions(version, metrics, active)
            VALUES (%s, %s::jsonb, FALSE)
            ON CONFLICT (version) DO NOTHING""",
-        (MODEL_VERSION, '{"synthetic": true, "ticket": "SEN-FR-20"}'),
+        (
+            MODEL_VERSION,
+            '{"synthetic": true, "ticket": "SEN-FR-20"}',
+        ),
     )
 
 
 def insert_event(conn, event):
-    """Commit flow and optional detection atomically. Return (flow_id, has_detection)."""
+    """Commit flow and optional detection atomically.
+
+    Returns (flow_id, has_detection).
+    """
     with conn.transaction():
         flow_id = conn.execute(
             """INSERT INTO flows
-               (seen_at, src_ip, dst_ip, src_port, dst_port, protocol,
-                duration_ms, packets, bytes, source)
+               (seen_at, src_ip, dst_ip, src_port, dst_port,
+                protocol, duration_ms, packets, bytes, source)
                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                RETURNING id""",
-            tuple(event[key] for key in (
-                "seen_at", "src_ip", "dst_ip", "src_port", "dst_port",
-                "protocol", "duration_ms", "packets", "bytes", "source"
-            )),
+            tuple(
+                event[key]
+                for key in (
+                    "seen_at",
+                    "src_ip",
+                    "dst_ip",
+                    "src_port",
+                    "dst_port",
+                    "protocol",
+                    "duration_ms",
+                    "packets",
+                    "bytes",
+                    "source",
+                )
+            ),
         ).fetchone()[0]
+
         if event["is_attack"]:
             conn.execute(
                 """INSERT INTO detections
-                   (flow_id, model_version, predicted_class, confidence,
-                    is_alert, top_reasons)
+                   (flow_id, model_version, predicted_class,
+                    confidence, is_alert, top_reasons)
                    VALUES (%s,%s,%s,%s,%s,%s::jsonb)""",
-                (flow_id, MODEL_VERSION, event["predicted_class"],
-                 event["confidence"], event["is_alert"],
-                 '{"note":"synthetic data for dashboard development"}'),
+                (
+                    flow_id,
+                    MODEL_VERSION,
+                    event["predicted_class"],
+                    event["confidence"],
+                    event["is_alert"],
+                    '{"note":"synthetic data for dashboard development"}',
+                ),
             )
+
     return flow_id, event["is_attack"]
 
 
-def run(conn, count=0, interval=1.0, seed=20, attack_probability=0.25):
+def run(
+    conn,
+    count=0,
+    interval=1.0,
+    seed=20,
+    attack_probability=0.25,
+):
     if count < 0 or interval <= 0:
         raise ValueError("count must be >= 0 and interval > 0")
+
     verify_schema(conn)
     register_model(conn)
+
     rng = random.Random(seed)
-    total = detections = 0
+    total = 0
+    detections = 0
     next_tick = time.monotonic()
+
     while not STOP and (count == 0 or total < count):
-        event = generate_event(rng, attack_probability=attack_probability)
+        event = generate_event(
+            rng,
+            attack_probability=attack_probability,
+        )
+
         flow_id, detected = insert_event(conn, event)
+
         total += 1
         detections += int(detected)
-        LOG.info("flow=%s label=%s confidence=%.3f total=%s detections=%s",
-                 flow_id, event["predicted_class"], event["confidence"],
-                 total, detections)
+
+        LOG.info(
+            "flow=%s label=%s confidence=%.3f total=%s detections=%s",
+            flow_id,
+            event["predicted_class"],
+            event["confidence"],
+            total,
+            detections,
+        )
+
         next_tick += interval
+
         while not STOP and time.monotonic() < next_tick:
-            time.sleep(min(0.1, next_tick - time.monotonic()))
+            time.sleep(
+                min(0.1, next_tick - time.monotonic())
+            )
+
     return total, detections
 
 
 def main():
-    parser = argparse.ArgumentParser(description="SEN-FR-20 C2 synthetic database feed")
-    parser.add_argument("--count", type=int, default=0,
-                        help="Number of flows; 0 means continuous")
-    parser.add_argument("--interval", type=float, default=1.0,
-                        help="Seconds between flows")
-    parser.add_argument("--attack-probability", type=float, default=0.25)
-    parser.add_argument("--seed", type=int, default=20)
+    parser = argparse.ArgumentParser(
+        description="SEN-FR-20 C2 synthetic database feed"
+    )
+
+    parser.add_argument(
+        "--count",
+        type=int,
+        default=0,
+        help="Number of flows; 0 means continuous",
+    )
+    parser.add_argument(
+        "--interval",
+        type=float,
+        default=1.0,
+        help="Seconds between flows",
+    )
+    parser.add_argument(
+        "--attack-probability",
+        type=float,
+        default=0.25,
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=20,
+    )
+
     args = parser.parse_args()
-    if args.count < 0 or args.interval <= 0 or not 0 <= args.attack_probability <= 1:
-        parser.error("count >= 0, interval > 0 and attack-probability in [0,1] required")
+
+    if (
+        args.count < 0
+        or args.interval <= 0
+        or not 0 <= args.attack_probability <= 1
+    ):
+        parser.error(
+            "count >= 0, interval > 0 and "
+            "attack-probability in [0,1] required"
+        )
+
     dsn = os.environ.get("DATABASE_URL")
+
     if not dsn:
-        parser.error("Set DATABASE_URL to your disposable Sentinel PostgreSQL database")
+        parser.error(
+            "Set DATABASE_URL to your disposable "
+            "Sentinel PostgreSQL database"
+        )
+
     import psycopg
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(message)s",
+    )
+
     signal.signal(signal.SIGINT, on_stop)
     signal.signal(signal.SIGTERM, on_stop)
+
     with psycopg.connect(dsn, autocommit=True) as conn:
-        count, detected = run(conn, args.count, args.interval,
-                              args.seed, args.attack_probability)
-    LOG.info("Completed: %d flows, %d detections", count, detected)
+        count, detected = run(
+            conn,
+            args.count,
+            args.interval,
+            args.seed,
+            args.attack_probability,
+        )
+
+    LOG.info(
+        "Completed: %d flows, %d detections",
+        count,
+        detected,
+    )
 
 
 if __name__ == "__main__":
