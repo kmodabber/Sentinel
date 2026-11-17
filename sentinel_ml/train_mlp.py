@@ -414,11 +414,20 @@ def train_task(
         t_inf0 = time.time()
         metrics = evaluate_single(per_variant[tag], X_te, y_te, benign_name)
         inference_time_s = time.time() - t_inf0
+        model_params = {
+            "hidden": list(hidden), "dropout": dropout, "lr": lr,
+            "batch_size": batch_size, "epochs": epochs, "patience": patience,
+            "seed": seed,
+        }
         metrics.update({
             "model": "mlp", "task": task, "dst_port": use_port,
             "n_features": int(X_te.shape[1]),
             "n_test_rows": int(len(X_te)),
             "inference_eval_time_s": round(inference_time_s, 2),
+            "code_commit": commit,
+            "data_version": version,
+            "seed": seed,
+            "model_params": model_params,
         })
         test_results.append(metrics)
         top_3 = ", ".join(f"{f['feature']} ({f['importance']:.3f})" for f in metrics["top_features"][:3])
