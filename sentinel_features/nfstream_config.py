@@ -11,7 +11,10 @@ Integrity: A Case Study".
 
 from nfstream import NFPlugin, NFStreamer
 
-BPF = "ip and (ip proto \\tcp or \\udp)"  # IPv4 TCP and UDP only
+# The settings live in nfstream_settings.py so they can be read without
+# nfstream installed; BPF is imported too so existing imports keep working.
+from sentinel_features.nfstream_settings import BPF, SETTINGS  # noqa: F401
+
 
 class FlowExpirationManager(NFPlugin):
     """Manages the expiration policy for TCP flows."""
@@ -33,18 +36,7 @@ def build_streamer(source, extra_udps=()):
     order stays Expiration, Payload, Label as in the original notebook.
     """
     return NFStreamer(
-        source=source
-        , decode_tunnels=False                                # Default: True
-        , bpf_filter=BPF                                      # Default: None
-        , promiscuous_mode=True                               # Default: True
-        , snapshot_length=1536                                # Default: 1536
-        , idle_timeout=60                                     # Default: 120
-        , active_timeout=120                                  # Default: 1800
-        , accounting_mode=0                                   # Default: 0
-        , udps=[FlowExpirationManager(), *extra_udps]         # Default: None
-        , n_dissections=0                                     # Default: 20
-        , statistical_analysis=True                           # Default: False
-        , splt_analysis=0                                     # Default: 0
-        , n_meters=1                                          # Default: 0
-        , performance_report=0                                # Default: 0
+        source=source,
+        udps=[FlowExpirationManager(), *extra_udps],          # Default: None
+        **SETTINGS,
     )
