@@ -3,15 +3,14 @@ import unittest
 from datetime import datetime, timezone
 from unittest.mock import MagicMock
 
-from fake_detections import (
+from scripts.fake_detections.fake_detections import (
     CLASSES,
     MODEL_VERSION,
     generate_event,
     insert_event,
     register_model,
 )
-
-from sentinel_features.labels import BENIGN
+from sentinel_features.features import BENIGN
 
 
 class FakeDetectionsTests(unittest.TestCase):
