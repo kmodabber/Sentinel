@@ -214,15 +214,15 @@ def test_train_mlp_propagates_custom_seed_to_eval_json(tmp_path):
     models_dir = tmp_path / "models"
     results_dir = tmp_path / "results"
     generate_parquet_splits(out_dir=data_dir, n=300, seed=0)
-    # train_mlp.main runs strict canonicalize_labels, so each split must contain
-    # exactly the canonical label set. Overwrite labels on the first N rows.
+    # train_mlp.main runs strict canonicalize_labels, which requires the label
+    # column to contain exactly the 12 canonical classes (no extras, no
+    # missing). The synthetic generator emits DoS/PortScan/SSH-Patator, and
+    # plain "DoS" is not canonical. Overwrite every row with a canonical label
+    # by cycling through CANONICAL_LABELS so all 12 classes are present.
     for name in ("train.parquet", "val.parquet", "test.parquet"):
         path = data_dir / name
         df = pd.read_parquet(path)
-        labels = list(df["label"].to_numpy())
-        for i, lab in enumerate(CANONICAL_LABELS):
-            labels[i] = lab
-        df["label"] = labels
+        df["label"] = [CANONICAL_LABELS[i % len(CANONICAL_LABELS)] for i in range(len(df))]
         df.to_parquet(path)
 
     train_main(
