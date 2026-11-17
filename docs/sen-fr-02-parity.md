@@ -14,7 +14,9 @@ sensor run are left for Stage 2 (SEN-FR-16, 19).
 - Settings (unchanged from the authors): BPF `ip and (ip proto tcp or udp)`,
   idle timeout 60, active timeout 120, n_dissections 0, statistical analysis
   on, TCP flows expire on RST/FIN, single-packet RST/FIN flows dropped.
-- Labeller: the authors' `labeller.py`, unmodified, `label_reverse=True`,
+- Labeller: the authors' `labeller.py`, with `utime()` pinned to `Europe/Berlin`
+  via `zoneinfo` (it previously used the machine's local time zone, and the
+  authors' `time_shift = 5` assumes Berlin time), `label_reverse=True`,
   `signal_reverse=False`.
 - Reference: `Tuesday.csv` renamed to `CyberML-DataQuality-Tuesday.csv` ([NFS-2023-TE repo link](https://github.com/FlowFrontiers/CyberML-DataQuality/tree/main/4-NFS-2023/NFS-2023-TE/datasets)),
   stored at [Drive link](https://drive.google.com/drive/folders/1vlJpfTmcXEFZKp55Dmpa__f7Z3ZlDsTV?usp=drive_link).
@@ -41,6 +43,11 @@ Regeneration has 1,471 more BENIGN flows (+0.32%). Both attack labels match
 exactly, so labelling and attack-flow handling reproduce the published data.
 Likely cause: NFStream version or platform differences in how short benign
 flows expire. Impact: none on attack labels; BENIGN is well inside the threshold.
+
+The Oct 29 run was on `America/Toronto`. After pinning the
+labeller to `Europe/Berlin`, the Tuesday output is identical.
+Tuesday labelling does not use time windows, so the gap has
+another cause.
 
 ## Tests
 
