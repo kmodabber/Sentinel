@@ -8,14 +8,27 @@ import logging
 import os
 import random
 import signal
+import sys
 import time
 from datetime import datetime, timezone
 from ipaddress import IPv4Address
+from pathlib import Path
+
+# Allow `python scripts/fake_detections/fake_detections.py` from the repo root.
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from sentinel_features.labels import (  # noqa: E402
+    BENIGN,
+    DDOS,
+    PORT_SCAN,
+    SSH_PATATOR,
+    WEB_ATTACKS,
+)
 
 LOG = logging.getLogger("fake_detections")
 STOP = False
 MODEL_VERSION = "synthetic-fr20-v1"
-CLASSES = ("Port Scan", "SSH Brute Force", "DDoS", "Web Attack")
+CLASSES = (PORT_SCAN, SSH_PATATOR, DDOS, *WEB_ATTACKS)
 # C2's source CHECK does not permit "synthetic". Use "replay" as a
 # development-only stand-in, and identify fake records by model_version.
 SOURCE = "replay"
@@ -30,15 +43,20 @@ def generate_event(rng, timestamp=None, attack_probability=0.25):
     if not 0 <= attack_probability <= 1:
         raise ValueError("attack_probability must be between 0 and 1")
     attack = rng.random() < attack_probability
-    label = rng.choice(CLASSES) if attack else "Benign"
-    port = {"SSH Brute Force": 22, "Web Attack": 443, "DDoS": 80}.get(
-        label, rng.choice([22, 53, 80, 443, 8080])
-    )
+    label = rng.choice(CLASSES) if attack else BENIGN
+    if label == SSH_PATATOR:
+        port = 22
+    elif label in WEB_ATTACKS:
+        port = 443
+    elif label == DDOS:
+        port = 80
+    else:
+        port = rng.choice([22, 53, 80, 443, 8080])
     src = str(IPv4Address(rng.randint(int(IPv4Address("198.18.0.1")),
                                      int(IPv4Address("198.19.255.254")))))
     dst = f"10.0.0.{rng.randint(1, 254)}"
-    packets = (rng.randint(1000, 20000) if label == "DDoS"
-               else rng.randint(2, 30) if label == "Port Scan"
+    packets = (rng.randint(1000, 20000) if label == DDOS
+               else rng.randint(2, 30) if label == PORT_SCAN
                else rng.randint(5, 400))
     byte_count = packets * rng.randint(60, 1400)
     confidence = round(rng.uniform(0.80, 0.99), 4) if attack else round(rng.uniform(0.60, 0.99), 4)

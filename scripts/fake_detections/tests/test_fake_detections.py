@@ -3,13 +3,21 @@ import unittest
 from datetime import datetime, timezone
 from unittest.mock import MagicMock
 
-from fake_detections import MODEL_VERSION, generate_event, insert_event, register_model
+from fake_detections import (
+    CLASSES,
+    MODEL_VERSION,
+    generate_event,
+    insert_event,
+    register_model,
+)
+
+from sentinel_features.labels import BENIGN
 
 
 class FakeDetectionsTests(unittest.TestCase):
     def test_benign_event_matches_c2_constraints(self):
         e = generate_event(random.Random(1), datetime.now(timezone.utc), 0)
-        self.assertEqual(e["predicted_class"], "Benign")
+        self.assertEqual(e["predicted_class"], BENIGN)
         self.assertEqual(e["source"], "replay")
         self.assertFalse(e["is_attack"])
         self.assertTrue(0 <= e["confidence"] <= 1)
@@ -19,7 +27,8 @@ class FakeDetectionsTests(unittest.TestCase):
     def test_attack_event_has_detection_fields(self):
         e = generate_event(random.Random(5), attack_probability=1)
         self.assertTrue(e["is_attack"])
-        self.assertNotEqual(e["predicted_class"], "Benign")
+        self.assertNotEqual(e["predicted_class"], BENIGN)
+        self.assertIn(e["predicted_class"], CLASSES)
         self.assertTrue(0 <= e["confidence"] <= 1)
         self.assertIsInstance(e["is_alert"], bool)
 
