@@ -26,7 +26,7 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
 from sentinel_features.features import LABELS as CANONICAL_LABELS
-from sentinel_ml.baselines import _rare_from_canonical, canonicalize_labels
+from sentinel_ml.baselines import canonicalize_labels
 from sentinel_ml.eval_template import prep_xy
 from sentinel_ml.train_mlp import (
     _maybe_subsample,
@@ -160,9 +160,8 @@ def main():
 
     train_df = pd.read_parquet(args.data_dir / "train.parquet")
     val_df = pd.read_parquet(args.data_dir / "val.parquet")
-    rare = _rare_from_canonical(train_df, CANONICAL_LABELS)
-    train_df = canonicalize_labels(train_df, rare_class_list=rare)
-    val_df = canonicalize_labels(val_df, rare_class_list=rare)
+    train_df = canonicalize_labels(train_df, canonical_labels=list(CANONICAL_LABELS))
+    val_df = canonicalize_labels(val_df, canonical_labels=list(CANONICAL_LABELS))
 
     port_variants = [True, False] if args.use_port == "both" else ([True] if args.use_port == "with" else [False])
     for use_port in port_variants:

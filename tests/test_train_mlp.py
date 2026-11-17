@@ -161,3 +161,13 @@ def test_fixtures_deterministic_across_pythonhashseed():
     df1.to_parquet(buf1, index=False)
     df2.to_parquet(buf2, index=False)
     assert buf1.getvalue() == buf2.getvalue()
+
+
+def test_sweep_mlp_importable():
+    """Guards sweep_mlp.py from drifting out of sync with the baselines API
+    (it has no training-path test, so CI missed the strict-canonicalize break)."""
+    import importlib
+
+    mod = importlib.import_module("sentinel_ml.sweep_mlp")
+    assert hasattr(mod, "sweep")
+    assert hasattr(mod, "main")
