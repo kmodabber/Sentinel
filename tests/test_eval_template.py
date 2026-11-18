@@ -206,13 +206,24 @@ def test_find_twin_mask_identifies_exact_feature_and_label_twins(tmp_path):
 
 
 def test_train_mlp_propagates_custom_seed_to_eval_json(tmp_path):
-    """Verify train_mlp --seed 7 writes seed=7 to eval_mlp_binary.json via run_eval_template."""
+    """Verify train_mlp --seed 7 writes seed=7 to eval_mlp_binary.json."""
+    from sentinel_features.features import LABELS as CANONICAL_LABELS
     from sentinel_ml.train_mlp import main as train_main
 
     data_dir = tmp_path / "data"
     models_dir = tmp_path / "models"
     results_dir = tmp_path / "results"
     generate_parquet_splits(out_dir=data_dir, n=300, seed=0)
+    # train_mlp.main runs strict canonicalize_labels, which requires the label
+    # column to contain exactly the 12 canonical classes (no extras, no
+    # missing). The synthetic generator emits DoS/PortScan/SSH-Patator, and
+    # plain "DoS" is not canonical. Overwrite every row with a canonical label
+    # by cycling through CANONICAL_LABELS so all 12 classes are present.
+    for name in ("train.parquet", "val.parquet", "test.parquet"):
+        path = data_dir / name
+        df = pd.read_parquet(path)
+        df["label"] = [CANONICAL_LABELS[i % len(CANONICAL_LABELS)] for i in range(len(df))]
+        df.to_parquet(path)
 
     train_main(
         task="binary",
