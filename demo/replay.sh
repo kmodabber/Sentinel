@@ -1,22 +1,37 @@
 #!/usr/bin/env bash
-# Usage: ./replay.sh <slice-name>     e.g. ./replay.sh ssh_brute_force
+# Usage: ./replay.sh <slice-name>     e.g. ./replay.sh SSH-Patator
 #        ./replay.sh list
+#        PPS=2000 ./replay.sh SSH-Patator     (override replay speed)
 set -euo pipefail
 
 TX=veth-replay      # tcpreplay writes here
 RX=veth-sensor      # the sensor (NFStreamer) reads here
-# SLICE_DIR="$(cd "$(dirname "$0")" && pwd)/../../slices"
-SLICE_DIR="$(cd "$(dirname "$0")" && pwd)/../models" # Testing with local pcap slice (change later)
+PPS="${PPS:-500}"   # packets per second
 
-list() { echo "Available slices:"; ls "$SLICE_DIR" | sed 's/\.pcap$//' | sed 's/^/  /'; }
+HERE="$(cd "$(dirname "$0")" && pwd)"
+CSV="$HERE/slice.csv"
+# SLICE_DIR="$HERE/../../slices"                      # real location (switch when decided)
+SLICE_DIR="${SLICE_DIR:-$HERE/../models/slices}"             # testing with local pcap slice (change later)
 
+# slice names from the first CSV column (skip header, strip Windows line endings)
+names() { tail -n +2 "$CSV" | tr -d '\r' | cut -d, -f1; }
+
+list() {
+  echo "Slices in slice.csv:"
+  names | while read -r n; do
+    if [ -f "$SLICE_DIR/$n.pcap" ]; then echo "  $n"; else echo "  $n (PCAP not cut yet)"; fi
+  done
+}
+
+[ -f "$CSV" ] || { echo "Missing $CSV"; exit 1; }
 [ $# -eq 1 ] || { echo "usage: $0 <slice-name|list>"; list; exit 1; }
 [ "$1" = "list" ] && { list; exit 0; }
 
-# slice name: letters, digits, _ and - only (no paths)
-[[ "$1" =~ ^[A-Za-z0-9_-]+$ ]] || { echo "Invalid slice name"; exit 1; }
+# name must be a row in the CSV (exact match), which also blocks path tricks
+names | grep -Fxq -- "$1" || { echo "Not in slice.csv: $1"; list; exit 1; }
+
 PCAP="$SLICE_DIR/$1.pcap"
-[ -f "$PCAP" ] || { echo "No such slice: $1"; list; exit 1; }
+[ -f "$PCAP" ] || { echo "Slice '$1' is in slice.csv but its PCAP isn't at $PCAP"; exit 1; }
 
 # create the veth pair if it doesn't exist yet
 if ! ip link show "$TX" >/dev/null 2>&1; then
@@ -36,5 +51,5 @@ for i in "$TX" "$RX"; do
   [ -z "$(ip -o addr show dev "$i")" ]      || { echo "ABORT: $i has an IP address"; exit 1; }
 done
 
-echo "Replaying '$1' -> $RX (local only)"
-sudo tcpreplay -i "$TX" --pps=500 "$PCAP"
+echo "Replaying '$1' -> $RX (local only, $PPS pps)"
+sudo tcpreplay -i "$TX" --pps="$PPS" "$PCAP"
