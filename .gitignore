@@ -14,6 +14,9 @@ results/
 logs/
 .venv/
 .DS_Store
+*.pcapng
+*.cap
+demo/slices/
 
 .env
 *.csv
