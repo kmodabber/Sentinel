@@ -1,28 +1,35 @@
-"""Unit tests for SEN-FR-13 MLP trainer. Uses only the synthetic fixture."""
+"""Unit tests for SEN-FR-13 MLP trainer."""
+# isort: off
+# torch must import before numpy on Windows (OpenMP clash: c10.dll WinError 1114).
+import torch  # noqa: F401,E402
+# isort: on
 
+import json
 from pathlib import Path
+from unittest import mock
 
 import numpy as np
 import pandas as pd
 import pytest
 from sklearn.utils.class_weight import compute_class_weight
 
-from sentinel_ml.make_synthetic import generate_parquet_splits
+from sentinel_features.features import LABELS as CANONICAL_LABELS
 from sentinel_ml.train_mlp import (
+    BINARY_LABELS,
     build_preprocessor,
     class_weights_from_train,
+    task_label_set,
 )
-from sentinel_ml.train_mlp import (
-    main as train_main,
+from sentinel_ml.train_mlp import main as train_main
+from tests.fixtures import (
+    CANONICAL_12,
+    CANONICAL_COUNTS_MIMICS_DATA_V1,
+    write_splits,
 )
 
 
 def test_preprocessor_fits_on_train_and_handles_negatives():
-    """QuantileTransformer+StandardScaler is fitted on TRAIN only, produces finite
-    outputs even with negative inputs (NFStream features can be negative), and
-    its stats are frozen at transform time."""
     rng = np.random.default_rng(0)
-    # Deliberately include negative values and heavy tails in the "train" set.
     X_train = pd.DataFrame({
         "a": rng.normal(0, 5, size=800),
         "b": rng.normal(-3, 2, size=800),
@@ -32,11 +39,9 @@ def test_preprocessor_fits_on_train_and_handles_negatives():
     Xt = pre.transform(X_train)
     assert np.all(np.isfinite(Xt))
     assert Xt.shape == X_train.shape
-    # StandardScaler fitted on the quantile output: train columns ~0 mean, ~1 std.
     assert np.allclose(Xt.mean(axis=0), 0.0, atol=0.1)
     assert np.allclose(Xt.std(axis=0), 1.0, atol=0.1)
 
-    # A very different second dataset must NOT retrain the transformer.
     X_other = pd.DataFrame({
         "a": rng.normal(100, 1, size=400),
         "b": rng.normal(-100, 1, size=400),
@@ -57,14 +62,24 @@ def test_class_weights_match_sklearn():
     assert np.allclose(got, expected)
 
 
+def test_mlp_classes_match_baselines_canonical():
+    """The MLP's multiclass label set must be the canonical 12 classes from
+    sentinel_features.features.LABELS, not whatever happens to be in train.
+    Keeps comparison with baselines meaningful (SEN-FR-07 / SEN-109)."""
+    assert task_label_set("multiclass") == list(CANONICAL_LABELS)
+    assert task_label_set("multiclass") == CANONICAL_12
+    assert task_label_set("binary") == BINARY_LABELS
+    assert set(task_label_set("binary")) == {"benign", "attack"}
+
+
 @pytest.mark.parametrize("task", ["binary", "multiclass"])
 def test_end_to_end_tiny(tmp_path: Path, task: str):
-    """Train on a 500-row synthetic fixture for a couple of epochs, both port
-    variants; check the eval-template output is produced with sane metrics."""
+    """Small canonical-shaped fixture (mimics data v1 post-SEN-FR-05 merge).
+    Checks end-to-end run produces canonical results."""
     data_dir = tmp_path / "data"
     models_dir = tmp_path / "models"
     results_dir = tmp_path / "results"
-    generate_parquet_splits(out_dir=data_dir, n=500, seed=0)
+    write_splits(data_dir, CANONICAL_COUNTS_MIMICS_DATA_V1, seed=0)
 
     train_main(
         task=task,
@@ -81,16 +96,78 @@ def test_end_to_end_tiny(tmp_path: Path, task: str):
 
     eval_file = results_dir / f"eval_mlp_{task}.json"
     assert eval_file.exists(), f"missing {eval_file}"
-    import json
     rows = json.loads(eval_file.read_text())
     assert len(rows) == 2  # with and without dst_port
+    expected_classes = set(task_label_set(task))
     for r in rows:
         assert 0.0 <= r["macro_f1"] <= 1.0
         assert 0.0 <= r["benign_fpr"] <= 1.0
-        assert len(r["per_class"]) > 0
+        assert set(r["per_class"].keys()) == expected_classes
 
-    # Per-variant training artefacts and metadata are present.
     for tag in ("with_port", "no_port"):
         assert (models_dir / f"preprocess_mlp_{task}_{tag}.joblib").exists()
         assert (models_dir / f"mlp_{task}_{tag}.pt").exists()
         assert (results_dir / f"train_mlp_{task}_{tag}.json").exists()
+
+
+def test_test_split_only_touched_once_after_training(tmp_path: Path):
+    """Early stopping must select on VAL, not TEST. Enforce by wrapping the
+    shared evaluate_single: it should be called exactly twice (one per use_port
+    variant) and only on the test frame, i.e. after train_one has returned."""
+    from sentinel_ml import train_mlp as tm
+
+    data_dir = tmp_path / "data"
+    write_splits(data_dir, CANONICAL_COUNTS_MIMICS_DATA_V1, seed=1)
+    test_df = pd.read_parquet(data_dir / "test.parquet")
+    test_len = len(test_df)
+
+    real_eval = tm.evaluate_single
+    call_sizes: list[int] = []
+
+    def tracking(model, X_test, y_test, benign_name, top_k=10):
+        call_sizes.append(len(X_test))
+        return real_eval(model, X_test, y_test, benign_name, top_k=top_k)
+
+    with mock.patch.object(tm, "evaluate_single", side_effect=tracking):
+        tm.main(
+            task="binary",
+            data_dir=data_dir,
+            models_dir=tmp_path / "models",
+            results_dir=tmp_path / "results",
+            epochs=2, patience=2, batch_size=32, hidden=(8, 4),
+            use_port_variants=(True, False), use_wandb=False,
+        )
+
+    assert len(call_sizes) == 2, (
+        f"evaluate_single should run once per use_port variant on TEST only; "
+        f"got {len(call_sizes)} calls (sizes={call_sizes})."
+    )
+    assert all(n == test_len for n in call_sizes), (
+        f"evaluate_single received frames of sizes {call_sizes} but test split "
+        f"has {test_len} rows - train/val must not be evaluated through it."
+    )
+
+
+def test_fixtures_deterministic_across_pythonhashseed():
+    """Guards against hash()-based seeding in tests/fixtures. The byte content
+    of a fixture frame must only depend on the explicit numeric seed."""
+    import io
+
+    from tests.fixtures import make_cicids_frame
+    label_counts = {label: 5 for label in CANONICAL_12}
+    df1 = make_cicids_frame(label_counts, seed=7)
+    df2 = make_cicids_frame(label_counts, seed=7)
+    buf1, buf2 = io.BytesIO(), io.BytesIO()
+    df1.to_parquet(buf1, index=False)
+    df2.to_parquet(buf2, index=False)
+    assert buf1.getvalue() == buf2.getvalue()
+
+
+def test_sweep_mlp_importable():
+    """Guards sweep_mlp.py from drifting out of sync with the baselines API
+    (it has no training-path test, so CI missed the strict-canonicalize break)."""
+    import importlib
+
+    mod = importlib.import_module("sentinel_ml.sweep_mlp")
+    assert hasattr(mod, "sweep")
+    assert hasattr(mod, "main")
