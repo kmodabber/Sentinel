@@ -1,4 +1,4 @@
-"""SEN-109: Sanity baselines (majority class + logistic regression) on data v1.
+"""SEN-109 / SEN-FR-07: Sanity baselines (majority class + logistic regression) on data v1.
 
 Metrics are computed via the shared eval template (sentinel_ml.eval_template) so
 the output matches what SEN-108 / eval report v1 consumes.
@@ -19,13 +19,24 @@ from sklearn.preprocessing import StandardScaler
 
 from sentinel_data.split import RARE_LABEL
 from sentinel_features.features import LABELS as CANONICAL_LABELS
-from sentinel_ml.eval_template import ID_COLS, evaluate_single, prep_xy  # noqa: F401
+from sentinel_ml.eval_template import (  # noqa: F401
+    ID_COLS,
+    SEED,
+    USE_WANDB,
+    WANDB_ENTITY,
+    WANDB_PROJECT,
+    _model_params,
+    evaluate_single,
+    extract_model_params,
+    find_train_twins,
+    get_code_commit,
+    get_data_metadata,
+    get_wandb_init_kwargs,
+    prep_xy,
+)
 
 DATA_DIR = Path("data/processed")
 EVAL_SPLIT = "test"
-SEED = 42
-WANDB_ENTITY = "wcs-sentinel"
-WANDB_PROJECT = "baseline_v1"
 
 LEAK_LOGREG_THRESHOLD = 0.95
 LEAK_ANY_THRESHOLD = 0.999
@@ -41,7 +52,7 @@ def _git_commit() -> str:
 
 
 def _data_metadata(data_dir: Path) -> dict:
-    card = data_dir / "data_card.json"
+    card = Path(data_dir) / "data_card.json"
     if not card.exists():
         return {"version": "unknown", "rare_class_policy": "unknown"}
     d = json.loads(card.read_text())
@@ -103,7 +114,7 @@ def leakage_flags(results: list[dict]) -> list[str]:
     return flags
 
 
-def _build_models():
+def _build_models(seed: int = SEED):
     return {
         "majority": lambda: DummyClassifier(strategy="most_frequent"),
         "logreg": lambda: make_pipeline(
@@ -111,7 +122,7 @@ def _build_models():
             LogisticRegression(
                 class_weight="balanced",
                 max_iter=2000,
-                random_state=SEED,
+                random_state=seed,
                 solver="lbfgs",
             ),
         ),
@@ -151,23 +162,29 @@ def _write_markdown(
 def run_baselines(
     data_dir: Path = DATA_DIR,
     eval_split: str = EVAL_SPLIT,
-    use_wandb: bool = False,
+    use_wandb: bool = USE_WANDB,
     out_dir: Path = Path("results"),
     train_sample: int | None = None,
     wandb_entity: str = WANDB_ENTITY,
     wandb_project: str = WANDB_PROJECT,
     drop_duplicates: bool = False,
     canonical_labels: list[str] | None = None,
+    seed: int = SEED,
 ) -> list[dict]:
     """Run majority + logreg baselines across binary/multiclass and with/without dst_port.
 
     Metric computation uses sentinel_ml.eval_template.evaluate_single so results match
     the team template format consumed by SEN-108.
     """
+    data_dir = Path(data_dir)
+    out_dir = Path(out_dir)
+    data_meta = get_data_metadata(data_dir)
+    commit_hash = get_code_commit()
+
     train_df = pd.read_parquet(data_dir / "train.parquet")
     if train_sample is not None:
         train_df = train_df.sample(
-            n=min(train_sample, len(train_df)), random_state=SEED
+            n=min(train_sample, len(train_df)), random_state=seed
         )
     eval_df = pd.read_parquet(data_dir / f"{eval_split}.parquet")
 
@@ -209,7 +226,7 @@ def run_baselines(
         flush=True,
     )
 
-    model_factories = _build_models()
+    model_factories = _build_models(seed=seed)
     combos = list(product(["binary", "multiclass"], [True, False]))
 
     results = []
@@ -226,22 +243,36 @@ def run_baselines(
             )
             t0 = time.time()
             model.fit(X_tr, y_tr)
+            elapsed = round(time.time() - t0, 2)
             if name == "majority":
                 # DummyClassifier has no coef_/feature_importances_, so evaluate_single
                 # would fall back to a very slow permutation_importance pass. Feature
                 # importance for a constant predictor is meaningless; short-circuit it.
                 model.feature_importances_ = np.zeros(X_ev.shape[1])
-            metrics = evaluate_single(model, X_ev, y_ev, benign_name)
+            metrics = evaluate_single(model, X_ev, y_ev, benign_name, X_train=X_tr, y_train=y_tr)
+            tw = metrics.get("train_twin_analysis", {})
             metrics.update(
                 {
                     "model": name,
                     "task": task,
                     "dst_port": use_port,
-                    "n_features": X_ev.shape[1],
+                    "eval_split": eval_split,
+                    "n_features": int(X_ev.shape[1]),
+                    "seed": seed,
+                    "train_rows": int(len(X_tr)),
+                    "eval_rows": int(len(X_ev)),
+                    "data_version": data_meta["data_version"],
+                    "code_commit": commit_hash,
+                    "model_params": _model_params(model),
+                    "fit_time_sec": elapsed,
+                    "macro_f1_unseen": tw.get("macro_f1_unseen"),
+                    "benign_fpr_unseen": tw.get("benign_fpr_unseen"),
+                    "delta_macro_f1_unseen_minus_all": tw.get("delta_macro_f1_unseen_minus_all"),
+                    "pct_feature_twins": tw.get("pct_feature_twins"),
                 }
             )
             print(
-                f"  done in {time.time() - t0:.1f}s | "
+                f"  done in {elapsed:.1f}s | "
                 f"F1={metrics['macro_f1']:.4f} | FPR={metrics['benign_fpr']:.4f}",
                 flush=True,
             )
@@ -250,7 +281,7 @@ def run_baselines(
     flags = leakage_flags(results)
     metadata = {
         "sen_ticket": "SEN-109",
-        "seed": SEED,
+        "seed": seed,
         "git_commit": _git_commit(),
         "data": _data_metadata(data_dir),
         "split_evaluated": eval_split,
@@ -287,34 +318,53 @@ def run_baselines(
         for r in results:
             tag = f"{r['model']}/{r['task']}/port={r['dst_port']}"
             run_flags = [f for f in flags if tag in f]
-            with wandb.init(
-                entity=wandb_entity,
-                project=wandb_project,
-                job_type="baseline",
-                name=f"{r['model']}-{r['task']}-port{r['dst_port']}"
-                + ("-dedup" if drop_duplicates else ""),
-                config={
-                    "model": r["model"],
-                    "task": r["task"],
-                    "dst_port": r["dst_port"],
-                    "n_features": r["n_features"],
-                    "seed": SEED,
-                    "git_commit": metadata["git_commit"],
-                    "data_version": metadata["data"]["version"],
-                    "split": eval_split,
-                    "drop_duplicates": drop_duplicates,
-                },
-                reinit="finish_previous",
-            ) as run:
-                run.log(
-                    {
-                        "macro_f1": r["macro_f1"],
-                        "benign_fpr": r["benign_fpr"],
-                    }
-                )
-                run.summary["leakage_flagged"] = bool(run_flags)
-                if run_flags:
-                    run.summary["leakage_flags"] = run_flags
+            run_name = f"baseline_{r['model']}_{r['task']}_{'port' if r['dst_port'] else 'noport'}_{eval_split}"
+            if drop_duplicates:
+                run_name += "_dedup"
+            run_config = {
+                **data_meta,
+                "model": r["model"],
+                "task": r["task"],
+                "dst_port": r["dst_port"],
+                "eval_split": r["eval_split"],
+                "split": eval_split,
+                "n_features": r["n_features"],
+                "seed": r["seed"],
+                "git_commit": metadata["git_commit"],
+                "code_commit": r["code_commit"],
+                "data_version": r["data_version"],
+                "train_rows": r["train_rows"],
+                "eval_rows": r["eval_rows"],
+                "drop_duplicates": drop_duplicates,
+                "parameters": r["parameters"],
+                "model_params": r["model_params"],
+            }
+            init_kwargs = get_wandb_init_kwargs(job_type="baseline", name=run_name, config=run_config)
+            init_kwargs["project"] = wandb_project
+            if init_kwargs.get("mode") == "online":
+                init_kwargs["entity"] = wandb_entity
+            with wandb.init(**init_kwargs) as run:
+                log_payload = {
+                    "macro_f1": r["macro_f1"],
+                    "weighted_f1": r["weighted_f1"],
+                    "accuracy": r["accuracy"],
+                    "benign_fpr": r["benign_fpr"],
+                    "macro_f1_unseen": r["macro_f1_unseen"],
+                    "benign_fpr_unseen": r["benign_fpr_unseen"],
+                    "delta_macro_f1_unseen_minus_all": r["delta_macro_f1_unseen_minus_all"],
+                    "pct_feature_twins": r["pct_feature_twins"],
+                    "fit_time_sec": r["fit_time_sec"],
+                }
+                for c_label, c_stats in r["per_class"].items():
+                    if isinstance(c_stats, dict) and "f1-score" in c_stats:
+                        log_payload[f"per_class_f1/{c_label}"] = c_stats["f1-score"]
+                        log_payload[f"per_class_recall/{c_label}"] = c_stats["recall"]
+                        log_payload[f"per_class_precision/{c_label}"] = c_stats["precision"]
+                run.log(log_payload)
+                if hasattr(run, "summary") and isinstance(run.summary, dict):
+                    run.summary["leakage_flagged"] = bool(run_flags)
+                    if run_flags:
+                        run.summary["leakage_flags"] = run_flags
 
     return results
 
@@ -325,7 +375,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="SEN-109 sanity baselines")
     parser.add_argument("--data-dir", type=Path, default=DATA_DIR)
     parser.add_argument("--eval-split", default=EVAL_SPLIT, choices=["val", "test"])
-    parser.add_argument("--wandb", action="store_true", help="log to W&B")
+    parser.add_argument("--wandb", action="store_true", default=USE_WANDB, help="log to W&B")
+    parser.add_argument("--no-wandb", action="store_false", dest="wandb", help="disable W&B logging")
     parser.add_argument("--train-sample", type=int, default=None)
     parser.add_argument(
         "--drop-duplicates",

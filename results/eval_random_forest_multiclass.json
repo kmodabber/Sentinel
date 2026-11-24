@@ -1,0 +1,1188 @@
+[
+  {
+    "macro_f1": 0.9037,
+    "weighted_f1": 0.9963,
+    "accuracy": 0.9964,
+    "benign_fpr": 0.0,
+    "per_class": {
+      "BENIGN": {
+        "precision": 0.9961,
+        "recall": 1.0,
+        "f1-score": 0.998,
+        "support": 527384.0
+      },
+      "Bot": {
+        "precision": 1.0,
+        "recall": 0.9932,
+        "f1-score": 0.9966,
+        "support": 148.0
+      },
+      "DDoS": {
+        "precision": 0.9993,
+        "recall": 0.9988,
+        "f1-score": 0.999,
+        "support": 19139.0
+      },
+      "DoS GoldenEye": {
+        "precision": 0.984,
+        "recall": 0.9691,
+        "f1-score": 0.9765,
+        "support": 1585.0
+      },
+      "DoS Hulk": {
+        "precision": 0.9999,
+        "recall": 0.9998,
+        "f1-score": 0.9999,
+        "support": 31711.0
+      },
+      "DoS Slowhttptest": {
+        "precision": 0.7209,
+        "recall": 0.6785,
+        "f1-score": 0.699,
+        "support": 594.0
+      },
+      "DoS slowloris": {
+        "precision": 0.9837,
+        "recall": 0.8142,
+        "f1-score": 0.891,
+        "support": 1039.0
+      },
+      "FTP-Patator": {
+        "precision": 0.9994,
+        "recall": 1.0,
+        "f1-score": 0.9997,
+        "support": 1593.0
+      },
+      "PortScan": {
+        "precision": 0.9998,
+        "recall": 0.9623,
+        "f1-score": 0.9807,
+        "support": 46343.0
+      },
+      "Rare attack": {
+        "precision": 1.0,
+        "recall": 0.2222,
+        "f1-score": 0.3636,
+        "support": 18.0
+      },
+      "SSH-Patator": {
+        "precision": 1.0,
+        "recall": 0.9178,
+        "f1-score": 0.9571,
+        "support": 596.0
+      },
+      "Web Attack - Brute Force": {
+        "precision": 1.0,
+        "recall": 0.9677,
+        "f1-score": 0.9836,
+        "support": 31.0
+      }
+    },
+    "confusion_matrix": {
+      "labels": [
+        "BENIGN",
+        "Bot",
+        "DDoS",
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest",
+        "DoS slowloris",
+        "FTP-Patator",
+        "PortScan",
+        "Rare attack",
+        "SSH-Patator",
+        "Web Attack - Brute Force"
+      ],
+      "matrix": [
+        [
+          527359,
+          0,
+          13,
+          0,
+          1,
+          0,
+          0,
+          1,
+          10,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          147,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          23,
+          0,
+          19116,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          32,
+          0,
+          0,
+          1536,
+          1,
+          16,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          7,
+          31704,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          161,
+          0,
+          0,
+          16,
+          0,
+          403,
+          14,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          52,
+          0,
+          0,
+          1,
+          0,
+          140,
+          846,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1593,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1744,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          44598,
+          0,
+          0,
+          0
+        ],
+        [
+          13,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          4,
+          0,
+          0
+        ],
+        [
+          49,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          547,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          30
+        ]
+      ]
+    },
+    "top_features": [
+      {
+        "feature": "src2dst_syn_packets",
+        "importance": 0.10127
+      },
+      {
+        "feature": "bidirectional_stddev_ps",
+        "importance": 0.06936
+      },
+      {
+        "feature": "dst2src_stddev_ps",
+        "importance": 0.0614
+      },
+      {
+        "feature": "bidirectional_mean_ps",
+        "importance": 0.05218
+      },
+      {
+        "feature": "bidirectional_bytes",
+        "importance": 0.05129
+      },
+      {
+        "feature": "dst2src_max_ps",
+        "importance": 0.04787
+      },
+      {
+        "feature": "dst2src_mean_ps",
+        "importance": 0.04783
+      },
+      {
+        "feature": "dst2src_rst_packets",
+        "importance": 0.04354
+      },
+      {
+        "feature": "src2dst_bytes",
+        "importance": 0.04268
+      },
+      {
+        "feature": "src2dst_ack_packets",
+        "importance": 0.041
+      }
+    ],
+    "train_twin_analysis": {
+      "n_test_rows": 630181,
+      "n_feature_twins": 309816,
+      "pct_feature_twins": 49.16,
+      "n_exact_twins": 309389,
+      "pct_exact_twins": 49.1,
+      "n_unseen_rows": 320365,
+      "pct_unseen_rows": 50.84,
+      "macro_f1_all": 0.9037,
+      "macro_f1_twins_only": 0.8907,
+      "macro_f1_unseen": 0.8418,
+      "delta_macro_f1_unseen_minus_all": -0.0619,
+      "benign_fpr_all": 0.0,
+      "benign_fpr_twins_only": 0.0,
+      "benign_fpr_unseen": 0.0001,
+      "delta_benign_fpr_unseen_minus_all": 0.0001,
+      "per_class_breakdown": {
+        "BENIGN": {
+          "test_support": 527384,
+          "train_twins": 255662,
+          "unseen_support": 271722,
+          "pct_twins": 48.48,
+          "f1_all": 0.998,
+          "f1_unseen": 0.9988,
+          "delta_f1_unseen_minus_all": 0.0008
+        },
+        "Bot": {
+          "test_support": 148,
+          "train_twins": 42,
+          "unseen_support": 106,
+          "pct_twins": 28.38,
+          "f1_all": 0.9966,
+          "f1_unseen": 0.9953,
+          "delta_f1_unseen_minus_all": -0.0013
+        },
+        "DDoS": {
+          "test_support": 19139,
+          "train_twins": 4052,
+          "unseen_support": 15087,
+          "pct_twins": 21.17,
+          "f1_all": 0.999,
+          "f1_unseen": 0.9988,
+          "delta_f1_unseen_minus_all": -0.0002
+        },
+        "DoS GoldenEye": {
+          "test_support": 1585,
+          "train_twins": 57,
+          "unseen_support": 1528,
+          "pct_twins": 3.6,
+          "f1_all": 0.9765,
+          "f1_unseen": 0.9769,
+          "delta_f1_unseen_minus_all": 0.0004
+        },
+        "DoS Hulk": {
+          "test_support": 31711,
+          "train_twins": 2611,
+          "unseen_support": 29100,
+          "pct_twins": 8.23,
+          "f1_all": 0.9999,
+          "f1_unseen": 0.9999,
+          "delta_f1_unseen_minus_all": 0.0
+        },
+        "DoS Slowhttptest": {
+          "test_support": 594,
+          "train_twins": 309,
+          "unseen_support": 285,
+          "pct_twins": 52.02,
+          "f1_all": 0.699,
+          "f1_unseen": 0.3942,
+          "delta_f1_unseen_minus_all": -0.3048
+        },
+        "DoS slowloris": {
+          "test_support": 1039,
+          "train_twins": 515,
+          "unseen_support": 524,
+          "pct_twins": 49.57,
+          "f1_all": 0.891,
+          "f1_unseen": 0.7743,
+          "delta_f1_unseen_minus_all": -0.1167
+        },
+        "FTP-Patator": {
+          "test_support": 1593,
+          "train_twins": 796,
+          "unseen_support": 797,
+          "pct_twins": 49.97,
+          "f1_all": 0.9997,
+          "f1_unseen": 0.9994,
+          "delta_f1_unseen_minus_all": -0.0003
+        },
+        "PortScan": {
+          "test_support": 46343,
+          "train_twins": 45762,
+          "unseen_support": 581,
+          "pct_twins": 98.75,
+          "f1_all": 0.9807,
+          "f1_unseen": 0.6513,
+          "delta_f1_unseen_minus_all": -0.3294
+        },
+        "Rare attack": {
+          "test_support": 18,
+          "train_twins": 0,
+          "unseen_support": 18,
+          "pct_twins": 0.0,
+          "f1_all": 0.3636,
+          "f1_unseen": 0.3636,
+          "delta_f1_unseen_minus_all": 0.0
+        },
+        "SSH-Patator": {
+          "test_support": 596,
+          "train_twins": 10,
+          "unseen_support": 586,
+          "pct_twins": 1.68,
+          "f1_all": 0.9571,
+          "f1_unseen": 0.9656,
+          "delta_f1_unseen_minus_all": 0.0085
+        },
+        "Web Attack - Brute Force": {
+          "test_support": 31,
+          "train_twins": 0,
+          "unseen_support": 31,
+          "pct_twins": 0.0,
+          "f1_all": 0.9836,
+          "f1_unseen": 0.9836,
+          "delta_f1_unseen_minus_all": 0.0
+        }
+      }
+    },
+    "model": "random_forest",
+    "task": "multiclass",
+    "dst_port": true,
+    "n_features": 56,
+    "seed": 42,
+    "data_version": "nfs2023te-v1",
+    "code_commit": "575a7db",
+    "parameters": {
+      "bootstrap": true,
+      "ccp_alpha": 0.0,
+      "class_weight": null,
+      "criterion": "gini",
+      "max_depth": 20,
+      "max_features": "sqrt",
+      "max_leaf_nodes": null,
+      "max_samples": 0.25,
+      "min_impurity_decrease": 0.0,
+      "min_samples_leaf": 1,
+      "min_samples_split": 2,
+      "min_weight_fraction_leaf": 0.0,
+      "monotonic_cst": null,
+      "n_estimators": 80,
+      "n_jobs": -1,
+      "oob_score": false,
+      "random_state": 42,
+      "verbose": 0,
+      "warm_start": false
+    },
+    "model_params": {
+      "bootstrap": true,
+      "ccp_alpha": 0.0,
+      "class_weight": null,
+      "criterion": "gini",
+      "max_depth": 20,
+      "max_features": "sqrt",
+      "max_leaf_nodes": null,
+      "max_samples": 0.25,
+      "min_impurity_decrease": 0.0,
+      "min_samples_leaf": 1,
+      "min_samples_split": 2,
+      "min_weight_fraction_leaf": 0.0,
+      "monotonic_cst": null,
+      "n_estimators": 80,
+      "n_jobs": -1,
+      "oob_score": false,
+      "random_state": 42,
+      "verbose": 0,
+      "warm_start": false
+    },
+    "val_tuning": {
+      "split": "val",
+      "seed": 42,
+      "candidates_evaluated": {
+        "n_estimators": [
+          80
+        ],
+        "max_depth": [
+          20,
+          26,
+          null
+        ],
+        "min_samples_leaf": [
+          1,
+          2,
+          5
+        ]
+      },
+      "n_trials": 9,
+      "trials": [
+        {
+          "params": {
+            "max_depth": 20,
+            "min_samples_leaf": 1,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9728
+        },
+        {
+          "params": {
+            "max_depth": 20,
+            "min_samples_leaf": 2,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9595
+        },
+        {
+          "params": {
+            "max_depth": 20,
+            "min_samples_leaf": 5,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9222
+        },
+        {
+          "params": {
+            "max_depth": 26,
+            "min_samples_leaf": 1,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9595
+        },
+        {
+          "params": {
+            "max_depth": 26,
+            "min_samples_leaf": 2,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9608
+        },
+        {
+          "params": {
+            "max_depth": 26,
+            "min_samples_leaf": 5,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9103
+        },
+        {
+          "params": {
+            "max_depth": null,
+            "min_samples_leaf": 1,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9714
+        },
+        {
+          "params": {
+            "max_depth": null,
+            "min_samples_leaf": 2,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.961
+        },
+        {
+          "params": {
+            "max_depth": null,
+            "min_samples_leaf": 5,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9233
+        }
+      ],
+      "selected_params": {
+        "n_estimators": 80,
+        "max_depth": 20,
+        "min_samples_leaf": 1,
+        "class_weight": null,
+        "max_samples": 0.25
+      },
+      "val_macro_f1": 0.9728,
+      "test_touched_during_tuning": false,
+      "val_benign_fpr": 0.0002,
+      "val_infer_time_sec": 0.78
+    },
+    "fit_time_sec": 198.72,
+    "infer_time_sec": 0.84,
+    "val_macro_f1": 0.9728,
+    "val_benign_fpr": 0.0002
+  },
+  {
+    "macro_f1": 0.8933,
+    "weighted_f1": 0.9959,
+    "accuracy": 0.996,
+    "benign_fpr": 0.0001,
+    "per_class": {
+      "BENIGN": {
+        "precision": 0.9956,
+        "recall": 0.9999,
+        "f1-score": 0.9978,
+        "support": 527384.0
+      },
+      "Bot": {
+        "precision": 1.0,
+        "recall": 0.9932,
+        "f1-score": 0.9966,
+        "support": 148.0
+      },
+      "DDoS": {
+        "precision": 0.9991,
+        "recall": 0.9988,
+        "f1-score": 0.999,
+        "support": 19139.0
+      },
+      "DoS GoldenEye": {
+        "precision": 0.9846,
+        "recall": 0.9249,
+        "f1-score": 0.9538,
+        "support": 1585.0
+      },
+      "DoS Hulk": {
+        "precision": 1.0,
+        "recall": 0.9997,
+        "f1-score": 0.9999,
+        "support": 31711.0
+      },
+      "DoS Slowhttptest": {
+        "precision": 0.7228,
+        "recall": 0.6717,
+        "f1-score": 0.6963,
+        "support": 594.0
+      },
+      "DoS slowloris": {
+        "precision": 0.983,
+        "recall": 0.7806,
+        "f1-score": 0.8702,
+        "support": 1039.0
+      },
+      "FTP-Patator": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 1593.0
+      },
+      "PortScan": {
+        "precision": 0.9996,
+        "recall": 0.9596,
+        "f1-score": 0.9792,
+        "support": 46343.0
+      },
+      "Rare attack": {
+        "precision": 1.0,
+        "recall": 0.1667,
+        "f1-score": 0.2857,
+        "support": 18.0
+      },
+      "SSH-Patator": {
+        "precision": 1.0,
+        "recall": 0.9178,
+        "f1-score": 0.9571,
+        "support": 596.0
+      },
+      "Web Attack - Brute Force": {
+        "precision": 1.0,
+        "recall": 0.9677,
+        "f1-score": 0.9836,
+        "support": 31.0
+      }
+    },
+    "confusion_matrix": {
+      "labels": [
+        "BENIGN",
+        "Bot",
+        "DDoS",
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest",
+        "DoS slowloris",
+        "FTP-Patator",
+        "PortScan",
+        "Rare attack",
+        "SSH-Patator",
+        "Web Attack - Brute Force"
+      ],
+      "matrix": [
+        [
+          527347,
+          0,
+          16,
+          3,
+          0,
+          0,
+          0,
+          0,
+          18,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          147,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          23,
+          0,
+          19116,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          104,
+          0,
+          0,
+          1466,
+          1,
+          14,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          6,
+          0,
+          0,
+          2,
+          31703,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          165,
+          0,
+          0,
+          16,
+          0,
+          399,
+          14,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          88,
+          0,
+          0,
+          1,
+          0,
+          139,
+          811,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1593,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1871,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          44471,
+          0,
+          0,
+          0
+        ],
+        [
+          14,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          3,
+          0,
+          0
+        ],
+        [
+          49,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          547,
+          0
+        ],
+        [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          30
+        ]
+      ]
+    },
+    "top_features": [
+      {
+        "feature": "dst2src_stddev_ps",
+        "importance": 0.07653
+      },
+      {
+        "feature": "bidirectional_stddev_ps",
+        "importance": 0.06655
+      },
+      {
+        "feature": "bidirectional_syn_packets",
+        "importance": 0.06401
+      },
+      {
+        "feature": "src2dst_syn_packets",
+        "importance": 0.06021
+      },
+      {
+        "feature": "bidirectional_mean_ps",
+        "importance": 0.059
+      },
+      {
+        "feature": "src2dst_bytes",
+        "importance": 0.05633
+      },
+      {
+        "feature": "dst2src_bytes",
+        "importance": 0.05382
+      },
+      {
+        "feature": "bidirectional_max_ps",
+        "importance": 0.04727
+      },
+      {
+        "feature": "bidirectional_bytes",
+        "importance": 0.04336
+      },
+      {
+        "feature": "src2dst_ack_packets",
+        "importance": 0.04242
+      }
+    ],
+    "train_twin_analysis": {
+      "n_test_rows": 630181,
+      "n_feature_twins": 361877,
+      "pct_feature_twins": 57.42,
+      "n_exact_twins": 361821,
+      "pct_exact_twins": 57.42,
+      "n_unseen_rows": 268304,
+      "pct_unseen_rows": 42.58,
+      "macro_f1_all": 0.8933,
+      "macro_f1_twins_only": 0.8683,
+      "macro_f1_unseen": 0.8353,
+      "delta_macro_f1_unseen_minus_all": -0.058,
+      "benign_fpr_all": 0.0001,
+      "benign_fpr_twins_only": 0.0001,
+      "benign_fpr_unseen": 0.0001,
+      "delta_benign_fpr_unseen_minus_all": 0.0,
+      "per_class_breakdown": {
+        "BENIGN": {
+          "test_support": 527384,
+          "train_twins": 307255,
+          "unseen_support": 220129,
+          "pct_twins": 58.26,
+          "f1_all": 0.9978,
+          "f1_unseen": 0.9989,
+          "delta_f1_unseen_minus_all": 0.0011
+        },
+        "Bot": {
+          "test_support": 148,
+          "train_twins": 42,
+          "unseen_support": 106,
+          "pct_twins": 28.38,
+          "f1_all": 0.9966,
+          "f1_unseen": 0.9953,
+          "delta_f1_unseen_minus_all": -0.0013
+        },
+        "DDoS": {
+          "test_support": 19139,
+          "train_twins": 4053,
+          "unseen_support": 15086,
+          "pct_twins": 21.18,
+          "f1_all": 0.999,
+          "f1_unseen": 0.9987,
+          "delta_f1_unseen_minus_all": -0.0003
+        },
+        "DoS GoldenEye": {
+          "test_support": 1585,
+          "train_twins": 85,
+          "unseen_support": 1500,
+          "pct_twins": 5.36,
+          "f1_all": 0.9538,
+          "f1_unseen": 0.9632,
+          "delta_f1_unseen_minus_all": 0.0094
+        },
+        "DoS Hulk": {
+          "test_support": 31711,
+          "train_twins": 2612,
+          "unseen_support": 29099,
+          "pct_twins": 8.24,
+          "f1_all": 0.9999,
+          "f1_unseen": 0.9999,
+          "delta_f1_unseen_minus_all": 0.0
+        },
+        "DoS Slowhttptest": {
+          "test_support": 594,
+          "train_twins": 309,
+          "unseen_support": 285,
+          "pct_twins": 52.02,
+          "f1_all": 0.6963,
+          "f1_unseen": 0.3971,
+          "delta_f1_unseen_minus_all": -0.2992
+        },
+        "DoS slowloris": {
+          "test_support": 1039,
+          "train_twins": 515,
+          "unseen_support": 524,
+          "pct_twins": 49.57,
+          "f1_all": 0.8702,
+          "f1_unseen": 0.722,
+          "delta_f1_unseen_minus_all": -0.1482
+        },
+        "FTP-Patator": {
+          "test_support": 1593,
+          "train_twins": 796,
+          "unseen_support": 797,
+          "pct_twins": 49.97,
+          "f1_all": 1.0,
+          "f1_unseen": 1.0,
+          "delta_f1_unseen_minus_all": 0.0
+        },
+        "PortScan": {
+          "test_support": 46343,
+          "train_twins": 46200,
+          "unseen_support": 143,
+          "pct_twins": 99.69,
+          "f1_all": 0.9792,
+          "f1_unseen": 0.7143,
+          "delta_f1_unseen_minus_all": -0.2649
+        },
+        "Rare attack": {
+          "test_support": 18,
+          "train_twins": 0,
+          "unseen_support": 18,
+          "pct_twins": 0.0,
+          "f1_all": 0.2857,
+          "f1_unseen": 0.2857,
+          "delta_f1_unseen_minus_all": 0.0
+        },
+        "SSH-Patator": {
+          "test_support": 596,
+          "train_twins": 10,
+          "unseen_support": 586,
+          "pct_twins": 1.68,
+          "f1_all": 0.9571,
+          "f1_unseen": 0.9656,
+          "delta_f1_unseen_minus_all": 0.0085
+        },
+        "Web Attack - Brute Force": {
+          "test_support": 31,
+          "train_twins": 0,
+          "unseen_support": 31,
+          "pct_twins": 0.0,
+          "f1_all": 0.9836,
+          "f1_unseen": 0.9836,
+          "delta_f1_unseen_minus_all": 0.0
+        }
+      }
+    },
+    "model": "random_forest",
+    "task": "multiclass",
+    "dst_port": false,
+    "n_features": 55,
+    "seed": 42,
+    "data_version": "nfs2023te-v1",
+    "code_commit": "575a7db",
+    "parameters": {
+      "bootstrap": true,
+      "ccp_alpha": 0.0,
+      "class_weight": null,
+      "criterion": "gini",
+      "max_depth": 20,
+      "max_features": "sqrt",
+      "max_leaf_nodes": null,
+      "max_samples": 0.25,
+      "min_impurity_decrease": 0.0,
+      "min_samples_leaf": 1,
+      "min_samples_split": 2,
+      "min_weight_fraction_leaf": 0.0,
+      "monotonic_cst": null,
+      "n_estimators": 80,
+      "n_jobs": -1,
+      "oob_score": false,
+      "random_state": 42,
+      "verbose": 0,
+      "warm_start": false
+    },
+    "model_params": {
+      "bootstrap": true,
+      "ccp_alpha": 0.0,
+      "class_weight": null,
+      "criterion": "gini",
+      "max_depth": 20,
+      "max_features": "sqrt",
+      "max_leaf_nodes": null,
+      "max_samples": 0.25,
+      "min_impurity_decrease": 0.0,
+      "min_samples_leaf": 1,
+      "min_samples_split": 2,
+      "min_weight_fraction_leaf": 0.0,
+      "monotonic_cst": null,
+      "n_estimators": 80,
+      "n_jobs": -1,
+      "oob_score": false,
+      "random_state": 42,
+      "verbose": 0,
+      "warm_start": false
+    },
+    "val_tuning": {
+      "split": "val",
+      "seed": 42,
+      "candidates_evaluated": {
+        "n_estimators": [
+          80
+        ],
+        "max_depth": [
+          20,
+          26,
+          null
+        ],
+        "min_samples_leaf": [
+          1,
+          2,
+          5
+        ]
+      },
+      "n_trials": 9,
+      "trials": [
+        {
+          "params": {
+            "max_depth": 20,
+            "min_samples_leaf": 1,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9589
+        },
+        {
+          "params": {
+            "max_depth": 20,
+            "min_samples_leaf": 2,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9481
+        },
+        {
+          "params": {
+            "max_depth": 20,
+            "min_samples_leaf": 5,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9315
+        },
+        {
+          "params": {
+            "max_depth": 26,
+            "min_samples_leaf": 1,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9587
+        },
+        {
+          "params": {
+            "max_depth": 26,
+            "min_samples_leaf": 2,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9513
+        },
+        {
+          "params": {
+            "max_depth": 26,
+            "min_samples_leaf": 5,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9319
+        },
+        {
+          "params": {
+            "max_depth": null,
+            "min_samples_leaf": 1,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9587
+        },
+        {
+          "params": {
+            "max_depth": null,
+            "min_samples_leaf": 2,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9514
+        },
+        {
+          "params": {
+            "max_depth": null,
+            "min_samples_leaf": 5,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.932
+        }
+      ],
+      "selected_params": {
+        "n_estimators": 80,
+        "max_depth": 20,
+        "min_samples_leaf": 1,
+        "class_weight": null,
+        "max_samples": 0.25
+      },
+      "val_macro_f1": 0.9589,
+      "test_touched_during_tuning": false,
+      "val_benign_fpr": 0.0003,
+      "val_infer_time_sec": 0.79
+    },
+    "fit_time_sec": 195.53,
+    "infer_time_sec": 0.82,
+    "val_macro_f1": 0.9589,
+    "val_benign_fpr": 0.0003
+  }
+]

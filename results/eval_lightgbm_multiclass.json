@@ -1,0 +1,1200 @@
+[
+  {
+    "macro_f1": 0.9276,
+    "weighted_f1": 0.9967,
+    "accuracy": 0.9967,
+    "benign_fpr": 0.0,
+    "per_class": {
+      "BENIGN": {
+        "precision": 0.9965,
+        "recall": 1.0,
+        "f1-score": 0.9982,
+        "support": 527384.0
+      },
+      "Bot": {
+        "precision": 1.0,
+        "recall": 0.9932,
+        "f1-score": 0.9966,
+        "support": 148.0
+      },
+      "DDoS": {
+        "precision": 0.9993,
+        "recall": 0.9988,
+        "f1-score": 0.999,
+        "support": 19139.0
+      },
+      "DoS GoldenEye": {
+        "precision": 0.9832,
+        "recall": 0.9968,
+        "f1-score": 0.99,
+        "support": 1585.0
+      },
+      "DoS Hulk": {
+        "precision": 0.9999,
+        "recall": 0.9998,
+        "f1-score": 0.9999,
+        "support": 31711.0
+      },
+      "DoS Slowhttptest": {
+        "precision": 0.7931,
+        "recall": 0.8838,
+        "f1-score": 0.836,
+        "support": 594.0
+      },
+      "DoS slowloris": {
+        "precision": 0.9504,
+        "recall": 0.8672,
+        "f1-score": 0.9069,
+        "support": 1039.0
+      },
+      "FTP-Patator": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 1593.0
+      },
+      "PortScan": {
+        "precision": 0.9999,
+        "recall": 0.9623,
+        "f1-score": 0.9807,
+        "support": 46343.0
+      },
+      "Rare attack": {
+        "precision": 0.5833,
+        "recall": 0.3889,
+        "f1-score": 0.4667,
+        "support": 18.0
+      },
+      "SSH-Patator": {
+        "precision": 1.0,
+        "recall": 0.9178,
+        "f1-score": 0.9571,
+        "support": 596.0
+      },
+      "Web Attack - Brute Force": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 31.0
+      }
+    },
+    "confusion_matrix": {
+      "labels": [
+        "BENIGN",
+        "Bot",
+        "DDoS",
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest",
+        "DoS slowloris",
+        "FTP-Patator",
+        "PortScan",
+        "Rare attack",
+        "SSH-Patator",
+        "Web Attack - Brute Force"
+      ],
+      "matrix": [
+        [
+          527362,
+          0,
+          14,
+          0,
+          0,
+          0,
+          0,
+          0,
+          3,
+          5,
+          0,
+          0
+        ],
+        [
+          1,
+          147,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          23,
+          0,
+          19116,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          3,
+          0,
+          0,
+          1580,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          7,
+          31704,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          8,
+          0,
+          0,
+          16,
+          0,
+          525,
+          45,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          2,
+          0,
+          0,
+          1,
+          0,
+          135,
+          901,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1593,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1747,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          44594,
+          0,
+          0,
+          0
+        ],
+        [
+          8,
+          0,
+          0,
+          2,
+          0,
+          1,
+          0,
+          0,
+          0,
+          7,
+          0,
+          0
+        ],
+        [
+          47,
+          0,
+          0,
+          0,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          547,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          31
+        ]
+      ]
+    },
+    "top_features": [
+      {
+        "feature": "dst_port",
+        "importance": 0.30449
+      },
+      {
+        "feature": "bidirectional_bytes",
+        "importance": 0.06664
+      },
+      {
+        "feature": "bidirectional_mean_ps",
+        "importance": 0.03873
+      },
+      {
+        "feature": "src2dst_max_ps",
+        "importance": 0.03709
+      },
+      {
+        "feature": "src2dst_bytes",
+        "importance": 0.03392
+      },
+      {
+        "feature": "src2dst_mean_ps",
+        "importance": 0.03256
+      },
+      {
+        "feature": "bidirectional_stddev_ps",
+        "importance": 0.02895
+      },
+      {
+        "feature": "src2dst_min_ps",
+        "importance": 0.0272
+      },
+      {
+        "feature": "bidirectional_duration_ms",
+        "importance": 0.02311
+      },
+      {
+        "feature": "dst2src_mean_ps",
+        "importance": 0.02218
+      }
+    ],
+    "train_twin_analysis": {
+      "n_test_rows": 630181,
+      "n_feature_twins": 309816,
+      "pct_feature_twins": 49.16,
+      "n_exact_twins": 309389,
+      "pct_exact_twins": 49.1,
+      "n_unseen_rows": 320365,
+      "pct_unseen_rows": 50.84,
+      "macro_f1_all": 0.9276,
+      "macro_f1_twins_only": 0.8925,
+      "macro_f1_unseen": 0.8825,
+      "delta_macro_f1_unseen_minus_all": -0.0451,
+      "benign_fpr_all": 0.0,
+      "benign_fpr_twins_only": 0.0,
+      "benign_fpr_unseen": 0.0001,
+      "delta_benign_fpr_unseen_minus_all": 0.0001,
+      "per_class_breakdown": {
+        "BENIGN": {
+          "test_support": 527384,
+          "train_twins": 255662,
+          "unseen_support": 271722,
+          "pct_twins": 48.48,
+          "f1_all": 0.9982,
+          "f1_unseen": 0.9993,
+          "delta_f1_unseen_minus_all": 0.0011
+        },
+        "Bot": {
+          "test_support": 148,
+          "train_twins": 42,
+          "unseen_support": 106,
+          "pct_twins": 28.38,
+          "f1_all": 0.9966,
+          "f1_unseen": 0.9953,
+          "delta_f1_unseen_minus_all": -0.0013
+        },
+        "DDoS": {
+          "test_support": 19139,
+          "train_twins": 4052,
+          "unseen_support": 15087,
+          "pct_twins": 21.17,
+          "f1_all": 0.999,
+          "f1_unseen": 0.9988,
+          "delta_f1_unseen_minus_all": -0.0002
+        },
+        "DoS GoldenEye": {
+          "test_support": 1585,
+          "train_twins": 57,
+          "unseen_support": 1528,
+          "pct_twins": 3.6,
+          "f1_all": 0.99,
+          "f1_unseen": 0.9903,
+          "delta_f1_unseen_minus_all": 0.0003
+        },
+        "DoS Hulk": {
+          "test_support": 31711,
+          "train_twins": 2611,
+          "unseen_support": 29100,
+          "pct_twins": 8.23,
+          "f1_all": 0.9999,
+          "f1_unseen": 0.9999,
+          "delta_f1_unseen_minus_all": 0.0
+        },
+        "DoS Slowhttptest": {
+          "test_support": 594,
+          "train_twins": 309,
+          "unseen_support": 285,
+          "pct_twins": 52.02,
+          "f1_all": 0.836,
+          "f1_unseen": 0.7066,
+          "delta_f1_unseen_minus_all": -0.1294
+        },
+        "DoS slowloris": {
+          "test_support": 1039,
+          "train_twins": 515,
+          "unseen_support": 524,
+          "pct_twins": 49.57,
+          "f1_all": 0.9069,
+          "f1_unseen": 0.8187,
+          "delta_f1_unseen_minus_all": -0.0882
+        },
+        "FTP-Patator": {
+          "test_support": 1593,
+          "train_twins": 796,
+          "unseen_support": 797,
+          "pct_twins": 49.97,
+          "f1_all": 1.0,
+          "f1_unseen": 1.0,
+          "delta_f1_unseen_minus_all": 0.0
+        },
+        "PortScan": {
+          "test_support": 46343,
+          "train_twins": 45762,
+          "unseen_support": 581,
+          "pct_twins": 98.75,
+          "f1_all": 0.9807,
+          "f1_unseen": 0.6497,
+          "delta_f1_unseen_minus_all": -0.331
+        },
+        "Rare attack": {
+          "test_support": 18,
+          "train_twins": 0,
+          "unseen_support": 18,
+          "pct_twins": 0.0,
+          "f1_all": 0.4667,
+          "f1_unseen": 0.4667,
+          "delta_f1_unseen_minus_all": 0.0
+        },
+        "SSH-Patator": {
+          "test_support": 596,
+          "train_twins": 10,
+          "unseen_support": 586,
+          "pct_twins": 1.68,
+          "f1_all": 0.9571,
+          "f1_unseen": 0.9656,
+          "delta_f1_unseen_minus_all": 0.0085
+        },
+        "Web Attack - Brute Force": {
+          "test_support": 31,
+          "train_twins": 0,
+          "unseen_support": 31,
+          "pct_twins": 0.0,
+          "f1_all": 1.0,
+          "f1_unseen": 1.0,
+          "delta_f1_unseen_minus_all": 0.0
+        }
+      }
+    },
+    "model": "lightgbm",
+    "task": "multiclass",
+    "dst_port": true,
+    "n_features": 56,
+    "seed": 42,
+    "data_version": "nfs2023te-v1",
+    "code_commit": "575a7db",
+    "parameters": {
+      "boosting_type": "gbdt",
+      "class_weight": null,
+      "colsample_bytree": 1.0,
+      "importance_type": "split",
+      "learning_rate": 0.1,
+      "max_depth": -1,
+      "min_child_samples": 20,
+      "min_child_weight": 1.0,
+      "min_split_gain": 0.0,
+      "n_estimators": 100,
+      "n_jobs": -1,
+      "num_leaves": 63,
+      "objective": null,
+      "random_state": 42,
+      "reg_alpha": 0.0,
+      "reg_lambda": 10.0,
+      "subsample": 1.0,
+      "subsample_for_bin": 200000,
+      "subsample_freq": 0,
+      "max_delta_step": 2.0,
+      "verbose": -1
+    },
+    "model_params": {
+      "boosting_type": "gbdt",
+      "class_weight": null,
+      "colsample_bytree": 1.0,
+      "importance_type": "split",
+      "learning_rate": 0.1,
+      "max_depth": -1,
+      "min_child_samples": 20,
+      "min_child_weight": 1.0,
+      "min_split_gain": 0.0,
+      "n_estimators": 100,
+      "n_jobs": -1,
+      "num_leaves": 63,
+      "objective": null,
+      "random_state": 42,
+      "reg_alpha": 0.0,
+      "reg_lambda": 10.0,
+      "subsample": 1.0,
+      "subsample_for_bin": 200000,
+      "subsample_freq": 0,
+      "max_delta_step": 2.0,
+      "verbose": -1
+    },
+    "val_tuning": {
+      "split": "val",
+      "seed": 42,
+      "candidates_evaluated": {
+        "n_estimators": [
+          100
+        ],
+        "num_leaves": [
+          31,
+          63,
+          127
+        ],
+        "learning_rate": [
+          0.05,
+          0.08,
+          0.1
+        ]
+      },
+      "n_trials": 9,
+      "trials": [
+        {
+          "params": {
+            "learning_rate": 0.05,
+            "n_estimators": 100,
+            "num_leaves": 31
+          },
+          "val_macro_f1": 0.9518
+        },
+        {
+          "params": {
+            "learning_rate": 0.05,
+            "n_estimators": 100,
+            "num_leaves": 63
+          },
+          "val_macro_f1": 0.9573
+        },
+        {
+          "params": {
+            "learning_rate": 0.05,
+            "n_estimators": 100,
+            "num_leaves": 127
+          },
+          "val_macro_f1": 0.9583
+        },
+        {
+          "params": {
+            "learning_rate": 0.08,
+            "n_estimators": 100,
+            "num_leaves": 31
+          },
+          "val_macro_f1": 0.975
+        },
+        {
+          "params": {
+            "learning_rate": 0.08,
+            "n_estimators": 100,
+            "num_leaves": 63
+          },
+          "val_macro_f1": 0.9837
+        },
+        {
+          "params": {
+            "learning_rate": 0.08,
+            "n_estimators": 100,
+            "num_leaves": 127
+          },
+          "val_macro_f1": 0.9747
+        },
+        {
+          "params": {
+            "learning_rate": 0.1,
+            "n_estimators": 100,
+            "num_leaves": 31
+          },
+          "val_macro_f1": 0.9843
+        },
+        {
+          "params": {
+            "learning_rate": 0.1,
+            "n_estimators": 100,
+            "num_leaves": 63
+          },
+          "val_macro_f1": 0.9876
+        },
+        {
+          "params": {
+            "learning_rate": 0.1,
+            "n_estimators": 100,
+            "num_leaves": 127
+          },
+          "val_macro_f1": 0.9876
+        }
+      ],
+      "selected_params": {
+        "n_estimators": 100,
+        "num_leaves": 63,
+        "learning_rate": 0.1,
+        "min_child_samples": 20,
+        "class_weight": null,
+        "reg_lambda": 10.0,
+        "max_delta_step": 2.0
+      },
+      "val_macro_f1": 0.9876,
+      "test_touched_during_tuning": false,
+      "val_benign_fpr": 0.0002,
+      "val_infer_time_sec": 3.07
+    },
+    "fit_time_sec": 394.77,
+    "infer_time_sec": 2.96,
+    "val_macro_f1": 0.9876,
+    "val_benign_fpr": 0.0002
+  },
+  {
+    "macro_f1": 0.9304,
+    "weighted_f1": 0.9963,
+    "accuracy": 0.9964,
+    "benign_fpr": 0.0001,
+    "per_class": {
+      "BENIGN": {
+        "precision": 0.9961,
+        "recall": 0.9999,
+        "f1-score": 0.998,
+        "support": 527384.0
+      },
+      "Bot": {
+        "precision": 1.0,
+        "recall": 0.9932,
+        "f1-score": 0.9966,
+        "support": 148.0
+      },
+      "DDoS": {
+        "precision": 0.9992,
+        "recall": 0.9989,
+        "f1-score": 0.999,
+        "support": 19139.0
+      },
+      "DoS GoldenEye": {
+        "precision": 0.9822,
+        "recall": 0.9413,
+        "f1-score": 0.9613,
+        "support": 1585.0
+      },
+      "DoS Hulk": {
+        "precision": 0.9999,
+        "recall": 0.9998,
+        "f1-score": 0.9999,
+        "support": 31711.0
+      },
+      "DoS Slowhttptest": {
+        "precision": 0.8012,
+        "recall": 0.9226,
+        "f1-score": 0.8576,
+        "support": 594.0
+      },
+      "DoS slowloris": {
+        "precision": 0.9845,
+        "recall": 0.8576,
+        "f1-score": 0.9167,
+        "support": 1039.0
+      },
+      "FTP-Patator": {
+        "precision": 0.9994,
+        "recall": 1.0,
+        "f1-score": 0.9997,
+        "support": 1593.0
+      },
+      "PortScan": {
+        "precision": 0.9996,
+        "recall": 0.9596,
+        "f1-score": 0.9792,
+        "support": 46343.0
+      },
+      "Rare attack": {
+        "precision": 1.0,
+        "recall": 0.3333,
+        "f1-score": 0.5,
+        "support": 18.0
+      },
+      "SSH-Patator": {
+        "precision": 1.0,
+        "recall": 0.9178,
+        "f1-score": 0.9571,
+        "support": 596.0
+      },
+      "Web Attack - Brute Force": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 31.0
+      }
+    },
+    "confusion_matrix": {
+      "labels": [
+        "BENIGN",
+        "Bot",
+        "DDoS",
+        "DoS GoldenEye",
+        "DoS Hulk",
+        "DoS Slowhttptest",
+        "DoS slowloris",
+        "FTP-Patator",
+        "PortScan",
+        "Rare attack",
+        "SSH-Patator",
+        "Web Attack - Brute Force"
+      ],
+      "matrix": [
+        [
+          527348,
+          0,
+          15,
+          4,
+          0,
+          0,
+          0,
+          0,
+          17,
+          0,
+          0,
+          0
+        ],
+        [
+          1,
+          147,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          22,
+          0,
+          19117,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          91,
+          0,
+          0,
+          1492,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          4,
+          0,
+          0,
+          3,
+          31704,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          16,
+          0,
+          0,
+          16,
+          0,
+          548,
+          14,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          12,
+          0,
+          0,
+          1,
+          0,
+          135,
+          891,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1593,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          1872,
+          0,
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          44469,
+          0,
+          0,
+          0
+        ],
+        [
+          10,
+          0,
+          0,
+          2,
+          0,
+          0,
+          0,
+          0,
+          0,
+          6,
+          0,
+          0
+        ],
+        [
+          48,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          547,
+          0
+        ],
+        [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          31
+        ]
+      ]
+    },
+    "top_features": [
+      {
+        "feature": "bidirectional_bytes",
+        "importance": 0.13597
+      },
+      {
+        "feature": "src2dst_bytes",
+        "importance": 0.07589
+      },
+      {
+        "feature": "src2dst_max_ps",
+        "importance": 0.06663
+      },
+      {
+        "feature": "bidirectional_mean_ps",
+        "importance": 0.05674
+      },
+      {
+        "feature": "bidirectional_stddev_ps",
+        "importance": 0.04716
+      },
+      {
+        "feature": "bidirectional_duration_ms",
+        "importance": 0.04115
+      },
+      {
+        "feature": "src2dst_min_ps",
+        "importance": 0.03826
+      },
+      {
+        "feature": "src2dst_mean_ps",
+        "importance": 0.03144
+      },
+      {
+        "feature": "src2dst_stddev_ps",
+        "importance": 0.03103
+      },
+      {
+        "feature": "bidirectional_ack_packets",
+        "importance": 0.02873
+      }
+    ],
+    "train_twin_analysis": {
+      "n_test_rows": 630181,
+      "n_feature_twins": 361877,
+      "pct_feature_twins": 57.42,
+      "n_exact_twins": 361821,
+      "pct_exact_twins": 57.42,
+      "n_unseen_rows": 268304,
+      "pct_unseen_rows": 42.58,
+      "macro_f1_all": 0.9304,
+      "macro_f1_twins_only": 0.8703,
+      "macro_f1_unseen": 0.8941,
+      "delta_macro_f1_unseen_minus_all": -0.0363,
+      "benign_fpr_all": 0.0001,
+      "benign_fpr_twins_only": 0.0001,
+      "benign_fpr_unseen": 0.0001,
+      "delta_benign_fpr_unseen_minus_all": 0.0,
+      "per_class_breakdown": {
+        "BENIGN": {
+          "test_support": 527384,
+          "train_twins": 307255,
+          "unseen_support": 220129,
+          "pct_twins": 58.26,
+          "f1_all": 0.998,
+          "f1_unseen": 0.9995,
+          "delta_f1_unseen_minus_all": 0.0015
+        },
+        "Bot": {
+          "test_support": 148,
+          "train_twins": 42,
+          "unseen_support": 106,
+          "pct_twins": 28.38,
+          "f1_all": 0.9966,
+          "f1_unseen": 0.9953,
+          "delta_f1_unseen_minus_all": -0.0013
+        },
+        "DDoS": {
+          "test_support": 19139,
+          "train_twins": 4053,
+          "unseen_support": 15086,
+          "pct_twins": 21.18,
+          "f1_all": 0.999,
+          "f1_unseen": 0.9988,
+          "delta_f1_unseen_minus_all": -0.0002
+        },
+        "DoS GoldenEye": {
+          "test_support": 1585,
+          "train_twins": 85,
+          "unseen_support": 1500,
+          "pct_twins": 5.36,
+          "f1_all": 0.9613,
+          "f1_unseen": 0.9703,
+          "delta_f1_unseen_minus_all": 0.009
+        },
+        "DoS Hulk": {
+          "test_support": 31711,
+          "train_twins": 2612,
+          "unseen_support": 29099,
+          "pct_twins": 8.24,
+          "f1_all": 0.9999,
+          "f1_unseen": 0.9999,
+          "delta_f1_unseen_minus_all": 0.0
+        },
+        "DoS Slowhttptest": {
+          "test_support": 594,
+          "train_twins": 309,
+          "unseen_support": 285,
+          "pct_twins": 52.02,
+          "f1_all": 0.8576,
+          "f1_unseen": 0.7592,
+          "delta_f1_unseen_minus_all": -0.0984
+        },
+        "DoS slowloris": {
+          "test_support": 1039,
+          "train_twins": 515,
+          "unseen_support": 524,
+          "pct_twins": 49.57,
+          "f1_all": 0.9167,
+          "f1_unseen": 0.8356,
+          "delta_f1_unseen_minus_all": -0.0811
+        },
+        "FTP-Patator": {
+          "test_support": 1593,
+          "train_twins": 796,
+          "unseen_support": 797,
+          "pct_twins": 49.97,
+          "f1_all": 0.9997,
+          "f1_unseen": 0.9994,
+          "delta_f1_unseen_minus_all": -0.0003
+        },
+        "PortScan": {
+          "test_support": 46343,
+          "train_twins": 46200,
+          "unseen_support": 143,
+          "pct_twins": 99.69,
+          "f1_all": 0.9792,
+          "f1_unseen": 0.7059,
+          "delta_f1_unseen_minus_all": -0.2733
+        },
+        "Rare attack": {
+          "test_support": 18,
+          "train_twins": 0,
+          "unseen_support": 18,
+          "pct_twins": 0.0,
+          "f1_all": 0.5,
+          "f1_unseen": 0.5,
+          "delta_f1_unseen_minus_all": 0.0
+        },
+        "SSH-Patator": {
+          "test_support": 596,
+          "train_twins": 10,
+          "unseen_support": 586,
+          "pct_twins": 1.68,
+          "f1_all": 0.9571,
+          "f1_unseen": 0.9656,
+          "delta_f1_unseen_minus_all": 0.0085
+        },
+        "Web Attack - Brute Force": {
+          "test_support": 31,
+          "train_twins": 0,
+          "unseen_support": 31,
+          "pct_twins": 0.0,
+          "f1_all": 1.0,
+          "f1_unseen": 1.0,
+          "delta_f1_unseen_minus_all": 0.0
+        }
+      }
+    },
+    "model": "lightgbm",
+    "task": "multiclass",
+    "dst_port": false,
+    "n_features": 55,
+    "seed": 42,
+    "data_version": "nfs2023te-v1",
+    "code_commit": "575a7db",
+    "parameters": {
+      "boosting_type": "gbdt",
+      "class_weight": null,
+      "colsample_bytree": 1.0,
+      "importance_type": "split",
+      "learning_rate": 0.1,
+      "max_depth": -1,
+      "min_child_samples": 20,
+      "min_child_weight": 1.0,
+      "min_split_gain": 0.0,
+      "n_estimators": 100,
+      "n_jobs": -1,
+      "num_leaves": 127,
+      "objective": null,
+      "random_state": 42,
+      "reg_alpha": 0.0,
+      "reg_lambda": 10.0,
+      "subsample": 1.0,
+      "subsample_for_bin": 200000,
+      "subsample_freq": 0,
+      "max_delta_step": 2.0,
+      "verbose": -1
+    },
+    "model_params": {
+      "boosting_type": "gbdt",
+      "class_weight": null,
+      "colsample_bytree": 1.0,
+      "importance_type": "split",
+      "learning_rate": 0.1,
+      "max_depth": -1,
+      "min_child_samples": 20,
+      "min_child_weight": 1.0,
+      "min_split_gain": 0.0,
+      "n_estimators": 100,
+      "n_jobs": -1,
+      "num_leaves": 127,
+      "objective": null,
+      "random_state": 42,
+      "reg_alpha": 0.0,
+      "reg_lambda": 10.0,
+      "subsample": 1.0,
+      "subsample_for_bin": 200000,
+      "subsample_freq": 0,
+      "max_delta_step": 2.0,
+      "verbose": -1
+    },
+    "val_tuning": {
+      "split": "val",
+      "seed": 42,
+      "candidates_evaluated": {
+        "n_estimators": [
+          100
+        ],
+        "num_leaves": [
+          31,
+          63,
+          127
+        ],
+        "learning_rate": [
+          0.05,
+          0.08,
+          0.1
+        ]
+      },
+      "n_trials": 9,
+      "trials": [
+        {
+          "params": {
+            "learning_rate": 0.05,
+            "n_estimators": 100,
+            "num_leaves": 31
+          },
+          "val_macro_f1": 0.9451
+        },
+        {
+          "params": {
+            "learning_rate": 0.05,
+            "n_estimators": 100,
+            "num_leaves": 63
+          },
+          "val_macro_f1": 0.9522
+        },
+        {
+          "params": {
+            "learning_rate": 0.05,
+            "n_estimators": 100,
+            "num_leaves": 127
+          },
+          "val_macro_f1": 0.9593
+        },
+        {
+          "params": {
+            "learning_rate": 0.08,
+            "n_estimators": 100,
+            "num_leaves": 31
+          },
+          "val_macro_f1": 0.9728
+        },
+        {
+          "params": {
+            "learning_rate": 0.08,
+            "n_estimators": 100,
+            "num_leaves": 63
+          },
+          "val_macro_f1": 0.9738
+        },
+        {
+          "params": {
+            "learning_rate": 0.08,
+            "n_estimators": 100,
+            "num_leaves": 127
+          },
+          "val_macro_f1": 0.9747
+        },
+        {
+          "params": {
+            "learning_rate": 0.1,
+            "n_estimators": 100,
+            "num_leaves": 31
+          },
+          "val_macro_f1": 0.9733
+        },
+        {
+          "params": {
+            "learning_rate": 0.1,
+            "n_estimators": 100,
+            "num_leaves": 63
+          },
+          "val_macro_f1": 0.9738
+        },
+        {
+          "params": {
+            "learning_rate": 0.1,
+            "n_estimators": 100,
+            "num_leaves": 127
+          },
+          "val_macro_f1": 0.9752
+        }
+      ],
+      "selected_params": {
+        "n_estimators": 100,
+        "num_leaves": 127,
+        "learning_rate": 0.1,
+        "min_child_samples": 20,
+        "class_weight": null,
+        "reg_lambda": 10.0,
+        "max_delta_step": 2.0
+      },
+      "val_macro_f1": 0.9752,
+      "test_touched_during_tuning": false,
+      "val_benign_fpr": 0.0003,
+      "val_infer_time_sec": 2.79
+    },
+    "fit_time_sec": 396.79,
+    "infer_time_sec": 2.91,
+    "val_macro_f1": 0.9752,
+    "val_benign_fpr": 0.0003
+  }
+]

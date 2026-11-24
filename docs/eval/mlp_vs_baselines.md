@@ -15,8 +15,8 @@
 | majority | 0.4556 | 0.0000 | 0.8369 |
 | logreg | 0.9645 | 0.0140 | 0.9805 |
 | **MLP (SEN-FR-13)** | 0.9940 | 0.0002 | 0.9967 |
-| random forest | _pending SEN-FR-08_ | _pending_ | _pending_ |
-| lightgbm | _pending SEN-FR-08_ | _pending_ | _pending_ |
+| random forest | 0.9939 | 0.0000 | 0.9968 |
+| lightgbm | 0.9941 | 0.0001 | 0.9968 |
 
 ### Binary — without dst_port
 
@@ -25,8 +25,8 @@
 | majority | 0.4556 | 0.0000 | 0.8369 |
 | logreg | 0.9650 | 0.0136 | 0.9807 |
 | **MLP (SEN-FR-13)** | 0.9924 | 0.0006 | 0.9959 |
-| random forest | _pending SEN-FR-08_ | _pending_ | _pending_ |
-| lightgbm | _pending SEN-FR-08_ | _pending_ | _pending_ |
+| random forest | 0.9933 | 0.0001 | 0.9964 |
+| lightgbm | 0.9934 | 0.0001 | 0.9965 |
 
 ### Multiclass — with dst_port
 
@@ -35,8 +35,8 @@
 | majority | 0.0759 | 0.0000 | 0.8369 |
 | logreg | 0.5569 | 0.0370 | 0.9648 |
 | **MLP (SEN-FR-13)** | 0.7133 | 0.0165 | 0.9821 |
-| random forest | _pending SEN-FR-08_ | _pending_ | _pending_ |
-| lightgbm | _pending SEN-FR-08_ | _pending_ | _pending_ |
+| random forest | 0.8855 | 0.0000 | 0.9962 |
+| lightgbm | 0.8868 | 0.0000 | 0.9966 |
 
 ### Multiclass — without dst_port
 
@@ -45,8 +45,8 @@
 | majority | 0.0759 | 0.0000 | 0.8369 |
 | logreg | 0.5140 | 0.0623 | 0.9435 |
 | **MLP (SEN-FR-13)** | 0.6388 | 0.0198 | 0.9796 |
-| random forest | _pending SEN-FR-08_ | _pending_ | _pending_ |
-| lightgbm | _pending SEN-FR-08_ | _pending_ | _pending_ |
+| random forest | 0.8633 | 0.0001 | 0.9958 |
+| lightgbm | 0.8799 | 0.0001 | 0.9961 |
 
 ## Per-class recall, multiclass (dst_port on)
 
