@@ -1,13 +1,13 @@
 [
   {
-    "macro_f1": 0.9107,
-    "weighted_f1": 0.9966,
-    "accuracy": 0.9966,
-    "benign_fpr": 0.0001,
+    "macro_f1": 0.9283,
+    "weighted_f1": 0.9967,
+    "accuracy": 0.9968,
+    "benign_fpr": 0.0,
     "per_class": {
       "BENIGN": {
-        "precision": 0.9966,
-        "recall": 0.9999,
+        "precision": 0.9965,
+        "recall": 1.0,
         "f1-score": 0.9982,
         "support": 527384.0
       },
@@ -24,9 +24,9 @@
         "support": 19139.0
       },
       "DoS GoldenEye": {
-        "precision": 0.9688,
-        "recall": 0.9994,
-        "f1-score": 0.9839,
+        "precision": 0.9826,
+        "recall": 0.9981,
+        "f1-score": 0.9903,
         "support": 1585.0
       },
       "DoS Hulk": {
@@ -36,15 +36,15 @@
         "support": 31711.0
       },
       "DoS Slowhttptest": {
-        "precision": 0.7585,
+        "precision": 0.7966,
         "recall": 0.936,
-        "f1-score": 0.838,
+        "f1-score": 0.8607,
         "support": 594.0
       },
       "DoS slowloris": {
-        "precision": 0.9806,
-        "recall": 0.8287,
-        "f1-score": 0.8983,
+        "precision": 0.9825,
+        "recall": 0.8643,
+        "f1-score": 0.9196,
         "support": 1039.0
       },
       "FTP-Patator": {
@@ -54,27 +54,27 @@
         "support": 1593.0
       },
       "PortScan": {
-        "precision": 0.9997,
+        "precision": 0.9999,
         "recall": 0.9622,
-        "f1-score": 0.9806,
+        "f1-score": 0.9807,
         "support": 46343.0
       },
       "Rare attack": {
-        "precision": 0.2609,
+        "precision": 0.6,
         "recall": 0.3333,
-        "f1-score": 0.2927,
+        "f1-score": 0.4286,
         "support": 18.0
       },
       "SSH-Patator": {
         "precision": 1.0,
-        "recall": 0.9178,
-        "f1-score": 0.9571,
+        "recall": 0.9346,
+        "f1-score": 0.9662,
         "support": 596.0
       },
       "Web Attack - Brute Force": {
         "precision": 1.0,
-        "recall": 0.9677,
-        "f1-score": 0.9836,
+        "recall": 1.0,
+        "f1-score": 1.0,
         "support": 31.0
       }
     },
@@ -95,16 +95,16 @@
       ],
       "matrix": [
         [
-          527331,
+          527361,
           0,
           16,
-          5,
           0,
           0,
           0,
           0,
-          15,
-          17,
+          0,
+          3,
+          4,
           0,
           0
         ],
@@ -140,9 +140,9 @@
           0,
           0,
           0,
-          1584,
+          1582,
           0,
-          1,
+          3,
           0,
           0,
           0,
@@ -165,13 +165,13 @@
           0
         ],
         [
-          7,
+          8,
           0,
           0,
           16,
           0,
           556,
-          15,
+          14,
           0,
           0,
           0,
@@ -184,8 +184,8 @@
           0,
           1,
           0,
-          175,
-          861,
+          138,
+          898,
           0,
           0,
           0,
@@ -207,11 +207,11 @@
           0
         ],
         [
-          1732,
+          1749,
           0,
           0,
-          19,
-          0,
+          1,
+          1,
           0,
           0,
           0,
@@ -235,7 +235,7 @@
           0
         ],
         [
-          47,
+          37,
           0,
           0,
           0,
@@ -245,11 +245,10 @@
           0,
           0,
           0,
-          547,
+          557,
           0
         ],
         [
-          1,
           0,
           0,
           0,
@@ -260,68 +259,69 @@
           0,
           0,
           0,
-          30
+          0,
+          31
         ]
       ]
     },
     "top_features": [
       {
         "feature": "dst_port",
-        "importance": 0.09392
+        "importance": 0.15893
       },
       {
         "feature": "bidirectional_bytes",
-        "importance": 0.057
-      },
-      {
-        "feature": "bidirectional_mean_ps",
-        "importance": 0.05682
+        "importance": 0.05877
       },
       {
         "feature": "src2dst_syn_packets",
-        "importance": 0.05633
-      },
-      {
-        "feature": "dst2src_mean_ps",
-        "importance": 0.04702
+        "importance": 0.05327
       },
       {
         "feature": "bidirectional_stddev_ps",
-        "importance": 0.04652
+        "importance": 0.04968
       },
       {
-        "feature": "dst2src_max_ps",
-        "importance": 0.03824
-      },
-      {
-        "feature": "src2dst_bytes",
-        "importance": 0.03767
+        "feature": "bidirectional_mean_ps",
+        "importance": 0.04563
       },
       {
         "feature": "dst2src_stddev_ps",
-        "importance": 0.03717
+        "importance": 0.03966
+      },
+      {
+        "feature": "src2dst_bytes",
+        "importance": 0.03842
+      },
+      {
+        "feature": "dst2src_mean_ps",
+        "importance": 0.03534
       },
       {
         "feature": "src2dst_max_ps",
-        "importance": 0.03589
+        "importance": 0.0345
+      },
+      {
+        "feature": "dst2src_max_ps",
+        "importance": 0.02948
       }
     ],
     "train_twin_analysis": {
       "n_test_rows": 630181,
-      "n_feature_twins": 309826,
+      "n_feature_twins": 309816,
       "pct_feature_twins": 49.16,
-      "n_exact_twins": 309399,
+      "n_exact_twins": 309389,
       "pct_exact_twins": 49.1,
-      "n_unseen_rows": 320355,
+      "n_unseen_rows": 320365,
       "pct_unseen_rows": 50.84,
-      "macro_f1_all": 0.9107,
-      "macro_f1_twins_only": 0.8917,
-      "macro_f1_unseen": 0.8637,
-      "delta_macro_f1_unseen_minus_all": -0.047,
-      "benign_fpr_all": 0.0001,
-      "benign_fpr_twins_only": 0.0001,
+      "macro_f1_all": 0.9283,
+      "macro_f1_twins_only": 0.9925,
+      "macro_f1_unseen": 0.8857,
+      "delta_macro_f1_unseen_minus_all": -0.0426,
+      "benign_fpr_all": 0.0,
+      "benign_fpr_twins_only": 0.0,
       "benign_fpr_unseen": 0.0001,
-      "delta_benign_fpr_unseen_minus_all": 0.0,
+      "delta_benign_fpr_unseen_minus_all": 0.0001,
       "per_class_breakdown": {
         "BENIGN": {
           "test_support": 527384,
@@ -329,8 +329,8 @@
           "unseen_support": 271722,
           "pct_twins": 48.48,
           "f1_all": 0.9982,
-          "f1_unseen": 0.9992,
-          "delta_f1_unseen_minus_all": 0.001
+          "f1_unseen": 0.9993,
+          "delta_f1_unseen_minus_all": 0.0011
         },
         "Bot": {
           "test_support": 148,
@@ -343,9 +343,9 @@
         },
         "DDoS": {
           "test_support": 19139,
-          "train_twins": 4054,
-          "unseen_support": 15085,
-          "pct_twins": 21.18,
+          "train_twins": 4052,
+          "unseen_support": 15087,
+          "pct_twins": 21.17,
           "f1_all": 0.999,
           "f1_unseen": 0.9987,
           "delta_f1_unseen_minus_all": -0.0003
@@ -355,15 +355,15 @@
           "train_twins": 57,
           "unseen_support": 1528,
           "pct_twins": 3.6,
-          "f1_all": 0.9839,
-          "f1_unseen": 0.9842,
+          "f1_all": 0.9903,
+          "f1_unseen": 0.9906,
           "delta_f1_unseen_minus_all": 0.0003
         },
         "DoS Hulk": {
           "test_support": 31711,
-          "train_twins": 2619,
-          "unseen_support": 29092,
-          "pct_twins": 8.26,
+          "train_twins": 2611,
+          "unseen_support": 29100,
+          "pct_twins": 8.23,
           "f1_all": 0.9999,
           "f1_unseen": 0.9999,
           "delta_f1_unseen_minus_all": 0.0
@@ -373,18 +373,18 @@
           "train_twins": 309,
           "unseen_support": 285,
           "pct_twins": 52.02,
-          "f1_all": 0.838,
-          "f1_unseen": 0.723,
-          "delta_f1_unseen_minus_all": -0.115
+          "f1_all": 0.8607,
+          "f1_unseen": 0.7598,
+          "delta_f1_unseen_minus_all": -0.1009
         },
         "DoS slowloris": {
           "test_support": 1039,
           "train_twins": 515,
           "unseen_support": 524,
           "pct_twins": 49.57,
-          "f1_all": 0.8983,
-          "f1_unseen": 0.7927,
-          "delta_f1_unseen_minus_all": -0.1056
+          "f1_all": 0.9196,
+          "f1_unseen": 0.8427,
+          "delta_f1_unseen_minus_all": -0.0769
         },
         "FTP-Patator": {
           "test_support": 1593,
@@ -400,17 +400,17 @@
           "train_twins": 45762,
           "unseen_support": 581,
           "pct_twins": 98.75,
-          "f1_all": 0.9806,
-          "f1_unseen": 0.629,
-          "delta_f1_unseen_minus_all": -0.3516
+          "f1_all": 0.9807,
+          "f1_unseen": 0.6481,
+          "delta_f1_unseen_minus_all": -0.3326
         },
         "Rare attack": {
           "test_support": 18,
           "train_twins": 0,
           "unseen_support": 18,
           "pct_twins": 0.0,
-          "f1_all": 0.2927,
-          "f1_unseen": 0.2927,
+          "f1_all": 0.4286,
+          "f1_unseen": 0.4286,
           "delta_f1_unseen_minus_all": 0.0
         },
         "SSH-Patator": {
@@ -418,17 +418,17 @@
           "train_twins": 10,
           "unseen_support": 586,
           "pct_twins": 1.68,
-          "f1_all": 0.9571,
+          "f1_all": 0.9662,
           "f1_unseen": 0.9656,
-          "delta_f1_unseen_minus_all": 0.0085
+          "delta_f1_unseen_minus_all": -0.0006
         },
         "Web Attack - Brute Force": {
           "test_support": 31,
           "train_twins": 0,
           "unseen_support": 31,
           "pct_twins": 0.0,
-          "f1_all": 0.9836,
-          "f1_unseen": 0.9836,
+          "f1_all": 1.0,
+          "f1_unseen": 1.0,
           "delta_f1_unseen_minus_all": 0.0
         }
       }
@@ -437,22 +437,23 @@
     "task": "multiclass",
     "dst_port": true,
     "n_features": 56,
+    "seed": 42,
     "data_version": "nfs2023te-v1",
-    "code_commit": "ea21e85",
+    "code_commit": "575a7db",
     "parameters": {
       "cv_folds": 3,
       "lgbm__boosting_type": "gbdt",
       "lgbm__class_weight": null,
       "lgbm__colsample_bytree": 1.0,
       "lgbm__importance_type": "split",
-      "lgbm__learning_rate": 0.05,
+      "lgbm__learning_rate": 0.1,
       "lgbm__max_depth": -1,
       "lgbm__min_child_samples": 20,
       "lgbm__min_child_weight": 1.0,
       "lgbm__min_split_gain": 0.0,
       "lgbm__n_estimators": 100,
       "lgbm__n_jobs": -1,
-      "lgbm__num_leaves": 31,
+      "lgbm__num_leaves": 63,
       "lgbm__objective": null,
       "lgbm__random_state": 42,
       "lgbm__reg_alpha": 0.0,
@@ -474,7 +475,7 @@
       "rf__max_leaf_nodes": null,
       "rf__max_samples": 0.25,
       "rf__min_impurity_decrease": 0.0,
-      "rf__min_samples_leaf": 2,
+      "rf__min_samples_leaf": 1,
       "rf__min_samples_split": 2,
       "rf__min_weight_fraction_leaf": 0.0,
       "rf__monotonic_cst": null,
@@ -485,86 +486,45 @@
       "rf__verbose": 0,
       "rf__warm_start": false,
       "rf": "RandomForestClassifier",
+      "task": "multiclass"
+    },
+    "model_params": {
+      "cv_folds": 3,
+      "lgbm": "LGBMClassifier(max_delta_step=2.0, min_child_weight=1.0, n_jobs=-1,\n               num_leaves=63, random_state=42, reg_lambda=10.0, verbose=-1)",
+      "meta_learner": null,
+      "random_state": 42,
+      "rf": "RandomForestClassifier(max_depth=20, max_samples=0.25, n_estimators=80,\n                       n_jobs=-1, random_state=42)",
       "task": "multiclass"
     },
     "meta_learner_type": "LogisticRegression(C=20.0, features=[prob, scaled_log_prob, abs_diff]) + class_multipliers",
     "learned_model_contributions": {
-      "rf_share": 0.5417,
-      "lgbm_share": 0.4583
-    },
-    "meta_fit_time_sec": 2.84,
-    "fit_time_sec": 128.51,
-    "infer_time_sec": 8.06,
-    "val_macro_f1": 0.9744,
-    "val_benign_fpr": 0.0002,
-    "seed": 42,
-    "model_params": {
-      "cv_folds": 3,
-      "lgbm__boosting_type": "gbdt",
-      "lgbm__class_weight": null,
-      "lgbm__colsample_bytree": 1.0,
-      "lgbm__importance_type": "split",
-      "lgbm__learning_rate": 0.05,
-      "lgbm__max_depth": -1,
-      "lgbm__min_child_samples": 20,
-      "lgbm__min_child_weight": 1.0,
-      "lgbm__min_split_gain": 0.0,
-      "lgbm__n_estimators": 100,
-      "lgbm__n_jobs": -1,
-      "lgbm__num_leaves": 31,
-      "lgbm__objective": null,
-      "lgbm__random_state": 42,
-      "lgbm__reg_alpha": 0.0,
-      "lgbm__reg_lambda": 10.0,
-      "lgbm__subsample": 1.0,
-      "lgbm__subsample_for_bin": 200000,
-      "lgbm__subsample_freq": 0,
-      "lgbm__max_delta_step": 2.0,
-      "lgbm__verbose": -1,
-      "lgbm": "LGBMClassifier",
-      "meta_learner": null,
-      "random_state": 42,
-      "rf__bootstrap": true,
-      "rf__ccp_alpha": 0.0,
-      "rf__class_weight": null,
-      "rf__criterion": "gini",
-      "rf__max_depth": 20,
-      "rf__max_features": "sqrt",
-      "rf__max_leaf_nodes": null,
-      "rf__max_samples": 0.25,
-      "rf__min_impurity_decrease": 0.0,
-      "rf__min_samples_leaf": 2,
-      "rf__min_samples_split": 2,
-      "rf__min_weight_fraction_leaf": 0.0,
-      "rf__monotonic_cst": null,
-      "rf__n_estimators": 80,
-      "rf__n_jobs": -1,
-      "rf__oob_score": false,
-      "rf__random_state": 42,
-      "rf__verbose": 0,
-      "rf__warm_start": false,
-      "rf": "RandomForestClassifier",
-      "task": "multiclass"
+      "rf_share": 0.5129,
+      "lgbm_share": 0.4871
     },
     "val_tuning": {
       "split": "val",
       "seed": 42,
       "oof_folds": 3,
       "meta_learner": "LogisticRegression(C=20.0) + coordinate-ascent class_multipliers on val OOF",
-      "val_oof_macro_f1": 0.9744,
+      "val_oof_macro_f1": 0.9893,
       "val_oof_benign_fpr": 0.0002,
       "test_touched_during_tuning": false
-    }
+    },
+    "meta_fit_time_sec": 3.14,
+    "fit_time_sec": 596.63,
+    "infer_time_sec": 4.48,
+    "val_macro_f1": 0.9893,
+    "val_benign_fpr": 0.0002
   },
   {
-    "macro_f1": 0.9189,
-    "weighted_f1": 0.9963,
+    "macro_f1": 0.9247,
+    "weighted_f1": 0.9964,
     "accuracy": 0.9964,
-    "benign_fpr": 0.0001,
+    "benign_fpr": 0.0002,
     "per_class": {
       "BENIGN": {
-        "precision": 0.9962,
-        "recall": 0.9999,
+        "precision": 0.9963,
+        "recall": 0.9998,
         "f1-score": 0.998,
         "support": 527384.0
       },
@@ -581,57 +541,57 @@
         "support": 19139.0
       },
       "DoS GoldenEye": {
-        "precision": 0.9805,
-        "recall": 0.9502,
-        "f1-score": 0.9651,
+        "precision": 0.971,
+        "recall": 0.9722,
+        "f1-score": 0.9716,
         "support": 1585.0
       },
       "DoS Hulk": {
         "precision": 1.0,
-        "recall": 0.9997,
-        "f1-score": 0.9998,
+        "recall": 0.9998,
+        "f1-score": 0.9999,
         "support": 31711.0
       },
       "DoS Slowhttptest": {
-        "precision": 0.7745,
-        "recall": 0.931,
-        "f1-score": 0.8456,
+        "precision": 0.7883,
+        "recall": 0.9276,
+        "f1-score": 0.8523,
         "support": 594.0
       },
       "DoS slowloris": {
-        "precision": 0.9657,
+        "precision": 0.9815,
         "recall": 0.8672,
-        "f1-score": 0.9138,
+        "f1-score": 0.9208,
         "support": 1039.0
       },
       "FTP-Patator": {
-        "precision": 1.0,
+        "precision": 0.9994,
         "recall": 1.0,
-        "f1-score": 1.0,
+        "f1-score": 0.9997,
         "support": 1593.0
       },
       "PortScan": {
-        "precision": 0.9996,
-        "recall": 0.9596,
-        "f1-score": 0.9792,
+        "precision": 0.9992,
+        "recall": 0.9598,
+        "f1-score": 0.9791,
         "support": 46343.0
       },
       "Rare attack": {
-        "precision": 0.3889,
-        "recall": 0.3889,
-        "f1-score": 0.3889,
+        "precision": 0.5455,
+        "recall": 0.3333,
+        "f1-score": 0.4138,
         "support": 18.0
       },
       "SSH-Patator": {
         "precision": 1.0,
-        "recall": 0.9178,
-        "f1-score": 0.9571,
+        "recall": 0.9346,
+        "f1-score": 0.9662,
         "support": 596.0
       },
       "Web Attack - Brute Force": {
         "precision": 1.0,
-        "recall": 0.9677,
-        "f1-score": 0.9836,
+        "recall": 1.0,
+        "f1-score": 1.0,
         "support": 31.0
       }
     },
@@ -652,16 +612,16 @@
       ],
       "matrix": [
         [
-          527308,
+          527301,
           0,
           17,
-          7,
+          19,
           0,
-          6,
-          15,
+          5,
+          1,
           0,
-          20,
-          11,
+          36,
+          5,
           0,
           0
         ],
@@ -694,26 +654,12 @@
           0
         ],
         [
-          62,
+          37,
           0,
           0,
-          1506,
+          1541,
           0,
-          17,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        [
-          5,
-          0,
-          0,
-          3,
-          31701,
-          2,
+          7,
           0,
           0,
           0,
@@ -722,12 +668,26 @@
           0
         ],
         [
-          10,
+          1,
+          0,
+          0,
+          6,
+          31704,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        [
+          12,
           0,
           0,
           16,
           0,
-          553,
+          551,
           15,
           0,
           0,
@@ -764,7 +724,7 @@
           0
         ],
         [
-          1871,
+          1861,
           0,
           0,
           1,
@@ -772,7 +732,7 @@
           0,
           0,
           0,
-          44471,
+          44481,
           0,
           0,
           0
@@ -781,34 +741,31 @@
           8,
           0,
           0,
-          2,
+          3,
           0,
           1,
           0,
           0,
           0,
-          7,
+          6,
           0,
           0
         ],
         [
-          47,
+          37,
           0,
           0,
           0,
           0,
           0,
-          2,
-          0,
-          0,
-          0,
-          547,
-          0
-        ],
-        [
+          1,
           1,
           0,
           0,
+          557,
+          0
+        ],
+        [
           0,
           0,
           0,
@@ -817,68 +774,71 @@
           0,
           0,
           0,
-          30
+          0,
+          0,
+          0,
+          31
         ]
       ]
     },
     "top_features": [
       {
-        "feature": "bidirectional_stddev_ps",
-        "importance": 0.06558
-      },
-      {
-        "feature": "bidirectional_mean_ps",
-        "importance": 0.05855
+        "feature": "bidirectional_bytes",
+        "importance": 0.08817
       },
       {
         "feature": "src2dst_bytes",
-        "importance": 0.05602
+        "importance": 0.06579
       },
       {
-        "feature": "bidirectional_bytes",
-        "importance": 0.05539
+        "feature": "bidirectional_mean_ps",
+        "importance": 0.0579
+      },
+      {
+        "feature": "bidirectional_stddev_ps",
+        "importance": 0.05717
       },
       {
         "feature": "src2dst_max_ps",
-        "importance": 0.05198
+        "importance": 0.04856
       },
       {
         "feature": "dst2src_stddev_ps",
-        "importance": 0.05113
+        "importance": 0.04817
       },
       {
         "feature": "bidirectional_syn_packets",
-        "importance": 0.04814
+        "importance": 0.03854
       },
       {
         "feature": "bidirectional_max_ps",
-        "importance": 0.04138
+        "importance": 0.03791
       },
       {
-        "feature": "dst2src_mean_ps",
-        "importance": 0.03873
+        "feature": "dst2src_bytes",
+        "importance": 0.03785
       },
       {
         "feature": "src2dst_syn_packets",
-        "importance": 0.03556
+        "importance": 0.03254
       }
     ],
     "train_twin_analysis": {
       "n_test_rows": 630181,
-      "n_feature_twins": 361887,
-      "pct_feature_twins": 57.43,
-      "n_exact_twins": 361831,
+      "n_feature_twins": 361877,
+      "pct_feature_twins": 57.42,
+      "n_exact_twins": 361821,
       "pct_exact_twins": 57.42,
-      "n_unseen_rows": 268294,
-      "pct_unseen_rows": 42.57,
-      "macro_f1_all": 0.9189,
-      "macro_f1_twins_only": 0.8783,
-      "macro_f1_unseen": 0.882,
-      "delta_macro_f1_unseen_minus_all": -0.0369,
-      "benign_fpr_all": 0.0001,
+      "n_unseen_rows": 268304,
+      "pct_unseen_rows": 42.58,
+      "macro_f1_all": 0.9247,
+      "macro_f1_twins_only": 0.9804,
+      "macro_f1_unseen": 0.8873,
+      "delta_macro_f1_unseen_minus_all": -0.0374,
+      "benign_fpr_all": 0.0002,
       "benign_fpr_twins_only": 0.0001,
-      "benign_fpr_unseen": 0.0003,
-      "delta_benign_fpr_unseen_minus_all": 0.0002,
+      "benign_fpr_unseen": 0.0002,
+      "delta_benign_fpr_unseen_minus_all": 0.0,
       "per_class_breakdown": {
         "BENIGN": {
           "test_support": 527384,
@@ -886,8 +846,8 @@
           "unseen_support": 220129,
           "pct_twins": 58.26,
           "f1_all": 0.998,
-          "f1_unseen": 0.9994,
-          "delta_f1_unseen_minus_all": 0.0014
+          "f1_unseen": 0.9995,
+          "delta_f1_unseen_minus_all": 0.0015
         },
         "Bot": {
           "test_support": 148,
@@ -900,9 +860,9 @@
         },
         "DDoS": {
           "test_support": 19139,
-          "train_twins": 4055,
-          "unseen_support": 15084,
-          "pct_twins": 21.19,
+          "train_twins": 4053,
+          "unseen_support": 15086,
+          "pct_twins": 21.18,
           "f1_all": 0.999,
           "f1_unseen": 0.9987,
           "delta_f1_unseen_minus_all": -0.0003
@@ -912,62 +872,62 @@
           "train_twins": 85,
           "unseen_support": 1500,
           "pct_twins": 5.36,
-          "f1_all": 0.9651,
-          "f1_unseen": 0.9707,
-          "delta_f1_unseen_minus_all": 0.0056
+          "f1_all": 0.9716,
+          "f1_unseen": 0.9771,
+          "delta_f1_unseen_minus_all": 0.0055
         },
         "DoS Hulk": {
           "test_support": 31711,
-          "train_twins": 2620,
-          "unseen_support": 29091,
-          "pct_twins": 8.26,
-          "f1_all": 0.9998,
+          "train_twins": 2612,
+          "unseen_support": 29099,
+          "pct_twins": 8.24,
+          "f1_all": 0.9999,
           "f1_unseen": 0.9999,
-          "delta_f1_unseen_minus_all": 0.0001
+          "delta_f1_unseen_minus_all": 0.0
         },
         "DoS Slowhttptest": {
           "test_support": 594,
           "train_twins": 309,
           "unseen_support": 285,
           "pct_twins": 52.02,
-          "f1_all": 0.8456,
-          "f1_unseen": 0.7422,
-          "delta_f1_unseen_minus_all": -0.1034
+          "f1_all": 0.8523,
+          "f1_unseen": 0.7514,
+          "delta_f1_unseen_minus_all": -0.1009
         },
         "DoS slowloris": {
           "test_support": 1039,
           "train_twins": 515,
           "unseen_support": 524,
           "pct_twins": 49.57,
-          "f1_all": 0.9138,
-          "f1_unseen": 0.8319,
-          "delta_f1_unseen_minus_all": -0.0819
+          "f1_all": 0.9208,
+          "f1_unseen": 0.8456,
+          "delta_f1_unseen_minus_all": -0.0752
         },
         "FTP-Patator": {
           "test_support": 1593,
           "train_twins": 796,
           "unseen_support": 797,
           "pct_twins": 49.97,
-          "f1_all": 1.0,
-          "f1_unseen": 1.0,
-          "delta_f1_unseen_minus_all": 0.0
+          "f1_all": 0.9997,
+          "f1_unseen": 0.9994,
+          "delta_f1_unseen_minus_all": -0.0003
         },
         "PortScan": {
           "test_support": 46343,
           "train_twins": 46200,
           "unseen_support": 143,
           "pct_twins": 99.69,
-          "f1_all": 0.9792,
-          "f1_unseen": 0.708,
-          "delta_f1_unseen_minus_all": -0.2712
+          "f1_all": 0.9791,
+          "f1_unseen": 0.7013,
+          "delta_f1_unseen_minus_all": -0.2778
         },
         "Rare attack": {
           "test_support": 18,
           "train_twins": 0,
           "unseen_support": 18,
           "pct_twins": 0.0,
-          "f1_all": 0.3889,
-          "f1_unseen": 0.3889,
+          "f1_all": 0.4138,
+          "f1_unseen": 0.4138,
           "delta_f1_unseen_minus_all": 0.0
         },
         "SSH-Patator": {
@@ -975,17 +935,17 @@
           "train_twins": 10,
           "unseen_support": 586,
           "pct_twins": 1.68,
-          "f1_all": 0.9571,
+          "f1_all": 0.9662,
           "f1_unseen": 0.9656,
-          "delta_f1_unseen_minus_all": 0.0085
+          "delta_f1_unseen_minus_all": -0.0006
         },
         "Web Attack - Brute Force": {
           "test_support": 31,
           "train_twins": 0,
           "unseen_support": 31,
           "pct_twins": 0.0,
-          "f1_all": 0.9836,
-          "f1_unseen": 0.9836,
+          "f1_all": 1.0,
+          "f1_unseen": 1.0,
           "delta_f1_unseen_minus_all": 0.0
         }
       }
@@ -994,22 +954,23 @@
     "task": "multiclass",
     "dst_port": false,
     "n_features": 55,
+    "seed": 42,
     "data_version": "nfs2023te-v1",
-    "code_commit": "ea21e85",
+    "code_commit": "575a7db",
     "parameters": {
       "cv_folds": 3,
       "lgbm__boosting_type": "gbdt",
       "lgbm__class_weight": null,
       "lgbm__colsample_bytree": 1.0,
       "lgbm__importance_type": "split",
-      "lgbm__learning_rate": 0.05,
+      "lgbm__learning_rate": 0.1,
       "lgbm__max_depth": -1,
       "lgbm__min_child_samples": 20,
       "lgbm__min_child_weight": 1.0,
       "lgbm__min_split_gain": 0.0,
       "lgbm__n_estimators": 100,
       "lgbm__n_jobs": -1,
-      "lgbm__num_leaves": 31,
+      "lgbm__num_leaves": 127,
       "lgbm__objective": null,
       "lgbm__random_state": 42,
       "lgbm__reg_alpha": 0.0,
@@ -1031,7 +992,7 @@
       "rf__max_leaf_nodes": null,
       "rf__max_samples": 0.25,
       "rf__min_impurity_decrease": 0.0,
-      "rf__min_samples_leaf": 2,
+      "rf__min_samples_leaf": 1,
       "rf__min_samples_split": 2,
       "rf__min_weight_fraction_leaf": 0.0,
       "rf__monotonic_cst": null,
@@ -1042,75 +1003,34 @@
       "rf__verbose": 0,
       "rf__warm_start": false,
       "rf": "RandomForestClassifier",
+      "task": "multiclass"
+    },
+    "model_params": {
+      "cv_folds": 3,
+      "lgbm": "LGBMClassifier(max_delta_step=2.0, min_child_weight=1.0, n_jobs=-1,\n               num_leaves=127, random_state=42, reg_lambda=10.0, verbose=-1)",
+      "meta_learner": null,
+      "random_state": 42,
+      "rf": "RandomForestClassifier(max_depth=20, max_samples=0.25, n_estimators=80,\n                       n_jobs=-1, random_state=42)",
       "task": "multiclass"
     },
     "meta_learner_type": "LogisticRegression(C=20.0, features=[prob, scaled_log_prob, abs_diff]) + class_multipliers",
     "learned_model_contributions": {
-      "rf_share": 0.5501,
-      "lgbm_share": 0.4499
-    },
-    "meta_fit_time_sec": 2.74,
-    "fit_time_sec": 128.09,
-    "infer_time_sec": 7.72,
-    "val_macro_f1": 0.9706,
-    "val_benign_fpr": 0.0004,
-    "seed": 42,
-    "model_params": {
-      "cv_folds": 3,
-      "lgbm__boosting_type": "gbdt",
-      "lgbm__class_weight": null,
-      "lgbm__colsample_bytree": 1.0,
-      "lgbm__importance_type": "split",
-      "lgbm__learning_rate": 0.05,
-      "lgbm__max_depth": -1,
-      "lgbm__min_child_samples": 20,
-      "lgbm__min_child_weight": 1.0,
-      "lgbm__min_split_gain": 0.0,
-      "lgbm__n_estimators": 100,
-      "lgbm__n_jobs": -1,
-      "lgbm__num_leaves": 31,
-      "lgbm__objective": null,
-      "lgbm__random_state": 42,
-      "lgbm__reg_alpha": 0.0,
-      "lgbm__reg_lambda": 10.0,
-      "lgbm__subsample": 1.0,
-      "lgbm__subsample_for_bin": 200000,
-      "lgbm__subsample_freq": 0,
-      "lgbm__max_delta_step": 2.0,
-      "lgbm__verbose": -1,
-      "lgbm": "LGBMClassifier",
-      "meta_learner": null,
-      "random_state": 42,
-      "rf__bootstrap": true,
-      "rf__ccp_alpha": 0.0,
-      "rf__class_weight": null,
-      "rf__criterion": "gini",
-      "rf__max_depth": 20,
-      "rf__max_features": "sqrt",
-      "rf__max_leaf_nodes": null,
-      "rf__max_samples": 0.25,
-      "rf__min_impurity_decrease": 0.0,
-      "rf__min_samples_leaf": 2,
-      "rf__min_samples_split": 2,
-      "rf__min_weight_fraction_leaf": 0.0,
-      "rf__monotonic_cst": null,
-      "rf__n_estimators": 80,
-      "rf__n_jobs": -1,
-      "rf__oob_score": false,
-      "rf__random_state": 42,
-      "rf__verbose": 0,
-      "rf__warm_start": false,
-      "rf": "RandomForestClassifier",
-      "task": "multiclass"
+      "rf_share": 0.5161,
+      "lgbm_share": 0.4839
     },
     "val_tuning": {
       "split": "val",
       "seed": 42,
       "oof_folds": 3,
       "meta_learner": "LogisticRegression(C=20.0) + coordinate-ascent class_multipliers on val OOF",
-      "val_oof_macro_f1": 0.9706,
-      "val_oof_benign_fpr": 0.0004,
+      "val_oof_macro_f1": 0.9829,
+      "val_oof_benign_fpr": 0.0005,
       "test_touched_during_tuning": false
-    }
+    },
+    "meta_fit_time_sec": 3.03,
+    "fit_time_sec": 595.35,
+    "infer_time_sec": 4.47,
+    "val_macro_f1": 0.9829,
+    "val_benign_fpr": 0.0005
   }
 ]

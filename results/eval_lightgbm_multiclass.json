@@ -1,12 +1,12 @@
 [
   {
-    "macro_f1": 0.8868,
-    "weighted_f1": 0.9966,
-    "accuracy": 0.9966,
+    "macro_f1": 0.9276,
+    "weighted_f1": 0.9967,
+    "accuracy": 0.9967,
     "benign_fpr": 0.0,
     "per_class": {
       "BENIGN": {
-        "precision": 0.9964,
+        "precision": 0.9965,
         "recall": 1.0,
         "f1-score": 0.9982,
         "support": 527384.0
@@ -18,15 +18,15 @@
         "support": 148.0
       },
       "DDoS": {
-        "precision": 0.9994,
+        "precision": 0.9993,
         "recall": 0.9988,
-        "f1-score": 0.9991,
+        "f1-score": 0.999,
         "support": 19139.0
       },
       "DoS GoldenEye": {
-        "precision": 0.983,
-        "recall": 0.9855,
-        "f1-score": 0.9842,
+        "precision": 0.9832,
+        "recall": 0.9968,
+        "f1-score": 0.99,
         "support": 1585.0
       },
       "DoS Hulk": {
@@ -55,14 +55,14 @@
       },
       "PortScan": {
         "precision": 0.9999,
-        "recall": 0.9614,
-        "f1-score": 0.9803,
+        "recall": 0.9623,
+        "f1-score": 0.9807,
         "support": 46343.0
       },
       "Rare attack": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1-score": 0.0,
+        "precision": 0.5833,
+        "recall": 0.3889,
+        "f1-score": 0.4667,
         "support": 18.0
       },
       "SSH-Patator": {
@@ -73,8 +73,8 @@
       },
       "Web Attack - Brute Force": {
         "precision": 1.0,
-        "recall": 0.9677,
-        "f1-score": 0.9836,
+        "recall": 1.0,
+        "f1-score": 1.0,
         "support": 31.0
       }
     },
@@ -95,16 +95,16 @@
       ],
       "matrix": [
         [
-          527370,
+          527362,
           0,
-          11,
+          14,
           0,
           0,
           0,
           0,
           0,
           3,
-          0,
+          5,
           0,
           0
         ],
@@ -137,10 +137,10 @@
           0
         ],
         [
-          21,
+          3,
           0,
           0,
-          1562,
+          1580,
           1,
           1,
           0,
@@ -207,7 +207,7 @@
           0
         ],
         [
-          1787,
+          1747,
           0,
           0,
           1,
@@ -215,13 +215,13 @@
           0,
           0,
           0,
-          44554,
+          44594,
           0,
           0,
           0
         ],
         [
-          15,
+          8,
           0,
           0,
           2,
@@ -230,7 +230,7 @@
           0,
           0,
           0,
-          0,
+          7,
           0,
           0
         ],
@@ -249,7 +249,6 @@
           0
         ],
         [
-          1,
           0,
           0,
           0,
@@ -260,68 +259,69 @@
           0,
           0,
           0,
-          30
+          0,
+          31
         ]
       ]
     },
     "top_features": [
       {
         "feature": "dst_port",
-        "importance": 0.1843
+        "importance": 0.30449
       },
       {
         "feature": "bidirectional_bytes",
-        "importance": 0.07013
+        "importance": 0.06664
       },
       {
         "feature": "bidirectional_mean_ps",
-        "importance": 0.05809
+        "importance": 0.03873
       },
       {
         "feature": "src2dst_max_ps",
-        "importance": 0.05017
-      },
-      {
-        "feature": "src2dst_min_ps",
-        "importance": 0.04108
-      },
-      {
-        "feature": "dst2src_mean_ps",
-        "importance": 0.03518
-      },
-      {
-        "feature": "src2dst_mean_ps",
-        "importance": 0.03464
+        "importance": 0.03709
       },
       {
         "feature": "src2dst_bytes",
-        "importance": 0.03386
+        "importance": 0.03392
       },
       {
-        "feature": "src2dst_stddev_ps",
-        "importance": 0.03107
+        "feature": "src2dst_mean_ps",
+        "importance": 0.03256
       },
       {
         "feature": "bidirectional_stddev_ps",
-        "importance": 0.02796
+        "importance": 0.02895
+      },
+      {
+        "feature": "src2dst_min_ps",
+        "importance": 0.0272
+      },
+      {
+        "feature": "bidirectional_duration_ms",
+        "importance": 0.02311
+      },
+      {
+        "feature": "dst2src_mean_ps",
+        "importance": 0.02218
       }
     ],
     "train_twin_analysis": {
       "n_test_rows": 630181,
-      "n_feature_twins": 309826,
+      "n_feature_twins": 309816,
       "pct_feature_twins": 49.16,
-      "n_exact_twins": 309399,
+      "n_exact_twins": 309389,
       "pct_exact_twins": 49.1,
-      "n_unseen_rows": 320355,
+      "n_unseen_rows": 320365,
       "pct_unseen_rows": 50.84,
-      "macro_f1_all": 0.8868,
+      "macro_f1_all": 0.9276,
       "macro_f1_twins_only": 0.8925,
-      "macro_f1_unseen": 0.8413,
-      "delta_macro_f1_unseen_minus_all": -0.0455,
+      "macro_f1_unseen": 0.8825,
+      "delta_macro_f1_unseen_minus_all": -0.0451,
       "benign_fpr_all": 0.0,
       "benign_fpr_twins_only": 0.0,
-      "benign_fpr_unseen": 0.0,
-      "delta_benign_fpr_unseen_minus_all": 0.0,
+      "benign_fpr_unseen": 0.0001,
+      "delta_benign_fpr_unseen_minus_all": 0.0001,
       "per_class_breakdown": {
         "BENIGN": {
           "test_support": 527384,
@@ -329,8 +329,8 @@
           "unseen_support": 271722,
           "pct_twins": 48.48,
           "f1_all": 0.9982,
-          "f1_unseen": 0.9992,
-          "delta_f1_unseen_minus_all": 0.001
+          "f1_unseen": 0.9993,
+          "delta_f1_unseen_minus_all": 0.0011
         },
         "Bot": {
           "test_support": 148,
@@ -343,11 +343,11 @@
         },
         "DDoS": {
           "test_support": 19139,
-          "train_twins": 4054,
-          "unseen_support": 15085,
-          "pct_twins": 21.18,
-          "f1_all": 0.9991,
-          "f1_unseen": 0.9989,
+          "train_twins": 4052,
+          "unseen_support": 15087,
+          "pct_twins": 21.17,
+          "f1_all": 0.999,
+          "f1_unseen": 0.9988,
           "delta_f1_unseen_minus_all": -0.0002
         },
         "DoS GoldenEye": {
@@ -355,15 +355,15 @@
           "train_twins": 57,
           "unseen_support": 1528,
           "pct_twins": 3.6,
-          "f1_all": 0.9842,
-          "f1_unseen": 0.9843,
-          "delta_f1_unseen_minus_all": 0.0001
+          "f1_all": 0.99,
+          "f1_unseen": 0.9903,
+          "delta_f1_unseen_minus_all": 0.0003
         },
         "DoS Hulk": {
           "test_support": 31711,
-          "train_twins": 2619,
-          "unseen_support": 29092,
-          "pct_twins": 8.26,
+          "train_twins": 2611,
+          "unseen_support": 29100,
+          "pct_twins": 8.23,
           "f1_all": 0.9999,
           "f1_unseen": 0.9999,
           "delta_f1_unseen_minus_all": 0.0
@@ -400,17 +400,17 @@
           "train_twins": 45762,
           "unseen_support": 581,
           "pct_twins": 98.75,
-          "f1_all": 0.9803,
-          "f1_unseen": 0.6434,
-          "delta_f1_unseen_minus_all": -0.3369
+          "f1_all": 0.9807,
+          "f1_unseen": 0.6497,
+          "delta_f1_unseen_minus_all": -0.331
         },
         "Rare attack": {
           "test_support": 18,
           "train_twins": 0,
           "unseen_support": 18,
           "pct_twins": 0.0,
-          "f1_all": 0.0,
-          "f1_unseen": 0.0,
+          "f1_all": 0.4667,
+          "f1_unseen": 0.4667,
           "delta_f1_unseen_minus_all": 0.0
         },
         "SSH-Patator": {
@@ -427,8 +427,8 @@
           "train_twins": 0,
           "unseen_support": 31,
           "pct_twins": 0.0,
-          "f1_all": 0.9836,
-          "f1_unseen": 0.9836,
+          "f1_all": 1.0,
+          "f1_unseen": 1.0,
           "delta_f1_unseen_minus_all": 0.0
         }
       }
@@ -437,21 +437,22 @@
     "task": "multiclass",
     "dst_port": true,
     "n_features": 56,
+    "seed": 42,
     "data_version": "nfs2023te-v1",
-    "code_commit": "ea21e85",
+    "code_commit": "575a7db",
     "parameters": {
       "boosting_type": "gbdt",
       "class_weight": null,
       "colsample_bytree": 1.0,
       "importance_type": "split",
-      "learning_rate": 0.05,
+      "learning_rate": 0.1,
       "max_depth": -1,
       "min_child_samples": 20,
       "min_child_weight": 1.0,
       "min_split_gain": 0.0,
       "n_estimators": 100,
       "n_jobs": -1,
-      "num_leaves": 31,
+      "num_leaves": 63,
       "objective": null,
       "random_state": 42,
       "reg_alpha": 0.0,
@@ -462,24 +463,19 @@
       "max_delta_step": 2.0,
       "verbose": -1
     },
-    "fit_time_sec": 81.42,
-    "infer_time_sec": 5.37,
-    "val_macro_f1": 0.9518,
-    "val_benign_fpr": 0.0001,
-    "seed": 42,
     "model_params": {
       "boosting_type": "gbdt",
       "class_weight": null,
       "colsample_bytree": 1.0,
       "importance_type": "split",
-      "learning_rate": 0.05,
+      "learning_rate": 0.1,
       "max_depth": -1,
       "min_child_samples": 20,
       "min_child_weight": 1.0,
       "min_split_gain": 0.0,
       "n_estimators": 100,
       "n_jobs": -1,
-      "num_leaves": 31,
+      "num_leaves": 63,
       "objective": null,
       "random_state": 42,
       "reg_alpha": 0.0,
@@ -495,9 +491,7 @@
       "seed": 42,
       "candidates_evaluated": {
         "n_estimators": [
-          80,
-          100,
-          150
+          100
         ],
         "num_leaves": [
           31,
@@ -508,38 +502,112 @@
           0.05,
           0.08,
           0.1
-        ],
-        "min_child_samples": [
-          20,
-          30,
-          50
-        ],
-        "class_weight": [
-          "balanced"
         ]
       },
+      "n_trials": 9,
+      "trials": [
+        {
+          "params": {
+            "learning_rate": 0.05,
+            "n_estimators": 100,
+            "num_leaves": 31
+          },
+          "val_macro_f1": 0.9518
+        },
+        {
+          "params": {
+            "learning_rate": 0.05,
+            "n_estimators": 100,
+            "num_leaves": 63
+          },
+          "val_macro_f1": 0.9573
+        },
+        {
+          "params": {
+            "learning_rate": 0.05,
+            "n_estimators": 100,
+            "num_leaves": 127
+          },
+          "val_macro_f1": 0.9583
+        },
+        {
+          "params": {
+            "learning_rate": 0.08,
+            "n_estimators": 100,
+            "num_leaves": 31
+          },
+          "val_macro_f1": 0.975
+        },
+        {
+          "params": {
+            "learning_rate": 0.08,
+            "n_estimators": 100,
+            "num_leaves": 63
+          },
+          "val_macro_f1": 0.9837
+        },
+        {
+          "params": {
+            "learning_rate": 0.08,
+            "n_estimators": 100,
+            "num_leaves": 127
+          },
+          "val_macro_f1": 0.9747
+        },
+        {
+          "params": {
+            "learning_rate": 0.1,
+            "n_estimators": 100,
+            "num_leaves": 31
+          },
+          "val_macro_f1": 0.9843
+        },
+        {
+          "params": {
+            "learning_rate": 0.1,
+            "n_estimators": 100,
+            "num_leaves": 63
+          },
+          "val_macro_f1": 0.9876
+        },
+        {
+          "params": {
+            "learning_rate": 0.1,
+            "n_estimators": 100,
+            "num_leaves": 127
+          },
+          "val_macro_f1": 0.9876
+        }
+      ],
       "selected_params": {
         "n_estimators": 100,
-        "num_leaves": 31,
-        "learning_rate": 0.05,
+        "num_leaves": 63,
+        "learning_rate": 0.1,
         "min_child_samples": 20,
-        "class_weight": null
+        "class_weight": null,
+        "reg_lambda": 10.0,
+        "max_delta_step": 2.0
       },
-      "val_macro_f1": 0.9518,
-      "val_benign_fpr": 0.0001,
-      "test_touched_during_tuning": false
-    }
+      "val_macro_f1": 0.9876,
+      "test_touched_during_tuning": false,
+      "val_benign_fpr": 0.0002,
+      "val_infer_time_sec": 3.07
+    },
+    "fit_time_sec": 394.77,
+    "infer_time_sec": 2.96,
+    "val_macro_f1": 0.9876,
+    "val_benign_fpr": 0.0002
   },
   {
-    "macro_f1": 0.8799,
-    "weighted_f1": 0.996,
-    "accuracy": 0.9961,
+    "macro_f1": 0.9304,
+    "weighted_f1": 0.9963,
+    "accuracy": 0.9964,
     "benign_fpr": 0.0001,
     "per_class": {
       "BENIGN": {
-        "precision": 0.9958,
+        "precision": 0.9961,
         "recall": 0.9999,
-        "f1-score": 0.9978,
+        "f1-score": 0.998,
         "support": 527384.0
       },
       "Bot": {
@@ -549,15 +617,15 @@
         "support": 148.0
       },
       "DDoS": {
-        "precision": 0.9993,
-        "recall": 0.9988,
+        "precision": 0.9992,
+        "recall": 0.9989,
         "f1-score": 0.999,
         "support": 19139.0
       },
       "DoS GoldenEye": {
-        "precision": 0.9832,
-        "recall": 0.9211,
-        "f1-score": 0.9511,
+        "precision": 0.9822,
+        "recall": 0.9413,
+        "f1-score": 0.9613,
         "support": 1585.0
       },
       "DoS Hulk": {
@@ -567,15 +635,15 @@
         "support": 31711.0
       },
       "DoS Slowhttptest": {
-        "precision": 0.8009,
-        "recall": 0.9209,
-        "f1-score": 0.8567,
+        "precision": 0.8012,
+        "recall": 0.9226,
+        "f1-score": 0.8576,
         "support": 594.0
       },
       "DoS slowloris": {
-        "precision": 0.9806,
-        "recall": 0.7315,
-        "f1-score": 0.8379,
+        "precision": 0.9845,
+        "recall": 0.8576,
+        "f1-score": 0.9167,
         "support": 1039.0
       },
       "FTP-Patator": {
@@ -586,14 +654,14 @@
       },
       "PortScan": {
         "precision": 0.9996,
-        "recall": 0.9595,
-        "f1-score": 0.9791,
+        "recall": 0.9596,
+        "f1-score": 0.9792,
         "support": 46343.0
       },
       "Rare attack": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1-score": 0.0,
+        "precision": 1.0,
+        "recall": 0.3333,
+        "f1-score": 0.5,
         "support": 18.0
       },
       "SSH-Patator": {
@@ -604,8 +672,8 @@
       },
       "Web Attack - Brute Force": {
         "precision": 1.0,
-        "recall": 0.9677,
-        "f1-score": 0.9836,
+        "recall": 1.0,
+        "f1-score": 1.0,
         "support": 31.0
       }
     },
@@ -626,15 +694,15 @@
       ],
       "matrix": [
         [
-          527347,
+          527348,
           0,
-          14,
-          3,
-          0,
-          0,
+          15,
+          4,
           0,
           0,
-          20,
+          0,
+          0,
+          17,
           0,
           0,
           0
@@ -654,9 +722,9 @@
           0
         ],
         [
-          23,
+          22,
           0,
-          19116,
+          19117,
           0,
           0,
           0,
@@ -668,10 +736,10 @@
           0
         ],
         [
-          123,
+          91,
           0,
           0,
-          1460,
+          1492,
           1,
           1,
           0,
@@ -696,12 +764,12 @@
           0
         ],
         [
-          17,
+          16,
           0,
           0,
           16,
           0,
-          547,
+          548,
           14,
           0,
           0,
@@ -710,13 +778,13 @@
           0
         ],
         [
-          143,
+          12,
           0,
           0,
           1,
           0,
           135,
-          760,
+          891,
           0,
           0,
           0,
@@ -738,7 +806,7 @@
           0
         ],
         [
-          1874,
+          1872,
           0,
           0,
           1,
@@ -746,33 +814,33 @@
           0,
           0,
           0,
-          44467,
+          44469,
           0,
           0,
           0
         ],
         [
-          17,
+          10,
           0,
           0,
-          1,
-          0,
-          0,
-          0,
+          2,
           0,
           0,
           0,
+          0,
+          0,
+          6,
           0,
           0
         ],
         [
-          47,
+          48,
           0,
           0,
           0,
           0,
           0,
-          1,
+          0,
           1,
           0,
           0,
@@ -780,7 +848,6 @@
           0
         ],
         [
-          1,
           0,
           0,
           0,
@@ -791,64 +858,65 @@
           0,
           0,
           0,
-          30
+          0,
+          31
         ]
       ]
     },
     "top_features": [
       {
         "feature": "bidirectional_bytes",
-        "importance": 0.08264
-      },
-      {
-        "feature": "src2dst_max_ps",
-        "importance": 0.07512
-      },
-      {
-        "feature": "bidirectional_mean_ps",
-        "importance": 0.06892
+        "importance": 0.13597
       },
       {
         "feature": "src2dst_bytes",
-        "importance": 0.05614
+        "importance": 0.07589
+      },
+      {
+        "feature": "src2dst_max_ps",
+        "importance": 0.06663
+      },
+      {
+        "feature": "bidirectional_mean_ps",
+        "importance": 0.05674
       },
       {
         "feature": "bidirectional_stddev_ps",
-        "importance": 0.0541
-      },
-      {
-        "feature": "src2dst_min_ps",
-        "importance": 0.04906
-      },
-      {
-        "feature": "src2dst_mean_ps",
-        "importance": 0.04095
-      },
-      {
-        "feature": "dst2src_mean_ps",
-        "importance": 0.04008
+        "importance": 0.04716
       },
       {
         "feature": "bidirectional_duration_ms",
-        "importance": 0.03205
+        "importance": 0.04115
+      },
+      {
+        "feature": "src2dst_min_ps",
+        "importance": 0.03826
+      },
+      {
+        "feature": "src2dst_mean_ps",
+        "importance": 0.03144
       },
       {
         "feature": "src2dst_stddev_ps",
-        "importance": 0.02891
+        "importance": 0.03103
+      },
+      {
+        "feature": "bidirectional_ack_packets",
+        "importance": 0.02873
       }
     ],
     "train_twin_analysis": {
       "n_test_rows": 630181,
-      "n_feature_twins": 361887,
-      "pct_feature_twins": 57.43,
-      "n_exact_twins": 361831,
+      "n_feature_twins": 361877,
+      "pct_feature_twins": 57.42,
+      "n_exact_twins": 361821,
       "pct_exact_twins": 57.42,
-      "n_unseen_rows": 268294,
-      "pct_unseen_rows": 42.57,
-      "macro_f1_all": 0.8799,
-      "macro_f1_twins_only": 0.8676,
-      "macro_f1_unseen": 0.8317,
-      "delta_macro_f1_unseen_minus_all": -0.0482,
+      "n_unseen_rows": 268304,
+      "pct_unseen_rows": 42.58,
+      "macro_f1_all": 0.9304,
+      "macro_f1_twins_only": 0.8703,
+      "macro_f1_unseen": 0.8941,
+      "delta_macro_f1_unseen_minus_all": -0.0363,
       "benign_fpr_all": 0.0001,
       "benign_fpr_twins_only": 0.0001,
       "benign_fpr_unseen": 0.0001,
@@ -859,9 +927,9 @@
           "train_twins": 307255,
           "unseen_support": 220129,
           "pct_twins": 58.26,
-          "f1_all": 0.9978,
-          "f1_unseen": 0.9991,
-          "delta_f1_unseen_minus_all": 0.0013
+          "f1_all": 0.998,
+          "f1_unseen": 0.9995,
+          "delta_f1_unseen_minus_all": 0.0015
         },
         "Bot": {
           "test_support": 148,
@@ -874,9 +942,9 @@
         },
         "DDoS": {
           "test_support": 19139,
-          "train_twins": 4055,
-          "unseen_support": 15084,
-          "pct_twins": 21.19,
+          "train_twins": 4053,
+          "unseen_support": 15086,
+          "pct_twins": 21.18,
           "f1_all": 0.999,
           "f1_unseen": 0.9988,
           "delta_f1_unseen_minus_all": -0.0002
@@ -886,15 +954,15 @@
           "train_twins": 85,
           "unseen_support": 1500,
           "pct_twins": 5.36,
-          "f1_all": 0.9511,
-          "f1_unseen": 0.9608,
-          "delta_f1_unseen_minus_all": 0.0097
+          "f1_all": 0.9613,
+          "f1_unseen": 0.9703,
+          "delta_f1_unseen_minus_all": 0.009
         },
         "DoS Hulk": {
           "test_support": 31711,
-          "train_twins": 2620,
-          "unseen_support": 29091,
-          "pct_twins": 8.26,
+          "train_twins": 2612,
+          "unseen_support": 29099,
+          "pct_twins": 8.24,
           "f1_all": 0.9999,
           "f1_unseen": 0.9999,
           "delta_f1_unseen_minus_all": 0.0
@@ -904,18 +972,18 @@
           "train_twins": 309,
           "unseen_support": 285,
           "pct_twins": 52.02,
-          "f1_all": 0.8567,
-          "f1_unseen": 0.7574,
-          "delta_f1_unseen_minus_all": -0.0993
+          "f1_all": 0.8576,
+          "f1_unseen": 0.7592,
+          "delta_f1_unseen_minus_all": -0.0984
         },
         "DoS slowloris": {
           "test_support": 1039,
           "train_twins": 515,
           "unseen_support": 524,
           "pct_twins": 49.57,
-          "f1_all": 0.8379,
-          "f1_unseen": 0.6364,
-          "delta_f1_unseen_minus_all": -0.2015
+          "f1_all": 0.9167,
+          "f1_unseen": 0.8356,
+          "delta_f1_unseen_minus_all": -0.0811
         },
         "FTP-Patator": {
           "test_support": 1593,
@@ -931,17 +999,17 @@
           "train_twins": 46200,
           "unseen_support": 143,
           "pct_twins": 99.69,
-          "f1_all": 0.9791,
-          "f1_unseen": 0.6847,
-          "delta_f1_unseen_minus_all": -0.2944
+          "f1_all": 0.9792,
+          "f1_unseen": 0.7059,
+          "delta_f1_unseen_minus_all": -0.2733
         },
         "Rare attack": {
           "test_support": 18,
           "train_twins": 0,
           "unseen_support": 18,
           "pct_twins": 0.0,
-          "f1_all": 0.0,
-          "f1_unseen": 0.0,
+          "f1_all": 0.5,
+          "f1_unseen": 0.5,
           "delta_f1_unseen_minus_all": 0.0
         },
         "SSH-Patator": {
@@ -958,8 +1026,8 @@
           "train_twins": 0,
           "unseen_support": 31,
           "pct_twins": 0.0,
-          "f1_all": 0.9836,
-          "f1_unseen": 0.9836,
+          "f1_all": 1.0,
+          "f1_unseen": 1.0,
           "delta_f1_unseen_minus_all": 0.0
         }
       }
@@ -968,21 +1036,22 @@
     "task": "multiclass",
     "dst_port": false,
     "n_features": 55,
+    "seed": 42,
     "data_version": "nfs2023te-v1",
-    "code_commit": "ea21e85",
+    "code_commit": "575a7db",
     "parameters": {
       "boosting_type": "gbdt",
       "class_weight": null,
       "colsample_bytree": 1.0,
       "importance_type": "split",
-      "learning_rate": 0.05,
+      "learning_rate": 0.1,
       "max_depth": -1,
       "min_child_samples": 20,
       "min_child_weight": 1.0,
       "min_split_gain": 0.0,
       "n_estimators": 100,
       "n_jobs": -1,
-      "num_leaves": 31,
+      "num_leaves": 127,
       "objective": null,
       "random_state": 42,
       "reg_alpha": 0.0,
@@ -993,24 +1062,19 @@
       "max_delta_step": 2.0,
       "verbose": -1
     },
-    "fit_time_sec": 83.13,
-    "infer_time_sec": 5.12,
-    "val_macro_f1": 0.9451,
-    "val_benign_fpr": 0.0003,
-    "seed": 42,
     "model_params": {
       "boosting_type": "gbdt",
       "class_weight": null,
       "colsample_bytree": 1.0,
       "importance_type": "split",
-      "learning_rate": 0.05,
+      "learning_rate": 0.1,
       "max_depth": -1,
       "min_child_samples": 20,
       "min_child_weight": 1.0,
       "min_split_gain": 0.0,
       "n_estimators": 100,
       "n_jobs": -1,
-      "num_leaves": 31,
+      "num_leaves": 127,
       "objective": null,
       "random_state": 42,
       "reg_alpha": 0.0,
@@ -1026,9 +1090,7 @@
       "seed": 42,
       "candidates_evaluated": {
         "n_estimators": [
-          80,
-          100,
-          150
+          100
         ],
         "num_leaves": [
           31,
@@ -1039,26 +1101,100 @@
           0.05,
           0.08,
           0.1
-        ],
-        "min_child_samples": [
-          20,
-          30,
-          50
-        ],
-        "class_weight": [
-          "balanced"
         ]
       },
+      "n_trials": 9,
+      "trials": [
+        {
+          "params": {
+            "learning_rate": 0.05,
+            "n_estimators": 100,
+            "num_leaves": 31
+          },
+          "val_macro_f1": 0.9451
+        },
+        {
+          "params": {
+            "learning_rate": 0.05,
+            "n_estimators": 100,
+            "num_leaves": 63
+          },
+          "val_macro_f1": 0.9522
+        },
+        {
+          "params": {
+            "learning_rate": 0.05,
+            "n_estimators": 100,
+            "num_leaves": 127
+          },
+          "val_macro_f1": 0.9593
+        },
+        {
+          "params": {
+            "learning_rate": 0.08,
+            "n_estimators": 100,
+            "num_leaves": 31
+          },
+          "val_macro_f1": 0.9728
+        },
+        {
+          "params": {
+            "learning_rate": 0.08,
+            "n_estimators": 100,
+            "num_leaves": 63
+          },
+          "val_macro_f1": 0.9738
+        },
+        {
+          "params": {
+            "learning_rate": 0.08,
+            "n_estimators": 100,
+            "num_leaves": 127
+          },
+          "val_macro_f1": 0.9747
+        },
+        {
+          "params": {
+            "learning_rate": 0.1,
+            "n_estimators": 100,
+            "num_leaves": 31
+          },
+          "val_macro_f1": 0.9733
+        },
+        {
+          "params": {
+            "learning_rate": 0.1,
+            "n_estimators": 100,
+            "num_leaves": 63
+          },
+          "val_macro_f1": 0.9738
+        },
+        {
+          "params": {
+            "learning_rate": 0.1,
+            "n_estimators": 100,
+            "num_leaves": 127
+          },
+          "val_macro_f1": 0.9752
+        }
+      ],
       "selected_params": {
         "n_estimators": 100,
-        "num_leaves": 31,
-        "learning_rate": 0.05,
+        "num_leaves": 127,
+        "learning_rate": 0.1,
         "min_child_samples": 20,
-        "class_weight": null
+        "class_weight": null,
+        "reg_lambda": 10.0,
+        "max_delta_step": 2.0
       },
-      "val_macro_f1": 0.9451,
+      "val_macro_f1": 0.9752,
+      "test_touched_during_tuning": false,
       "val_benign_fpr": 0.0003,
-      "test_touched_during_tuning": false
-    }
+      "val_infer_time_sec": 2.79
+    },
+    "fit_time_sec": 396.79,
+    "infer_time_sec": 2.91,
+    "val_macro_f1": 0.9752,
+    "val_benign_fpr": 0.0003
   }
 ]

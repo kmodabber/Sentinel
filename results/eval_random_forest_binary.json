@@ -6,9 +6,9 @@
     "benign_fpr": 0.0,
     "per_class": {
       "attack": {
-        "precision": 0.9998,
-        "recall": 0.9801,
-        "f1-score": 0.9898,
+        "precision": 0.9999,
+        "recall": 0.9798,
+        "f1-score": 0.9897,
         "support": 102797.0
       },
       "benign": {
@@ -25,64 +25,64 @@
       ],
       "matrix": [
         [
-          100751,
-          2046
+          100723,
+          2074
         ],
         [
-          22,
-          527362
+          14,
+          527370
         ]
       ]
     },
     "top_features": [
       {
         "feature": "src2dst_syn_packets",
-        "importance": 0.12449
+        "importance": 0.12678
       },
       {
         "feature": "bidirectional_stddev_ps",
-        "importance": 0.08052
+        "importance": 0.0764
       },
       {
         "feature": "bidirectional_mean_ps",
-        "importance": 0.07256
-      },
-      {
-        "feature": "dst2src_stddev_ps",
-        "importance": 0.06515
+        "importance": 0.07325
       },
       {
         "feature": "dst2src_mean_ps",
-        "importance": 0.06425
-      },
-      {
-        "feature": "src2dst_ack_packets",
-        "importance": 0.05621
+        "importance": 0.07045
       },
       {
         "feature": "dst2src_max_ps",
-        "importance": 0.05253
+        "importance": 0.06128
+      },
+      {
+        "feature": "dst2src_stddev_ps",
+        "importance": 0.05494
       },
       {
         "feature": "bidirectional_bytes",
-        "importance": 0.0431
-      },
-      {
-        "feature": "src2dst_bytes",
-        "importance": 0.04216
+        "importance": 0.05118
       },
       {
         "feature": "dst2src_rst_packets",
-        "importance": 0.03931
+        "importance": 0.04374
+      },
+      {
+        "feature": "src2dst_ack_packets",
+        "importance": 0.03635
+      },
+      {
+        "feature": "bidirectional_syn_packets",
+        "importance": 0.03548
       }
     ],
     "train_twin_analysis": {
       "n_test_rows": 630181,
-      "n_feature_twins": 309826,
+      "n_feature_twins": 309816,
       "pct_feature_twins": 49.16,
-      "n_exact_twins": 309400,
+      "n_exact_twins": 309390,
       "pct_exact_twins": 49.1,
-      "n_unseen_rows": 320355,
+      "n_unseen_rows": 320365,
       "pct_unseen_rows": 50.84,
       "macro_f1_all": 0.9939,
       "macro_f1_twins_only": 0.9916,
@@ -90,17 +90,17 @@
       "delta_macro_f1_unseen_minus_all": 0.0025,
       "benign_fpr_all": 0.0,
       "benign_fpr_twins_only": 0.0,
-      "benign_fpr_unseen": 0.0001,
-      "delta_benign_fpr_unseen_minus_all": 0.0001,
+      "benign_fpr_unseen": 0.0,
+      "delta_benign_fpr_unseen_minus_all": 0.0,
       "per_class_breakdown": {
         "attack": {
           "test_support": 102797,
-          "train_twins": 54164,
-          "unseen_support": 48633,
-          "pct_twins": 52.69,
-          "f1_all": 0.9898,
+          "train_twins": 54154,
+          "unseen_support": 48643,
+          "pct_twins": 52.68,
+          "f1_all": 0.9897,
           "f1_unseen": 0.9939,
-          "delta_f1_unseen_minus_all": 0.0041
+          "delta_f1_unseen_minus_all": 0.0042
         },
         "benign": {
           "test_support": 527384,
@@ -117,8 +117,9 @@
     "task": "binary",
     "dst_port": true,
     "n_features": 56,
+    "seed": 42,
     "data_version": "nfs2023te-v1",
-    "code_commit": "ea21e85",
+    "code_commit": "575a7db",
     "parameters": {
       "bootstrap": true,
       "ccp_alpha": 0.0,
@@ -129,7 +130,7 @@
       "max_leaf_nodes": null,
       "max_samples": 0.25,
       "min_impurity_decrease": 0.0,
-      "min_samples_leaf": 2,
+      "min_samples_leaf": 5,
       "min_samples_split": 2,
       "min_weight_fraction_leaf": 0.0,
       "monotonic_cst": null,
@@ -140,11 +141,6 @@
       "verbose": 0,
       "warm_start": false
     },
-    "fit_time_sec": 35.99,
-    "infer_time_sec": 1.06,
-    "val_macro_f1": 0.9989,
-    "val_benign_fpr": 0.0002,
-    "seed": 42,
     "model_params": {
       "bootstrap": true,
       "ccp_alpha": 0.0,
@@ -155,7 +151,7 @@
       "max_leaf_nodes": null,
       "max_samples": 0.25,
       "min_impurity_decrease": 0.0,
-      "min_samples_leaf": 2,
+      "min_samples_leaf": 5,
       "min_samples_split": 2,
       "min_weight_fraction_leaf": 0.0,
       "monotonic_cst": null,
@@ -171,9 +167,7 @@
       "seed": 42,
       "candidates_evaluated": {
         "n_estimators": [
-          50,
-          80,
-          120
+          80
         ],
         "max_depth": [
           20,
@@ -184,22 +178,99 @@
           1,
           2,
           5
-        ],
-        "class_weight": [
-          "balanced_subsample",
-          "balanced"
         ]
       },
+      "n_trials": 9,
+      "trials": [
+        {
+          "params": {
+            "max_depth": 20,
+            "min_samples_leaf": 1,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.999
+        },
+        {
+          "params": {
+            "max_depth": 20,
+            "min_samples_leaf": 2,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9989
+        },
+        {
+          "params": {
+            "max_depth": 20,
+            "min_samples_leaf": 5,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.999
+        },
+        {
+          "params": {
+            "max_depth": 26,
+            "min_samples_leaf": 1,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9989
+        },
+        {
+          "params": {
+            "max_depth": 26,
+            "min_samples_leaf": 2,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9989
+        },
+        {
+          "params": {
+            "max_depth": 26,
+            "min_samples_leaf": 5,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.999
+        },
+        {
+          "params": {
+            "max_depth": null,
+            "min_samples_leaf": 1,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9989
+        },
+        {
+          "params": {
+            "max_depth": null,
+            "min_samples_leaf": 2,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9989
+        },
+        {
+          "params": {
+            "max_depth": null,
+            "min_samples_leaf": 5,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.999
+        }
+      ],
       "selected_params": {
         "n_estimators": 80,
         "max_depth": 20,
-        "min_samples_leaf": 2,
-        "class_weight": null
+        "min_samples_leaf": 5,
+        "class_weight": null,
+        "max_samples": 0.25
       },
-      "val_macro_f1": 0.9989,
-      "val_benign_fpr": 0.0002,
-      "test_touched_during_tuning": false
-    }
+      "val_macro_f1": 0.999,
+      "test_touched_during_tuning": false,
+      "val_benign_fpr": 0.0001,
+      "val_infer_time_sec": 0.43
+    },
+    "fit_time_sec": 151.66,
+    "infer_time_sec": 0.46,
+    "val_macro_f1": 0.999,
+    "val_benign_fpr": 0.0001
   },
   {
     "macro_f1": 0.9933,
@@ -208,15 +279,15 @@
     "benign_fpr": 0.0001,
     "per_class": {
       "attack": {
-        "precision": 0.9997,
-        "recall": 0.9782,
+        "precision": 0.9996,
+        "recall": 0.9781,
         "f1-score": 0.9888,
         "support": 102797.0
       },
       "benign": {
         "precision": 0.9958,
         "recall": 0.9999,
-        "f1-score": 0.9979,
+        "f1-score": 0.9978,
         "support": 527384.0
       }
     },
@@ -227,69 +298,69 @@
       ],
       "matrix": [
         [
-          100555,
-          2242
+          100549,
+          2248
         ],
         [
-          30,
-          527354
+          38,
+          527346
         ]
       ]
     },
     "top_features": [
       {
         "feature": "dst2src_stddev_ps",
-        "importance": 0.09679
+        "importance": 0.09181
       },
       {
         "feature": "bidirectional_syn_packets",
-        "importance": 0.08722
+        "importance": 0.08371
       },
       {
         "feature": "bidirectional_stddev_ps",
-        "importance": 0.08134
+        "importance": 0.08311
       },
       {
         "feature": "src2dst_syn_packets",
-        "importance": 0.06613
+        "importance": 0.06539
       },
       {
         "feature": "bidirectional_max_ps",
-        "importance": 0.0561
-      },
-      {
-        "feature": "bidirectional_mean_ps",
-        "importance": 0.055
-      },
-      {
-        "feature": "dst2src_bytes",
-        "importance": 0.05262
+        "importance": 0.06027
       },
       {
         "feature": "dst2src_mean_ps",
-        "importance": 0.05126
+        "importance": 0.05234
+      },
+      {
+        "feature": "src2dst_ack_packets",
+        "importance": 0.05097
+      },
+      {
+        "feature": "bidirectional_mean_ps",
+        "importance": 0.04933
+      },
+      {
+        "feature": "dst2src_bytes",
+        "importance": 0.04699
       },
       {
         "feature": "dst2src_max_ps",
-        "importance": 0.04159
-      },
-      {
-        "feature": "dst2src_ack_packets",
-        "importance": 0.03741
+        "importance": 0.04093
       }
     ],
     "train_twin_analysis": {
       "n_test_rows": 630181,
-      "n_feature_twins": 361887,
-      "pct_feature_twins": 57.43,
-      "n_exact_twins": 361832,
+      "n_feature_twins": 361877,
+      "pct_feature_twins": 57.42,
+      "n_exact_twins": 361822,
       "pct_exact_twins": 57.42,
-      "n_unseen_rows": 268294,
-      "pct_unseen_rows": 42.57,
+      "n_unseen_rows": 268304,
+      "pct_unseen_rows": 42.58,
       "macro_f1_all": 0.9933,
       "macro_f1_twins_only": 0.9898,
-      "macro_f1_unseen": 0.9975,
-      "delta_macro_f1_unseen_minus_all": 0.0042,
+      "macro_f1_unseen": 0.9973,
+      "delta_macro_f1_unseen_minus_all": 0.004,
       "benign_fpr_all": 0.0001,
       "benign_fpr_twins_only": 0.0001,
       "benign_fpr_unseen": 0.0001,
@@ -297,20 +368,20 @@
       "per_class_breakdown": {
         "attack": {
           "test_support": 102797,
-          "train_twins": 54632,
-          "unseen_support": 48165,
-          "pct_twins": 53.15,
+          "train_twins": 54622,
+          "unseen_support": 48175,
+          "pct_twins": 53.14,
           "f1_all": 0.9888,
-          "f1_unseen": 0.9959,
-          "delta_f1_unseen_minus_all": 0.0071
+          "f1_unseen": 0.9956,
+          "delta_f1_unseen_minus_all": 0.0068
         },
         "benign": {
           "test_support": 527384,
           "train_twins": 307255,
           "unseen_support": 220129,
           "pct_twins": 58.26,
-          "f1_all": 0.9979,
-          "f1_unseen": 0.9991,
+          "f1_all": 0.9978,
+          "f1_unseen": 0.999,
           "delta_f1_unseen_minus_all": 0.0012
         }
       }
@@ -319,19 +390,20 @@
     "task": "binary",
     "dst_port": false,
     "n_features": 55,
+    "seed": 42,
     "data_version": "nfs2023te-v1",
-    "code_commit": "ea21e85",
+    "code_commit": "575a7db",
     "parameters": {
       "bootstrap": true,
       "ccp_alpha": 0.0,
       "class_weight": null,
       "criterion": "gini",
-      "max_depth": 20,
+      "max_depth": null,
       "max_features": "sqrt",
       "max_leaf_nodes": null,
       "max_samples": 0.25,
       "min_impurity_decrease": 0.0,
-      "min_samples_leaf": 2,
+      "min_samples_leaf": 1,
       "min_samples_split": 2,
       "min_weight_fraction_leaf": 0.0,
       "monotonic_cst": null,
@@ -342,22 +414,17 @@
       "verbose": 0,
       "warm_start": false
     },
-    "fit_time_sec": 34.5,
-    "infer_time_sec": 0.92,
-    "val_macro_f1": 0.9984,
-    "val_benign_fpr": 0.0003,
-    "seed": 42,
     "model_params": {
       "bootstrap": true,
       "ccp_alpha": 0.0,
       "class_weight": null,
       "criterion": "gini",
-      "max_depth": 20,
+      "max_depth": null,
       "max_features": "sqrt",
       "max_leaf_nodes": null,
       "max_samples": 0.25,
       "min_impurity_decrease": 0.0,
-      "min_samples_leaf": 2,
+      "min_samples_leaf": 1,
       "min_samples_split": 2,
       "min_weight_fraction_leaf": 0.0,
       "monotonic_cst": null,
@@ -373,9 +440,7 @@
       "seed": 42,
       "candidates_evaluated": {
         "n_estimators": [
-          50,
-          80,
-          120
+          80
         ],
         "max_depth": [
           20,
@@ -386,21 +451,98 @@
           1,
           2,
           5
-        ],
-        "class_weight": [
-          "balanced_subsample",
-          "balanced"
         ]
       },
+      "n_trials": 9,
+      "trials": [
+        {
+          "params": {
+            "max_depth": 20,
+            "min_samples_leaf": 1,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9984
+        },
+        {
+          "params": {
+            "max_depth": 20,
+            "min_samples_leaf": 2,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9984
+        },
+        {
+          "params": {
+            "max_depth": 20,
+            "min_samples_leaf": 5,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9983
+        },
+        {
+          "params": {
+            "max_depth": 26,
+            "min_samples_leaf": 1,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9984
+        },
+        {
+          "params": {
+            "max_depth": 26,
+            "min_samples_leaf": 2,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9984
+        },
+        {
+          "params": {
+            "max_depth": 26,
+            "min_samples_leaf": 5,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9984
+        },
+        {
+          "params": {
+            "max_depth": null,
+            "min_samples_leaf": 1,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9984
+        },
+        {
+          "params": {
+            "max_depth": null,
+            "min_samples_leaf": 2,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9984
+        },
+        {
+          "params": {
+            "max_depth": null,
+            "min_samples_leaf": 5,
+            "n_estimators": 80
+          },
+          "val_macro_f1": 0.9984
+        }
+      ],
       "selected_params": {
         "n_estimators": 80,
-        "max_depth": 20,
-        "min_samples_leaf": 2,
-        "class_weight": null
+        "max_depth": null,
+        "min_samples_leaf": 1,
+        "class_weight": null,
+        "max_samples": 0.25
       },
       "val_macro_f1": 0.9984,
-      "val_benign_fpr": 0.0003,
-      "test_touched_during_tuning": false
-    }
+      "test_touched_during_tuning": false,
+      "val_benign_fpr": 0.0004,
+      "val_infer_time_sec": 0.36
+    },
+    "fit_time_sec": 138.51,
+    "infer_time_sec": 0.37,
+    "val_macro_f1": 0.9984,
+    "val_benign_fpr": 0.0004
   }
 ]

@@ -3,17 +3,17 @@
     "macro_f1": 0.9941,
     "weighted_f1": 0.9968,
     "accuracy": 0.9968,
-    "benign_fpr": 0.0001,
+    "benign_fpr": 0.0,
     "per_class": {
       "attack": {
-        "precision": 0.9996,
-        "recall": 0.9807,
+        "precision": 0.9998,
+        "recall": 0.9806,
         "f1-score": 0.9901,
         "support": 102797.0
       },
       "benign": {
-        "precision": 0.9963,
-        "recall": 0.9999,
+        "precision": 0.9962,
+        "recall": 1.0,
         "f1-score": 0.9981,
         "support": 527384.0
       }
@@ -25,82 +25,82 @@
       ],
       "matrix": [
         [
-          100818,
-          1979
+          100798,
+          1999
         ],
         [
-          39,
-          527345
+          18,
+          527366
         ]
       ]
     },
     "top_features": [
       {
         "feature": "dst_port",
-        "importance": 0.14948
+        "importance": 0.15288
       },
       {
         "feature": "src2dst_syn_packets",
-        "importance": 0.06757
-      },
-      {
-        "feature": "bidirectional_stddev_ps",
-        "importance": 0.05889
+        "importance": 0.06831
       },
       {
         "feature": "bidirectional_mean_ps",
-        "importance": 0.05547
+        "importance": 0.05662
+      },
+      {
+        "feature": "bidirectional_stddev_ps",
+        "importance": 0.05627
       },
       {
         "feature": "bidirectional_bytes",
-        "importance": 0.04607
+        "importance": 0.05148
       },
       {
         "feature": "dst2src_mean_ps",
-        "importance": 0.04583
+        "importance": 0.04773
       },
       {
         "feature": "dst2src_stddev_ps",
-        "importance": 0.04282
-      },
-      {
-        "feature": "src2dst_bytes",
-        "importance": 0.03487
-      },
-      {
-        "feature": "src2dst_ack_packets",
-        "importance": 0.03286
+        "importance": 0.03691
       },
       {
         "feature": "dst2src_max_ps",
-        "importance": 0.02941
+        "importance": 0.03395
+      },
+      {
+        "feature": "src2dst_bytes",
+        "importance": 0.02508
+      },
+      {
+        "feature": "bidirectional_max_ps",
+        "importance": 0.0243
       }
     ],
     "train_twin_analysis": {
       "n_test_rows": 630181,
-      "n_feature_twins": 309826,
+      "n_feature_twins": 309816,
       "pct_feature_twins": 49.16,
-      "n_exact_twins": 309400,
+      "n_exact_twins": 309390,
       "pct_exact_twins": 49.1,
-      "n_unseen_rows": 320355,
+      "n_unseen_rows": 320365,
       "pct_unseen_rows": 50.84,
       "macro_f1_all": 0.9941,
-      "macro_f1_twins_only": 0.9918,
-      "macro_f1_unseen": 0.9966,
-      "delta_macro_f1_unseen_minus_all": 0.0025,
-      "benign_fpr_all": 0.0001,
+      "macro_f1_twins_only": 0.9917,
+      "macro_f1_unseen": 0.9967,
+      "delta_macro_f1_unseen_minus_all": 0.0026,
+      "benign_fpr_all": 0.0,
       "benign_fpr_twins_only": 0.0,
       "benign_fpr_unseen": 0.0001,
-      "delta_benign_fpr_unseen_minus_all": 0.0,
+      "delta_benign_fpr_unseen_minus_all": 0.0001,
       "per_class_breakdown": {
         "attack": {
           "test_support": 102797,
-          "train_twins": 54164,
-          "unseen_support": 48633,
-          "pct_twins": 52.69,
+          "train_twins": 54154,
+          "unseen_support": 48643,
+          "pct_twins": 52.68,
           "f1_all": 0.9901,
-          "f1_unseen": 0.9942,
-          "delta_f1_unseen_minus_all": 0.0041
+          "f1_unseen": 0.9944,
+          "delta_f1_unseen_minus_all": 0.0043
         },
         "benign": {
           "test_support": 527384,
@@ -117,14 +117,15 @@
     "task": "binary",
     "dst_port": true,
     "n_features": 56,
+    "seed": 42,
     "data_version": "nfs2023te-v1",
-    "code_commit": "ea21e85",
+    "code_commit": "575a7db",
     "parameters": {
       "lgbm__boosting_type": "gbdt",
       "lgbm__class_weight": null,
       "lgbm__colsample_bytree": 1.0,
       "lgbm__importance_type": "split",
-      "lgbm__learning_rate": 0.08,
+      "lgbm__learning_rate": 0.1,
       "lgbm__max_depth": -1,
       "lgbm__min_child_samples": 20,
       "lgbm__min_child_weight": 0.01,
@@ -153,7 +154,7 @@
       "rf__max_leaf_nodes": null,
       "rf__max_samples": 0.25,
       "rf__min_impurity_decrease": 0.0,
-      "rf__min_samples_leaf": 2,
+      "rf__min_samples_leaf": 5,
       "rf__min_samples_split": 2,
       "rf__min_weight_fraction_leaf": 0.0,
       "rf__monotonic_cst": null,
@@ -164,6 +165,17 @@
       "rf__verbose": 0,
       "rf__warm_start": false,
       "rf": "RandomForestClassifier",
+      "task": "binary",
+      "weights": [
+        0.5,
+        0.5
+      ]
+    },
+    "model_params": {
+      "lgbm": "LGBMClassifier(max_delta_step=2.0, min_child_weight=0.01, n_jobs=-1,\n               num_leaves=63, random_state=42, reg_lambda=1.0, verbose=-1)",
+      "prefitted": true,
+      "random_state": 42,
+      "rf": "RandomForestClassifier(max_depth=20, max_samples=0.25, min_samples_leaf=5,\n                       n_estimators=80, n_jobs=-1, random_state=42)",
       "task": "binary",
       "weights": [
         0.5,
@@ -175,98 +187,46 @@
       "lgbm": 0.5
     },
     "val_tuned_weights": {
-      "rf": 0.8,
-      "lgbm": 0.2
+      "rf": 0.6,
+      "lgbm": 0.4
     },
     "val_tuned_test_macro_f1": 0.9941,
-    "val_tuned_test_macro_f1_unseen": 0.9966,
+    "val_tuned_test_macro_f1_unseen": 0.9967,
     "val_tuned_test_benign_fpr": 0.0,
-    "val_tuned_test_benign_fpr_unseen": 0.0001,
-    "fit_time_sec": 51.29,
-    "infer_time_sec": 1.86,
-    "val_macro_f1": 0.9989,
-    "val_benign_fpr": 0.0003,
-    "seed": 42,
-    "model_params": {
-      "lgbm__boosting_type": "gbdt",
-      "lgbm__class_weight": null,
-      "lgbm__colsample_bytree": 1.0,
-      "lgbm__importance_type": "split",
-      "lgbm__learning_rate": 0.08,
-      "lgbm__max_depth": -1,
-      "lgbm__min_child_samples": 20,
-      "lgbm__min_child_weight": 0.01,
-      "lgbm__min_split_gain": 0.0,
-      "lgbm__n_estimators": 100,
-      "lgbm__n_jobs": -1,
-      "lgbm__num_leaves": 63,
-      "lgbm__objective": null,
-      "lgbm__random_state": 42,
-      "lgbm__reg_alpha": 0.0,
-      "lgbm__reg_lambda": 1.0,
-      "lgbm__subsample": 1.0,
-      "lgbm__subsample_for_bin": 200000,
-      "lgbm__subsample_freq": 0,
-      "lgbm__max_delta_step": 2.0,
-      "lgbm__verbose": -1,
-      "lgbm": "LGBMClassifier",
-      "prefitted": true,
-      "random_state": 42,
-      "rf__bootstrap": true,
-      "rf__ccp_alpha": 0.0,
-      "rf__class_weight": null,
-      "rf__criterion": "gini",
-      "rf__max_depth": 20,
-      "rf__max_features": "sqrt",
-      "rf__max_leaf_nodes": null,
-      "rf__max_samples": 0.25,
-      "rf__min_impurity_decrease": 0.0,
-      "rf__min_samples_leaf": 2,
-      "rf__min_samples_split": 2,
-      "rf__min_weight_fraction_leaf": 0.0,
-      "rf__monotonic_cst": null,
-      "rf__n_estimators": 80,
-      "rf__n_jobs": -1,
-      "rf__oob_score": false,
-      "rf__random_state": 42,
-      "rf__verbose": 0,
-      "rf__warm_start": false,
-      "rf": "RandomForestClassifier",
-      "task": "binary",
-      "weights": [
-        0.5,
-        0.5
-      ]
-    },
+    "val_tuned_test_benign_fpr_unseen": 0.0,
     "val_tuning": {
       "split": "val",
       "seed": 42,
       "sweep_steps": 21,
       "best_weights": {
-        "rf": 0.8,
-        "lgbm": 0.2
+        "rf": 0.6,
+        "lgbm": 0.4
       },
-      "val_macro_f1": 0.9989,
-      "val_benign_fpr": 0.0003,
+      "val_macro_f1": 0.999,
+      "val_benign_fpr": 0.0002,
       "test_touched_during_tuning": false
-    }
+    },
+    "fit_time_sec": 225.77,
+    "infer_time_sec": 0.86,
+    "val_macro_f1": 0.999,
+    "val_benign_fpr": 0.0002
   },
   {
-    "macro_f1": 0.9937,
-    "weighted_f1": 0.9966,
-    "accuracy": 0.9966,
-    "benign_fpr": 0.0,
+    "macro_f1": 0.9935,
+    "weighted_f1": 0.9965,
+    "accuracy": 0.9965,
+    "benign_fpr": 0.0001,
     "per_class": {
       "attack": {
         "precision": 0.9997,
-        "recall": 0.9793,
-        "f1-score": 0.9894,
+        "recall": 0.9788,
+        "f1-score": 0.9891,
         "support": 102797.0
       },
       "benign": {
-        "precision": 0.996,
-        "recall": 1.0,
-        "f1-score": 0.998,
+        "precision": 0.9959,
+        "recall": 0.9999,
+        "f1-score": 0.9979,
         "support": 527384.0
       }
     },
@@ -277,90 +237,90 @@
       ],
       "matrix": [
         [
-          100666,
-          2131
+          100614,
+          2183
         ],
         [
-          26,
-          527358
+          30,
+          527354
         ]
       ]
     },
     "top_features": [
       {
         "feature": "bidirectional_stddev_ps",
-        "importance": 0.07478
+        "importance": 0.07244
       },
       {
         "feature": "dst2src_stddev_ps",
-        "importance": 0.06686
+        "importance": 0.06284
       },
       {
         "feature": "bidirectional_mean_ps",
-        "importance": 0.05508
+        "importance": 0.05088
       },
       {
         "feature": "bidirectional_bytes",
-        "importance": 0.0503
+        "importance": 0.04857
       },
       {
         "feature": "bidirectional_syn_packets",
-        "importance": 0.0474
+        "importance": 0.04806
       },
       {
         "feature": "dst2src_mean_ps",
-        "importance": 0.04362
-      },
-      {
-        "feature": "dst2src_bytes",
-        "importance": 0.03946
+        "importance": 0.04472
       },
       {
         "feature": "bidirectional_max_ps",
-        "importance": 0.03869
-      },
-      {
-        "feature": "src2dst_bytes",
-        "importance": 0.03866
+        "importance": 0.04296
       },
       {
         "feature": "src2dst_syn_packets",
-        "importance": 0.03806
+        "importance": 0.03697
+      },
+      {
+        "feature": "dst2src_bytes",
+        "importance": 0.03559
+      },
+      {
+        "feature": "src2dst_bytes",
+        "importance": 0.03533
       }
     ],
     "train_twin_analysis": {
       "n_test_rows": 630181,
-      "n_feature_twins": 361887,
-      "pct_feature_twins": 57.43,
-      "n_exact_twins": 361832,
+      "n_feature_twins": 361877,
+      "pct_feature_twins": 57.42,
+      "n_exact_twins": 361822,
       "pct_exact_twins": 57.42,
-      "n_unseen_rows": 268294,
-      "pct_unseen_rows": 42.57,
-      "macro_f1_all": 0.9937,
+      "n_unseen_rows": 268304,
+      "pct_unseen_rows": 42.58,
+      "macro_f1_all": 0.9935,
       "macro_f1_twins_only": 0.9898,
-      "macro_f1_unseen": 0.9982,
-      "delta_macro_f1_unseen_minus_all": 0.0045,
-      "benign_fpr_all": 0.0,
+      "macro_f1_unseen": 0.9978,
+      "delta_macro_f1_unseen_minus_all": 0.0043,
+      "benign_fpr_all": 0.0001,
       "benign_fpr_twins_only": 0.0001,
-      "benign_fpr_unseen": 0.0,
+      "benign_fpr_unseen": 0.0001,
       "delta_benign_fpr_unseen_minus_all": 0.0,
       "per_class_breakdown": {
         "attack": {
           "test_support": 102797,
-          "train_twins": 54632,
-          "unseen_support": 48165,
-          "pct_twins": 53.15,
-          "f1_all": 0.9894,
-          "f1_unseen": 0.997,
-          "delta_f1_unseen_minus_all": 0.0076
+          "train_twins": 54622,
+          "unseen_support": 48175,
+          "pct_twins": 53.14,
+          "f1_all": 0.9891,
+          "f1_unseen": 0.9964,
+          "delta_f1_unseen_minus_all": 0.0073
         },
         "benign": {
           "test_support": 527384,
           "train_twins": 307255,
           "unseen_support": 220129,
           "pct_twins": 58.26,
-          "f1_all": 0.998,
-          "f1_unseen": 0.9993,
+          "f1_all": 0.9979,
+          "f1_unseen": 0.9992,
           "delta_f1_unseen_minus_all": 0.0013
         }
       }
@@ -369,14 +329,15 @@
     "task": "binary",
     "dst_port": false,
     "n_features": 55,
+    "seed": 42,
     "data_version": "nfs2023te-v1",
-    "code_commit": "ea21e85",
+    "code_commit": "575a7db",
     "parameters": {
       "lgbm__boosting_type": "gbdt",
       "lgbm__class_weight": null,
       "lgbm__colsample_bytree": 1.0,
       "lgbm__importance_type": "split",
-      "lgbm__learning_rate": 0.08,
+      "lgbm__learning_rate": 0.1,
       "lgbm__max_depth": -1,
       "lgbm__min_child_samples": 20,
       "lgbm__min_child_weight": 0.01,
@@ -400,12 +361,12 @@
       "rf__ccp_alpha": 0.0,
       "rf__class_weight": null,
       "rf__criterion": "gini",
-      "rf__max_depth": 20,
+      "rf__max_depth": null,
       "rf__max_features": "sqrt",
       "rf__max_leaf_nodes": null,
       "rf__max_samples": 0.25,
       "rf__min_impurity_decrease": 0.0,
-      "rf__min_samples_leaf": 2,
+      "rf__min_samples_leaf": 1,
       "rf__min_samples_split": 2,
       "rf__min_weight_fraction_leaf": 0.0,
       "rf__monotonic_cst": null,
@@ -416,6 +377,17 @@
       "rf__verbose": 0,
       "rf__warm_start": false,
       "rf": "RandomForestClassifier",
+      "task": "binary",
+      "weights": [
+        0.5,
+        0.5
+      ]
+    },
+    "model_params": {
+      "lgbm": "LGBMClassifier(max_delta_step=2.0, min_child_weight=0.01, n_jobs=-1,\n               num_leaves=63, random_state=42, reg_lambda=1.0, verbose=-1)",
+      "prefitted": true,
+      "random_state": 42,
+      "rf": "RandomForestClassifier(max_samples=0.25, n_estimators=80, n_jobs=-1,\n                       random_state=42)",
       "task": "binary",
       "weights": [
         0.5,
@@ -427,80 +399,28 @@
       "lgbm": 0.5
     },
     "val_tuned_weights": {
-      "rf": 0.85,
-      "lgbm": 0.15
+      "rf": 0.7,
+      "lgbm": 0.3
     },
     "val_tuned_test_macro_f1": 0.9934,
-    "val_tuned_test_macro_f1_unseen": 0.9975,
+    "val_tuned_test_macro_f1_unseen": 0.9976,
     "val_tuned_test_benign_fpr": 0.0001,
-    "val_tuned_test_benign_fpr_unseen": 0.0,
-    "fit_time_sec": 49.76,
-    "infer_time_sec": 1.74,
-    "val_macro_f1": 0.9983,
-    "val_benign_fpr": 0.0004,
-    "seed": 42,
-    "model_params": {
-      "lgbm__boosting_type": "gbdt",
-      "lgbm__class_weight": null,
-      "lgbm__colsample_bytree": 1.0,
-      "lgbm__importance_type": "split",
-      "lgbm__learning_rate": 0.08,
-      "lgbm__max_depth": -1,
-      "lgbm__min_child_samples": 20,
-      "lgbm__min_child_weight": 0.01,
-      "lgbm__min_split_gain": 0.0,
-      "lgbm__n_estimators": 100,
-      "lgbm__n_jobs": -1,
-      "lgbm__num_leaves": 63,
-      "lgbm__objective": null,
-      "lgbm__random_state": 42,
-      "lgbm__reg_alpha": 0.0,
-      "lgbm__reg_lambda": 1.0,
-      "lgbm__subsample": 1.0,
-      "lgbm__subsample_for_bin": 200000,
-      "lgbm__subsample_freq": 0,
-      "lgbm__max_delta_step": 2.0,
-      "lgbm__verbose": -1,
-      "lgbm": "LGBMClassifier",
-      "prefitted": true,
-      "random_state": 42,
-      "rf__bootstrap": true,
-      "rf__ccp_alpha": 0.0,
-      "rf__class_weight": null,
-      "rf__criterion": "gini",
-      "rf__max_depth": 20,
-      "rf__max_features": "sqrt",
-      "rf__max_leaf_nodes": null,
-      "rf__max_samples": 0.25,
-      "rf__min_impurity_decrease": 0.0,
-      "rf__min_samples_leaf": 2,
-      "rf__min_samples_split": 2,
-      "rf__min_weight_fraction_leaf": 0.0,
-      "rf__monotonic_cst": null,
-      "rf__n_estimators": 80,
-      "rf__n_jobs": -1,
-      "rf__oob_score": false,
-      "rf__random_state": 42,
-      "rf__verbose": 0,
-      "rf__warm_start": false,
-      "rf": "RandomForestClassifier",
-      "task": "binary",
-      "weights": [
-        0.5,
-        0.5
-      ]
-    },
+    "val_tuned_test_benign_fpr_unseen": 0.0001,
     "val_tuning": {
       "split": "val",
       "seed": 42,
       "sweep_steps": 21,
       "best_weights": {
-        "rf": 0.85,
-        "lgbm": 0.15
+        "rf": 0.7,
+        "lgbm": 0.3
       },
-      "val_macro_f1": 0.9983,
+      "val_macro_f1": 0.9984,
       "val_benign_fpr": 0.0004,
       "test_touched_during_tuning": false
-    }
+    },
+    "fit_time_sec": 214.98,
+    "infer_time_sec": 0.76,
+    "val_macro_f1": 0.9984,
+    "val_benign_fpr": 0.0004
   }
 ]
