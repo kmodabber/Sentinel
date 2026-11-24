@@ -43,6 +43,12 @@ DEFAULT_SWEEP = np.round(np.arange(0.50, 1.00, 0.01), 2)
 # SEN-NFR-04 target: attack recall >= 0.95 and benign FPR <= 0.01 on val.
 RECALL_TARGET = 0.95
 FPR_TARGET = 0.01
+# Per-class floor: the global threshold must also keep every attack class that
+# CAN reach this recall at some threshold above it. Default 0.80 — picking the
+# "highest overall-feasible" threshold can silently drive individual classes
+# (e.g. the slow DoS) to near-zero recall, which is why this exists. Set to 0
+# to disable the per-class constraint.
+CLASS_FLOOR = 0.80
 
 
 def _stub_nfstream_on_windows() -> None:
@@ -159,67 +165,147 @@ def sweep(
     return rows
 
 
-def recommend_global(rows: list[dict], recall_target: float = RECALL_TARGET,
-                     fpr_target: float = FPR_TARGET) -> dict:
-    """Highest threshold that still meets attack recall and benign FPR targets.
+def _coverable_classes(rows: list[dict], class_floor: float) -> tuple[list[str], list[str]]:
+    """Split the attack classes into those that reach class_floor somewhere in
+    the sweep and those that never do.
 
-    If no threshold meets both targets, return the one closest to them, flagged.
+    Classes with no val rows (per_class_recall == None at every threshold)
+    are treated as non-coverable and reported separately.
     """
-    feasible = [r for r in rows if r["attack_recall"] >= recall_target and r["benign_fpr"] <= fpr_target]
+    attack_labels = list(rows[0]["per_class_recall"].keys())
+    coverable, never = [], []
+    for cls in attack_labels:
+        best_recall = max((r["per_class_recall"].get(cls) or 0.0) for r in rows)
+        if best_recall >= class_floor:
+            coverable.append(cls)
+        else:
+            never.append(cls)
+    return coverable, never
+
+
+def recommend_global(rows: list[dict], recall_target: float = RECALL_TARGET,
+                     fpr_target: float = FPR_TARGET,
+                     class_floor: float = CLASS_FLOOR) -> dict:
+    """Highest threshold that still meets attack recall, benign FPR AND, if
+    class_floor > 0, a per-class recall floor for every class that CAN reach
+    the floor at some threshold.
+
+    Classes that never reach class_floor anywhere in the sweep (e.g. Rare
+    attack when the model doesn't learn it) are excluded from the per-class
+    constraint and reported in `never_reach_class_floor`. Set class_floor=0
+    to disable the per-class constraint entirely.
+
+    If no threshold meets everything, return the one closest to the overall
+    targets, flagged. (The class floor is a soft constraint in the fallback;
+    we never fail silently on it — the caller sees meets_targets=False.)
+    """
+    coverable, never = _coverable_classes(rows, class_floor) if class_floor > 0 else (
+        list(rows[0]["per_class_recall"].keys()) if rows else [], []
+    )
+
+    def meets_class_floor(r: dict) -> bool:
+        if class_floor <= 0:
+            return True
+        return all((r["per_class_recall"].get(c) or 0.0) >= class_floor for c in coverable)
+
+    feasible = [
+        r for r in rows
+        if r["attack_recall"] >= recall_target
+        and r["benign_fpr"] <= fpr_target
+        and meets_class_floor(r)
+    ]
     if feasible:
         best = max(feasible, key=lambda r: r["threshold"])
-        return {"threshold": best["threshold"], "meets_targets": True, "basis": best}
+        return {
+            "threshold": best["threshold"],
+            "meets_targets": True,
+            "basis": best,
+            "class_floor": class_floor,
+            "never_reach_class_floor": never,
+        }
 
-    # No threshold met both targets. Pick the one with the smallest sum of
-    # shortfalls, so the write-up reports the best achievable trade-off.
+    # No threshold met everything. Pick the one with the smallest sum of
+    # shortfalls against the OVERALL targets (ignoring the per-class floor
+    # in the ranking — we still report it on the chosen row).
     def shortfall(r):
         rs = max(0.0, recall_target - r["attack_recall"])
         fs = max(0.0, r["benign_fpr"] - fpr_target)
         return rs + fs
 
     best = min(rows, key=shortfall)
-    return {"threshold": best["threshold"], "meets_targets": False, "basis": best}
+    return {
+        "threshold": best["threshold"],
+        "meets_targets": False,
+        "basis": best,
+        "class_floor": class_floor,
+        "never_reach_class_floor": never,
+    }
 
 
 def recommend_per_class(rows: list[dict], global_t: float,
                         recall_floor: float = 0.90) -> dict:
-    """Per-class thresholds for classes whose recall at global_t is far below.
+    """Per-class thresholds for classes whose recall at global_t is below the
+    floor. For each such class, pick the HIGHEST threshold <= global_t at
+    which the class reaches recall_floor — the least loosening needed. If no
+    threshold <= global_t gets the class to the floor, keep the class on the
+    global value and record it in `never_reach_floor`.
 
-    If a class never reaches recall_floor at any threshold, keep its global
-    value and flag it in the write-up instead.
+    Returns:
+        {
+            "thresholds": {attack_label: float, ...},  # C1 shape — use this
+                                                        # as thresholds.json.
+            "never_reach_floor": [attack_label, ...],  # kept on global_t.
+        }
     """
     attack_labels = list(rows[0]["per_class_recall"].keys())
-    per_class = {}
-    # Find the row at the global threshold.
+    thresholds: dict[str, float] = {}
+    never_reach: list[str] = []
     base_row = next(r for r in rows if r["threshold"] == global_t)
+
     for cls in attack_labels:
         base_recall = base_row["per_class_recall"].get(cls)
-        if base_recall is None or base_recall >= recall_floor:
-            per_class[cls] = global_t
+        if base_recall is not None and base_recall >= recall_floor:
+            thresholds[cls] = global_t
             continue
-        # Lower the threshold for this class until it meets the floor.
-        lowered = None
-        for r in sorted(rows, key=lambda r: -r["threshold"]):
-            if (r["per_class_recall"].get(cls) or 0.0) >= recall_floor:
-                lowered = r["threshold"]
-        per_class[cls] = lowered if lowered is not None else global_t
-    return per_class
+        # Search thresholds <= global_t for the HIGHEST one where the class
+        # reaches recall_floor (least loosening). The sweep is unsorted here,
+        # so filter + sort descending and take the first qualifying row.
+        candidates = [
+            r for r in rows
+            if r["threshold"] <= global_t
+            and (r["per_class_recall"].get(cls) or 0.0) >= recall_floor
+        ]
+        if candidates:
+            best = max(candidates, key=lambda r: r["threshold"])
+            thresholds[cls] = best["threshold"]
+        else:
+            thresholds[cls] = global_t
+            never_reach.append(cls)
+
+    return {"thresholds": thresholds, "never_reach_floor": never_reach}
 
 
 def write_outputs(
     rows: list[dict],
     recommendation: dict,
-    per_class_thresholds: dict,
+    per_class_result: dict,
     out_dir: Path = RESULTS_DIR,
 ) -> None:
-    """Write thresholds.json (C1 shape), the full sweep CSV, and a PNG plot."""
+    """Write thresholds.json (C1 shape), the full sweep CSV, and a PNG plot.
+
+    `per_class_result` is the dict returned by recommend_per_class — only the
+    "thresholds" part goes into thresholds.json; "never_reach_floor" is for
+    the write-up.
+    """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # thresholds.json in C1 shape: {attack_label: value}. This is NOT the
     # package folder; the package owner copies this into theirs when
     # publishing. Benign is not in this file (dummy_package.py pattern).
-    (out_dir / "thresholds.json").write_text(json.dumps(per_class_thresholds, indent=2))
+    (out_dir / "thresholds.json").write_text(
+        json.dumps(per_class_result["thresholds"], indent=2)
+    )
 
     # Full per-threshold table (handy to paste into the write-up).
     flat = []
@@ -273,6 +359,10 @@ def main():
     parser.add_argument("--out-dir", type=Path, default=RESULTS_DIR)
     parser.add_argument("--recall-target", type=float, default=RECALL_TARGET)
     parser.add_argument("--fpr-target", type=float, default=FPR_TARGET)
+    parser.add_argument("--class-floor", type=float, default=CLASS_FLOOR,
+                        help="Per-class recall floor the global threshold must "
+                             "keep for every class that can reach it anywhere "
+                             "in the sweep. Pass 0 to disable.")
     args = parser.parse_args()
 
     print(f"[threshold_sweep] scoring val through {args.package}...", flush=True)
@@ -280,12 +370,21 @@ def main():
     print(f"[threshold_sweep] scored {len(detections):,} val rows", flush=True)
 
     rows = sweep(detections)
-    rec = recommend_global(rows, args.recall_target, args.fpr_target)
+    rec = recommend_global(rows, args.recall_target, args.fpr_target, args.class_floor)
     pcls = recommend_per_class(rows, rec["threshold"])
     write_outputs(rows, rec, pcls, args.out_dir)
 
     print(f"[threshold_sweep] recommended threshold = {rec['threshold']} "
-          f"(meets targets={rec['meets_targets']}); wrote {args.out_dir}")
+          f"(meets targets={rec['meets_targets']}, class_floor={args.class_floor}); "
+          f"wrote {args.out_dir}")
+    if rec.get("never_reach_class_floor"):
+        print(f"[threshold_sweep] classes that never reach class_floor "
+              f"{args.class_floor} (excluded from per-class constraint, "
+              f"kept on global threshold): {rec['never_reach_class_floor']}")
+    if pcls.get("never_reach_floor"):
+        print(f"[threshold_sweep] per-class recommend_per_class: these never "
+              f"reach its recall_floor and stay on global_t: "
+              f"{pcls['never_reach_floor']}")
 
 
 if __name__ == "__main__":

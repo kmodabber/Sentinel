@@ -11,7 +11,29 @@ import numpy as np  # noqa: I001
 import pandas as pd
 
 from sentinel_features.features import ATTACK_LABELS, BENIGN
-from sentinel_ml.threshold_sweep import _metrics_at, recommend_global, sweep
+from sentinel_ml.threshold_sweep import (
+    _metrics_at,
+    recommend_global,
+    recommend_per_class,
+    sweep,
+)
+
+
+def _rows_with_per_class(per_class_recall_by_threshold: dict[float, dict[str, float | None]]) -> list[dict]:
+    """Build a minimal rows list keyed by threshold with the per-class recall
+    curves we need. attack_recall/benign_fpr are set to pass the overall
+    targets at every threshold so the per-class behaviour is what we test.
+    """
+    rows = []
+    for t in sorted(per_class_recall_by_threshold.keys(), reverse=True):
+        rows.append({
+            "threshold": round(float(t), 4),
+            "attack_recall": 0.99,
+            "benign_fpr": 0.0001,
+            "alerts_per_10k_benign": 1.0,
+            "per_class_recall": per_class_recall_by_threshold[t],
+        })
+    return rows
 
 
 def _tiny_detections(n_benign: int = 80, n_attack: int = 40, seed: int = 0) -> pd.DataFrame:
@@ -77,7 +99,8 @@ def test_recommend_global_picks_highest_feasible():
     """If several thresholds meet the targets, recommend the highest of them."""
     det = _tiny_detections(n_benign=200, n_attack=100, seed=1)
     rows = sweep(det)
-    rec = recommend_global(rows, recall_target=0.0, fpr_target=1.0)  # trivially feasible
+    # Disable the per-class floor so this test stays about the overall targets.
+    rec = recommend_global(rows, recall_target=0.0, fpr_target=1.0, class_floor=0.0)
     assert rec["meets_targets"] is True
     assert rec["threshold"] == max(r["threshold"] for r in rows)
 
@@ -89,6 +112,74 @@ def test_recommend_global_falls_back_when_infeasible():
     rec = recommend_global(rows, recall_target=1.0, fpr_target=0.0)  # impossible
     assert rec["meets_targets"] is False
     assert "threshold" in rec
+
+
+def test_per_class_picks_highest_threshold_at_or_below_global():
+    """Class reaches recall_floor at 0.9 and 0.5, not at 0.98. With global_t=0.98
+    and floor=0.80 it should get 0.9 (least loosening), NOT 0.5.
+    """
+    rows = _rows_with_per_class({
+        0.98: {"Bot": 0.95, "DoS slowloris": 0.30},
+        0.90: {"Bot": 0.95, "DoS slowloris": 0.85},
+        0.50: {"Bot": 0.95, "DoS slowloris": 0.95},
+    })
+    out = recommend_per_class(rows, global_t=0.98, recall_floor=0.80)
+    assert out["thresholds"]["Bot"] == 0.98          # already above floor
+    assert out["thresholds"]["DoS slowloris"] == 0.90  # highest <= 0.98 at floor
+    assert out["never_reach_floor"] == []
+
+
+def test_per_class_class_already_above_floor_keeps_global_t():
+    rows = _rows_with_per_class({
+        0.98: {"Bot": 0.95, "DDoS": 0.99},
+        0.90: {"Bot": 0.95, "DDoS": 0.99},
+        0.50: {"Bot": 0.95, "DDoS": 0.99},
+    })
+    out = recommend_per_class(rows, global_t=0.98, recall_floor=0.80)
+    assert out["thresholds"] == {"Bot": 0.98, "DDoS": 0.98}
+    assert out["never_reach_floor"] == []
+
+
+def test_per_class_never_reaches_floor_is_listed_and_kept_on_global():
+    """A class that never reaches the floor anywhere in the sweep must stay on
+    global_t and be surfaced in never_reach_floor (not silently lowered to the
+    sweep minimum)."""
+    rows = _rows_with_per_class({
+        0.98: {"Rare attack": 0.0},
+        0.90: {"Rare attack": 0.0},
+        0.50: {"Rare attack": 0.05},
+    })
+    out = recommend_per_class(rows, global_t=0.98, recall_floor=0.80)
+    assert out["thresholds"]["Rare attack"] == 0.98
+    assert out["never_reach_floor"] == ["Rare attack"]
+
+
+def test_recommend_global_respects_class_floor():
+    """At 0.98 DoS slowloris is below class_floor=0.80 but it DOES reach 0.80
+    at 0.90, so the global recommendation must drop to 0.90 (not stay at 0.98).
+    Rare attack never reaches 0.80, so it's excluded and reported.
+    """
+    rows = _rows_with_per_class({
+        0.98: {"Bot": 0.95, "DoS slowloris": 0.30, "Rare attack": 0.0},
+        0.90: {"Bot": 0.95, "DoS slowloris": 0.85, "Rare attack": 0.0},
+        0.50: {"Bot": 0.95, "DoS slowloris": 0.95, "Rare attack": 0.05},
+    })
+    rec = recommend_global(rows, recall_target=0.90, fpr_target=0.01, class_floor=0.80)
+    assert rec["meets_targets"] is True
+    assert rec["threshold"] == 0.90
+    assert "Rare attack" in rec["never_reach_class_floor"]
+    assert "DoS slowloris" not in rec["never_reach_class_floor"]
+
+
+def test_recommend_global_class_floor_zero_matches_old_behaviour():
+    """With class_floor=0 the picker is purely overall-target-driven."""
+    rows = _rows_with_per_class({
+        0.98: {"Bot": 0.95, "DoS slowloris": 0.30},
+        0.90: {"Bot": 0.95, "DoS slowloris": 0.85},
+        0.50: {"Bot": 0.95, "DoS slowloris": 0.95},
+    })
+    rec = recommend_global(rows, recall_target=0.90, fpr_target=0.01, class_floor=0.0)
+    assert rec["threshold"] == 0.98
 
 
 def test_empty_benign_returns_nan_fpr():
