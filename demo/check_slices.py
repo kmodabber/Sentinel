@@ -37,13 +37,22 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from sensor.package import load_package, score
-from sensor.pcap_flows import flows_from_pcap
+# sensor.pcap_flows pulls in nfstream's native extension, which can't load on
+# bare Windows and would block even importing this module from a unit test.
+# Keep those imports inside main() / check_slice() so the pure helpers
+# (mapping, verdict, masks) can be imported anywhere.
 from sentinel_features.features import ATTACK_LABELS, BENIGN, LABELS
 from sentinel_ml.explain import Explainer
 
 RESULTS_DIR = Path("results") / "sen-135"
 SLICE_CSV = Path("demo") / "slice.csv"
+DATA_CARD = Path("data") / "processed" / "data_card.json"
+# split.py: attack classes with <100 flows after cleaning are merged into this.
+RARE_LABEL = "Rare attack"
+# Fallback mapping used only if data_card.json isn't readable. Per
+# sentinel_data/split.py the small CICIDS 2017 attacks that are always
+# merged into Rare attack include the two web attacks below.
+HARDCODED_RARE_MERGED = {"Web Attack - XSS", "Web Attack - Sql Injection"}
 # Stage-3 gate / smoke / CTS demo slices come first.
 PRIORITY_SLICES = [
     "PortScan-firewall-on",
@@ -60,6 +69,44 @@ def load_slice_catalog(path: Path = SLICE_CSV) -> pd.DataFrame:
         lambda n: PRIORITY_SLICES.index(n) if n in PRIORITY_SLICES else 999
     )
     return df.sort_values(["priority", "slice_name"]).reset_index(drop=True)
+
+
+def _load_rare_merged(data_card_path: Path = DATA_CARD) -> set[str]:
+    """Return the set of original labels that split.py merged into Rare attack.
+
+    Reads data/processed/data_card.json (written by sentinel_data/split.py).
+    Falls back to the hard-coded CICIDS 2017 web attacks if the data card
+    isn't present or is missing the `rare_classes.merged` key.
+    """
+    try:
+        card = json.loads(Path(data_card_path).read_text(encoding="utf-8"))
+        merged = card.get("rare_classes", {}).get("merged")
+        if merged:
+            return set(merged)
+    except (OSError, ValueError, json.JSONDecodeError):
+        pass
+    return set(HARDCODED_RARE_MERGED)
+
+
+def map_slice_label_to_model_class(
+    slice_label: str,
+    rare_merged: set[str],
+    labels: list[str] = LABELS,
+) -> tuple[str, str]:
+    """Map a slice.csv label to the class the model can actually predict.
+
+    Returns (model_class, status):
+      - "direct": the slice label IS a model class — model_class == slice_label
+      - "rare":   slice_label is in the data_card's rare_classes.merged list,
+                  so the ground truth collapses to RARE_LABEL
+      - "unknown": the slice label doesn't map to anything the model knows —
+                   the caller should warn and refuse to call it a HIT
+    """
+    if slice_label in labels:
+        return slice_label, "direct"
+    if slice_label in rare_merged and RARE_LABEL in labels:
+        return RARE_LABEL, "rare"
+    return slice_label, "unknown"
 
 
 def _find_pcap(slice_dir: Path, slice_name: str) -> Path | None:
@@ -87,11 +134,21 @@ def _single_packet_rst_fin_mask(flows: pd.DataFrame) -> np.ndarray:
 
 
 def _verdict(attacker_alert_share: float, attacker_hit_class_share: float,
-             expected_label: str) -> str:
-    """HIT / PARTIAL / MISS using the plan's rough rules."""
+             expected_model_class: str, mapping_status: str = "direct") -> str:
+    """HIT / PARTIAL / MISS using the plan's rough rules.
+
+    expected_model_class must be one the model can actually predict — pass
+    the output of map_slice_label_to_model_class, not the raw slice label.
+    mapping_status="unknown" means the label never maps to anything the
+    model learned, so we refuse to call it a HIT regardless of alerts.
+    """
+    if mapping_status == "unknown":
+        # Can't score hit-class — the mapping is undefined. Still report
+        # alert coverage via MISS/PARTIAL so reviewers see the signal.
+        return "MISS" if attacker_alert_share < 0.20 else "PARTIAL"
     if attacker_alert_share < 0.20:
         return "MISS"
-    if attacker_hit_class_share >= 0.60 and expected_label in LABELS:
+    if attacker_hit_class_share >= 0.60 and expected_model_class in LABELS:
         return "HIT"
     return "PARTIAL"
 
@@ -102,8 +159,14 @@ def check_slice(
     pcap_path: Path,
     threshold: float,
     explainer: Explainer,
+    rare_merged: set[str],
 ) -> dict:
     """Run one slice end-to-end and return a result dict."""
+    # Lazy import: nfstream DLL (via sensor.pcap_flows) may not load on
+    # Windows. Importing at call time keeps the module importable in tests.
+    from sensor.package import score
+    from sensor.pcap_flows import flows_from_pcap
+
     flows = flows_from_pcap(pcap_path, keep_metadata=True)
     feature_cols = package["features"]
     detections = score(package, flows[feature_cols])
@@ -115,7 +178,10 @@ def check_slice(
 
     attacker = slice_row["attacker_ip"]
     victim = slice_row["victim_ip"]
-    expected_label = slice_row["label"]
+    slice_label = slice_row["label"]
+    expected_model_class, mapping_status = map_slice_label_to_model_class(
+        slice_label, rare_merged
+    )
 
     atk_mask = _attacker_mask(flows, attacker, victim)
     other_mask = ~atk_mask
@@ -124,7 +190,7 @@ def check_slice(
 
     atk_detect = detections[atk_mask]
     class_mix = atk_detect["predicted_class"].value_counts().to_dict()
-    hit_class_count = int((atk_detect["predicted_class"] == expected_label).sum())
+    hit_class_count = int((atk_detect["predicted_class"] == expected_model_class).sum())
     attacker_alerts = int(is_alert[atk_mask].sum())
     other_alerts = int(is_alert[other_mask].sum())
 
@@ -132,7 +198,8 @@ def check_slice(
     attacker_hit_class_share = (
         hit_class_count / max(atk_mask.sum(), 1)
     )
-    verdict = _verdict(attacker_alert_share, attacker_hit_class_share, expected_label)
+    verdict = _verdict(attacker_alert_share, attacker_hit_class_share,
+                       expected_model_class, mapping_status)
 
     # SHAP sample for the first few alerts in the attacker set.
     sample_alert_idx = detections.index[(is_alert) & atk_mask][:SHAP_SAMPLE]
@@ -150,7 +217,9 @@ def check_slice(
 
     return {
         "slice_name": slice_row["slice_name"],
-        "expected_label": expected_label,
+        "slice_label": slice_label,                    # raw label from slice.csv
+        "expected_model_class": expected_model_class,  # what the model can predict
+        "mapping_status": mapping_status,              # direct | rare | unknown
         "pcap": str(pcap_path),
         "flows_total": int(len(flows)),
         "flows_attacker_victim": int(atk_mask.sum()),
@@ -178,12 +247,31 @@ def main():
                         help="SEN-134 recommended threshold")
     parser.add_argument("--slice-csv", type=Path, default=SLICE_CSV)
     parser.add_argument("--out-dir", type=Path, default=RESULTS_DIR)
+    parser.add_argument("--data-card", type=Path, default=DATA_CARD,
+                        help="data_card.json used to resolve slice labels to "
+                             "model classes (Rare attack merges). Falls back "
+                             "to a hard-coded list if missing.")
     args = parser.parse_args()
+
+    # Lazy: sensor.package loads nfstream, which can't import on bare Windows.
+    from sensor.package import load_package
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
     catalog = load_slice_catalog(args.slice_csv)
     package = load_package(args.package)
     explainer = Explainer(package)
+    rare_merged = _load_rare_merged(args.data_card)
+
+    # Warn up-front if any slice label doesn't map to a class the model knows.
+    for _, row in catalog.iterrows():
+        _, status = map_slice_label_to_model_class(row["label"], rare_merged)
+        if status == "unknown":
+            print(
+                f"[sen-135] WARNING: slice '{row['slice_name']}' has label "
+                f"'{row['label']}' which does not map to any model class; "
+                "verdict will never be HIT. Check data_card.json / split.py.",
+                file=sys.stderr,
+            )
 
     summary_rows = []
     missing = []
@@ -194,7 +282,8 @@ def main():
             continue
         print(f"[sen-135] running slice {row['slice_name']} ...", flush=True)
         try:
-            result = check_slice(package, row.to_dict(), pcap, args.threshold, explainer)
+            result = check_slice(package, row.to_dict(), pcap, args.threshold,
+                                 explainer, rare_merged)
         except Exception as e:
             print(f"  ERROR on {row['slice_name']}: {e!r}", file=sys.stderr)
             result = {"slice_name": row["slice_name"], "error": repr(e)}
@@ -204,7 +293,8 @@ def main():
     summary_csv = args.out_dir / "summary.csv"
     if summary_rows:
         keys = [k for k in [
-            "slice_name", "expected_label", "flows_total", "flows_attacker_victim",
+            "slice_name", "slice_label", "expected_model_class", "mapping_status",
+            "flows_total", "flows_attacker_victim",
             "flows_other", "attacker_alerts", "attacker_alert_share",
             "attacker_hit_class_share", "other_alerts",
             "attacker_median_confidence", "single_packet_rst_fin", "verdict",
