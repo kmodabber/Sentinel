@@ -123,8 +123,9 @@ empty, it drops the "Top reasons: ..." line entirely (UC-2).
    dst_port). For future models with scaling we'd need to decide: raw or
    scaled. I'd default to raw (human-readable). OK?
 
-Once you confirm, I'll land explain.py (already drafted in
-`sentinel_ml/explain.py`) and the sensor-side wiring is just:
+`sentinel_ml/explain.py` is already in this PR and produces the shape above;
+I'll adjust it to track any format changes you want. The sensor-side wiring
+is just:
 
 ```python
 reasons = explainer.explain(flows_batch, detections["predicted_class"])
