@@ -14,8 +14,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from sklearn.base import clone
-from sklearn.metrics import confusion_matrix
-from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import confusion_matrix, f1_score
+from sklearn.model_selection import ParameterGrid, StratifiedKFold
 
 from sentinel_ml.ensemble import (
     FixedWeightEnsemble,
@@ -29,6 +29,7 @@ from sentinel_ml.ensemble import (
 )
 from sentinel_ml.eval_template import (
     SEED,
+    _json_safe,
     _model_params,
     extract_model_params,
     find_train_twins,
@@ -48,6 +49,139 @@ WANDB_PROJECT = "Sentinel"
 def _wandb_init_kwargs(job_type: str, name: str, config: dict) -> dict:
     """Builds wandb.init arguments, falling back to offline mode when no API key is configured."""
     return get_wandb_init_kwargs(job_type=job_type, name=name, config=config)
+
+
+# Compact val-only grids (~9 candidates each). Test is never used here.
+RF_VAL_GRID = {
+    "max_depth": [20, 26, None],
+    "min_samples_leaf": [1, 2, 5],
+}
+LGBM_VAL_GRID = {
+    "num_leaves": [31, 63, 127],
+    "learning_rate": [0.05, 0.08, 0.1],
+}
+
+
+def _selected_params_from_model(model, keys: list[str]) -> dict:
+    """Pulls the searched hyperparameter keys from a fitted estimator's get_params()."""
+    params = model.get_params(deep=False)
+    return {k: _json_safe(params.get(k)) for k in keys}
+
+
+def tune_rf_on_val(
+    X_tr,
+    y_tr,
+    X_va,
+    y_va,
+    *,
+    task: str,
+    random_state: int,
+    n_estimators: int = 80,
+) -> tuple[object, dict]:
+    """Fits a small ParameterGrid of Random Forests on train and picks the best val macro-F1."""
+    grid_axes = {
+        "n_estimators": [n_estimators],
+        **RF_VAL_GRID,
+    }
+    candidates = list(ParameterGrid(grid_axes))
+    trials = []
+    best_score = -1.0
+    best_params = None
+
+    for params in candidates:
+        model = default_rf(task=task, random_state=random_state, n_estimators=params["n_estimators"])
+        model.set_params(
+            max_depth=params["max_depth"],
+            min_samples_leaf=params["min_samples_leaf"],
+        )
+        model.fit(X_tr, y_tr)
+        preds = model.predict(X_va)
+        score = float(f1_score(y_va, preds, average="macro", zero_division=0))
+        trials.append({"params": dict(params), "val_macro_f1": round(score, 4)})
+        if score > best_score:
+            best_score = score
+            best_params = dict(params)
+
+    assert best_params is not None
+    best_model = default_rf(task=task, random_state=random_state, n_estimators=best_params["n_estimators"])
+    best_model.set_params(
+        max_depth=best_params["max_depth"],
+        min_samples_leaf=best_params["min_samples_leaf"],
+    )
+    best_model.fit(X_tr, y_tr)
+    selected = _selected_params_from_model(
+        best_model, ["n_estimators", "max_depth", "min_samples_leaf", "class_weight", "max_samples"]
+    )
+    tuning = {
+        "split": "val",
+        "seed": random_state,
+        "candidates_evaluated": {k: list(v) for k, v in grid_axes.items()},
+        "n_trials": len(trials),
+        "trials": trials,
+        "selected_params": selected,
+        "val_macro_f1": round(best_score, 4),
+        "test_touched_during_tuning": False,
+    }
+    return best_model, tuning
+
+
+def tune_lgbm_on_val(
+    X_tr,
+    y_tr,
+    X_va,
+    y_va,
+    *,
+    task: str,
+    random_state: int,
+    n_estimators: int = 100,
+) -> tuple[object, dict]:
+    """Fits a small ParameterGrid of LightGBM models on train and picks the best val macro-F1."""
+    grid_axes = {
+        "n_estimators": [n_estimators],
+        **LGBM_VAL_GRID,
+    }
+    candidates = list(ParameterGrid(grid_axes))
+    trials = []
+    best_score = -1.0
+    best_params = None
+
+    for params in candidates:
+        model = default_lgbm(task=task, random_state=random_state, n_estimators=params["n_estimators"])
+        model.set_params(
+            num_leaves=params["num_leaves"],
+            learning_rate=params["learning_rate"],
+        )
+        model.fit(X_tr, y_tr)
+        preds = model.predict(X_va)
+        score = float(f1_score(y_va, preds, average="macro", zero_division=0))
+        trials.append({"params": dict(params), "val_macro_f1": round(score, 4)})
+        if score > best_score:
+            best_score = score
+            best_params = dict(params)
+
+    assert best_params is not None
+    best_model = default_lgbm(task=task, random_state=random_state, n_estimators=best_params["n_estimators"])
+    best_model.set_params(
+        num_leaves=best_params["num_leaves"],
+        learning_rate=best_params["learning_rate"],
+    )
+    best_model.fit(X_tr, y_tr)
+    selected = _selected_params_from_model(
+        best_model,
+        ["n_estimators", "num_leaves", "learning_rate", "min_child_samples", "class_weight", "reg_lambda", "max_delta_step"],
+    )
+    tuning = {
+        "split": "val",
+        "seed": random_state,
+        "candidates_evaluated": {k: list(v) for k, v in grid_axes.items()},
+        "n_trials": len(trials),
+        "trials": trials,
+        "selected_params": selected,
+        "val_macro_f1": round(best_score, 4),
+        "test_touched_during_tuning": False,
+    }
+    return best_model, tuning
+
 
 
 def _cm_stats(cm: np.ndarray, labels: list[str], benign_idx: int | None) -> dict:
@@ -304,7 +438,12 @@ def run_training_and_comparison(
             y_tr_arr = np.asarray(y_tr)
             y_va_arr = np.asarray(y_va)
             y_te_arr = np.asarray(y_te)
-            labels = sorted(pd.unique(y_te_arr).tolist())
+            # Union of train/val/test labels so a prediction outside the test-only set cannot KeyError.
+            labels = sorted(
+                set(pd.unique(y_tr_arr).tolist())
+                | set(pd.unique(y_va_arr).tolist())
+                | set(pd.unique(y_te_arr).tolist())
+            )
 
             twin_info = find_train_twins(X_tr_df, X_te_df, y_train=y_tr_arr, y_test=y_te_arr)
             print(
@@ -316,15 +455,20 @@ def run_training_and_comparison(
             )
 
             # ------------------------------------------------------------------
-            # 1. Train & Evaluate Random Forest
+            # 1. Tune & Evaluate Random Forest (val-only ParameterGrid)
             # ------------------------------------------------------------------
-            rf_model = default_rf(task=task, random_state=random_state, n_estimators=n_estimators_rf)
+            print(
+                f"  [1/4] Tuning Random Forest on val ({len(list(ParameterGrid({'n_estimators': [n_estimators_rf], **RF_VAL_GRID})))} candidates)...",
+                flush=True,
+            )
+            t0 = time.time()
+            rf_model, rf_tuning = tune_rf_on_val(
+                X_tr, y_tr_arr, X_va, y_va_arr,
+                task=task, random_state=random_state, n_estimators=n_estimators_rf,
+            )
+            rf_fit_sec = round(time.time() - t0, 2)
             rf_params = extract_model_params(rf_model)
             rf_model_params = _model_params(rf_model)
-            print(f"  [1/4] Training Random Forest (n_estimators={n_estimators_rf})...", flush=True)
-            t0 = time.time()
-            rf_model.fit(X_tr, y_tr_arr)
-            rf_fit_sec = round(time.time() - t0, 2)
 
             t0 = time.time()
             p_rf_va = rf_model.predict_proba(X_va)
@@ -344,6 +488,11 @@ def run_training_and_comparison(
                 preds_rf_te, y_te_arr, labels, benign_name, rf_imp, feature_names, twin_info=twin_info
             )
             rf_tw = rf_te_metrics["train_twin_analysis"]
+            rf_tuning.update({
+                "val_benign_fpr": rf_val_metrics["benign_fpr"],
+                "val_infer_time_sec": rf_val_infer_sec,
+                "val_macro_f1": rf_val_metrics["macro_f1"],
+            })
             rf_te_metrics.update({
                 "model": "random_forest",
                 "task": task,
@@ -354,26 +503,7 @@ def run_training_and_comparison(
                 "code_commit": commit_hash,
                 "parameters": rf_params,
                 "model_params": rf_model_params,
-                "val_tuning": {
-                    "split": "val",
-                    "seed": random_state,
-                    "candidates_evaluated": {
-                        "n_estimators": [50, 80, 120],
-                        "max_depth": [20, 26, None],
-                        "min_samples_leaf": [1, 2, 5],
-                        "class_weight": ["balanced_subsample", "balanced"],
-                    },
-                    "selected_params": {
-                        "n_estimators": n_estimators_rf,
-                        "max_depth": 26,
-                        "min_samples_leaf": 2,
-                        "class_weight": "balanced_subsample",
-                    },
-                    "val_macro_f1": rf_val_metrics["macro_f1"],
-                    "val_benign_fpr": rf_val_metrics["benign_fpr"],
-                    "val_infer_time_sec": rf_val_infer_sec,
-                    "test_touched_during_tuning": False,
-                },
+                "val_tuning": rf_tuning,
                 "fit_time_sec": rf_fit_sec,
                 "infer_time_sec": rf_te_infer_sec,
                 "val_macro_f1": rf_val_metrics["macro_f1"],
@@ -381,7 +511,8 @@ def run_training_and_comparison(
             })
             eval_files.setdefault(("random_forest", task), []).append(rf_te_metrics)
             print(
-                f"        RF done in {rf_fit_sec:.1f}s | Val F1={rf_val_metrics['macro_f1']:.4f} | "
+                f"        RF done in {rf_fit_sec:.1f}s | selected={rf_tuning['selected_params']} | "
+                f"Val F1={rf_val_metrics['macro_f1']:.4f} | "
                 f"Test F1(all->unseen)={rf_te_metrics['macro_f1']:.4f}->{rf_tw['macro_f1_unseen']:.4f} "
                 f"(Δ={rf_tw['delta_macro_f1_unseen_minus_all']:+.4f}) | "
                 f"FPR(all->unseen)={rf_te_metrics['benign_fpr']:.4f}->{rf_tw['benign_fpr_unseen']:.4f}",
@@ -389,15 +520,20 @@ def run_training_and_comparison(
             )
 
             # ------------------------------------------------------------------
-            # 2. Train & Evaluate LightGBM
+            # 2. Tune & Evaluate LightGBM (val-only ParameterGrid)
             # ------------------------------------------------------------------
-            lgbm_model = default_lgbm(task=task, random_state=random_state, n_estimators=n_estimators_lgbm)
+            print(
+                f"  [2/4] Tuning LightGBM on val ({len(list(ParameterGrid({'n_estimators': [n_estimators_lgbm], **LGBM_VAL_GRID})))} candidates)...",
+                flush=True,
+            )
+            t0 = time.time()
+            lgbm_model, lgbm_tuning = tune_lgbm_on_val(
+                X_tr, y_tr_arr, X_va, y_va_arr,
+                task=task, random_state=random_state, n_estimators=n_estimators_lgbm,
+            )
+            lgbm_fit_sec = round(time.time() - t0, 2)
             lgbm_params = extract_model_params(lgbm_model)
             lgbm_model_params = _model_params(lgbm_model)
-            print(f"  [2/4] Training LightGBM (n_estimators={n_estimators_lgbm})...", flush=True)
-            t0 = time.time()
-            lgbm_model.fit(X_tr, y_tr_arr)
-            lgbm_fit_sec = round(time.time() - t0, 2)
 
             t0 = time.time()
             p_lgbm_va = lgbm_model.predict_proba(X_va)
@@ -407,8 +543,10 @@ def run_training_and_comparison(
             p_lgbm_te = lgbm_model.predict_proba(X_te)
             lgbm_te_infer_sec = round(time.time() - t0, 2)
 
-            preds_lgbm_va = classes[np.argmax(p_lgbm_va, axis=1)]
-            preds_lgbm_te = classes[np.argmax(p_lgbm_te, axis=1)]
+            # Use LightGBM's own class order (same labels as RF for this data, but safer).
+            lgbm_classes = np.asarray(lgbm_model.classes_)
+            preds_lgbm_va = lgbm_classes[np.argmax(p_lgbm_va, axis=1)]
+            preds_lgbm_te = lgbm_classes[np.argmax(p_lgbm_te, axis=1)]
 
             lgbm_imp = _normalize_importances(lgbm_model.feature_importances_)
             lgbm_val_metrics = _metrics_from_preds(preds_lgbm_va, y_va_arr, labels, benign_name, lgbm_imp, feature_names)
@@ -416,6 +554,11 @@ def run_training_and_comparison(
                 preds_lgbm_te, y_te_arr, labels, benign_name, lgbm_imp, feature_names, twin_info=twin_info
             )
             lgbm_tw = lgbm_te_metrics["train_twin_analysis"]
+            lgbm_tuning.update({
+                "val_benign_fpr": lgbm_val_metrics["benign_fpr"],
+                "val_infer_time_sec": lgbm_val_infer_sec,
+                "val_macro_f1": lgbm_val_metrics["macro_f1"],
+            })
             lgbm_te_metrics.update({
                 "model": "lightgbm",
                 "task": task,
@@ -426,28 +569,7 @@ def run_training_and_comparison(
                 "code_commit": commit_hash,
                 "parameters": lgbm_params,
                 "model_params": lgbm_model_params,
-                "val_tuning": {
-                    "split": "val",
-                    "seed": random_state,
-                    "candidates_evaluated": {
-                        "n_estimators": [80, 100, 150],
-                        "num_leaves": [31, 63, 127],
-                        "learning_rate": [0.05, 0.08, 0.1],
-                        "min_child_samples": [20, 30, 50],
-                        "class_weight": ["balanced"],
-                    },
-                    "selected_params": {
-                        "n_estimators": n_estimators_lgbm,
-                        "num_leaves": 63,
-                        "learning_rate": 0.08,
-                        "min_child_samples": 30,
-                        "class_weight": "balanced",
-                    },
-                    "val_macro_f1": lgbm_val_metrics["macro_f1"],
-                    "val_benign_fpr": lgbm_val_metrics["benign_fpr"],
-                    "val_infer_time_sec": lgbm_val_infer_sec,
-                    "test_touched_during_tuning": False,
-                },
+                "val_tuning": lgbm_tuning,
                 "fit_time_sec": lgbm_fit_sec,
                 "infer_time_sec": lgbm_te_infer_sec,
                 "val_macro_f1": lgbm_val_metrics["macro_f1"],
@@ -455,7 +577,8 @@ def run_training_and_comparison(
             })
             eval_files.setdefault(("lightgbm", task), []).append(lgbm_te_metrics)
             print(
-                f"        LightGBM done in {lgbm_fit_sec:.1f}s | Val F1={lgbm_val_metrics['macro_f1']:.4f} | "
+                f"        LightGBM done in {lgbm_fit_sec:.1f}s | selected={lgbm_tuning['selected_params']} | "
+                f"Val F1={lgbm_val_metrics['macro_f1']:.4f} | "
                 f"Test F1(all->unseen)={lgbm_te_metrics['macro_f1']:.4f}->{lgbm_tw['macro_f1_unseen']:.4f} "
                 f"(Δ={lgbm_tw['delta_macro_f1_unseen_minus_all']:+.4f}) | "
                 f"FPR(all->unseen)={lgbm_te_metrics['benign_fpr']:.4f}->{lgbm_tw['benign_fpr_unseen']:.4f}",

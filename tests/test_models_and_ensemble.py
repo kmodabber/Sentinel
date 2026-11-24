@@ -125,6 +125,28 @@ def test_full_training_and_comparison_pipeline(tmp_path, monkeypatch):
             assert r["val_tuning"]["split"] == "val"
             assert r["val_tuning"]["test_touched_during_tuning"] is False
 
+    # selected_params must match the fitted model_params for the searched keys
+    # (guards against hardcoded/fake tuning records that diverge from the model).
+    for fname, keys in (
+        ("eval_random_forest_binary.json", ["n_estimators", "max_depth", "min_samples_leaf"]),
+        ("eval_random_forest_multiclass.json", ["n_estimators", "max_depth", "min_samples_leaf"]),
+        ("eval_lightgbm_binary.json", ["n_estimators", "num_leaves", "learning_rate"]),
+        ("eval_lightgbm_multiclass.json", ["n_estimators", "num_leaves", "learning_rate"]),
+    ):
+        for rec in json.loads((out_dir / fname).read_text()):
+            selected = rec["val_tuning"]["selected_params"]
+            model_params = rec["model_params"]
+            for key in keys:
+                assert key in selected, f"{fname}: missing selected_params[{key}]"
+                assert key in model_params, f"{fname}: missing model_params[{key}]"
+                assert selected[key] == model_params[key], (
+                    f"{fname}: selected_params[{key}]={selected[key]!r} "
+                    f"!= model_params[{key}]={model_params[key]!r}"
+                )
+            assert rec["val_tuning"]["n_trials"] >= 6
+            assert isinstance(rec["val_tuning"].get("trials"), list)
+            assert len(rec["val_tuning"]["trials"]) == rec["val_tuning"]["n_trials"]
+
     assert len(summary["rf_vs_lightgbm"]) == 4
     assert len(summary["ensemble_comparison"]) == 4
     assert len(summary["summary_rows"]) == 20
