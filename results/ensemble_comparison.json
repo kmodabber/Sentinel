@@ -1,0 +1,1794 @@
+[
+  {
+    "task": "binary",
+    "dst_port": true,
+    "n_features": 56,
+    "data_version": "nfs2023te-v1",
+    "code_commit": "ea21e85",
+    "train_twin_summary": {
+      "n_test_rows": 630181,
+      "n_feature_twins": 309826,
+      "pct_feature_twins": 49.16,
+      "n_unseen_rows": 320355
+    },
+    "base_models": {
+      "random_forest_test_macro_f1": 0.9939,
+      "random_forest_test_macro_f1_unseen": 0.9964,
+      "random_forest_test_benign_fpr": 0.0,
+      "lightgbm_test_macro_f1": 0.9941,
+      "lightgbm_test_macro_f1_unseen": 0.9966,
+      "lightgbm_test_benign_fpr": 0.0001
+    },
+    "fixed_weights_equal_05_05": {
+      "weights": {
+        "rf": 0.5,
+        "lgbm": 0.5
+      },
+      "parameters": {
+        "lgbm__boosting_type": "gbdt",
+        "lgbm__class_weight": null,
+        "lgbm__colsample_bytree": 1.0,
+        "lgbm__importance_type": "split",
+        "lgbm__learning_rate": 0.08,
+        "lgbm__max_depth": -1,
+        "lgbm__min_child_samples": 20,
+        "lgbm__min_child_weight": 0.01,
+        "lgbm__min_split_gain": 0.0,
+        "lgbm__n_estimators": 100,
+        "lgbm__n_jobs": -1,
+        "lgbm__num_leaves": 63,
+        "lgbm__objective": null,
+        "lgbm__random_state": 42,
+        "lgbm__reg_alpha": 0.0,
+        "lgbm__reg_lambda": 1.0,
+        "lgbm__subsample": 1.0,
+        "lgbm__subsample_for_bin": 200000,
+        "lgbm__subsample_freq": 0,
+        "lgbm__max_delta_step": 2.0,
+        "lgbm__verbose": -1,
+        "lgbm": "LGBMClassifier",
+        "prefitted": true,
+        "random_state": 42,
+        "rf__bootstrap": true,
+        "rf__ccp_alpha": 0.0,
+        "rf__class_weight": null,
+        "rf__criterion": "gini",
+        "rf__max_depth": 20,
+        "rf__max_features": "sqrt",
+        "rf__max_leaf_nodes": null,
+        "rf__max_samples": 0.25,
+        "rf__min_impurity_decrease": 0.0,
+        "rf__min_samples_leaf": 2,
+        "rf__min_samples_split": 2,
+        "rf__min_weight_fraction_leaf": 0.0,
+        "rf__monotonic_cst": null,
+        "rf__n_estimators": 80,
+        "rf__n_jobs": -1,
+        "rf__oob_score": false,
+        "rf__random_state": 42,
+        "rf__verbose": 0,
+        "rf__warm_start": false,
+        "rf": "RandomForestClassifier",
+        "task": "binary",
+        "weights": [
+          0.5,
+          0.5
+        ]
+      },
+      "val_macro_f1": 0.9989,
+      "val_benign_fpr": 0.0003,
+      "test_macro_f1": 0.9941,
+      "test_macro_f1_unseen": 0.9966,
+      "delta_macro_f1_unseen_minus_all": 0.0025,
+      "test_weighted_f1": 0.9968,
+      "test_accuracy": 0.9968,
+      "test_benign_fpr": 0.0001,
+      "test_benign_fpr_unseen": 0.0001
+    },
+    "fixed_weights_val_tuned": {
+      "weights": {
+        "rf": 0.8,
+        "lgbm": 0.2
+      },
+      "parameters": {
+        "lgbm__boosting_type": "gbdt",
+        "lgbm__class_weight": null,
+        "lgbm__colsample_bytree": 1.0,
+        "lgbm__importance_type": "split",
+        "lgbm__learning_rate": 0.08,
+        "lgbm__max_depth": -1,
+        "lgbm__min_child_samples": 20,
+        "lgbm__min_child_weight": 0.01,
+        "lgbm__min_split_gain": 0.0,
+        "lgbm__n_estimators": 100,
+        "lgbm__n_jobs": -1,
+        "lgbm__num_leaves": 63,
+        "lgbm__objective": null,
+        "lgbm__random_state": 42,
+        "lgbm__reg_alpha": 0.0,
+        "lgbm__reg_lambda": 1.0,
+        "lgbm__subsample": 1.0,
+        "lgbm__subsample_for_bin": 200000,
+        "lgbm__subsample_freq": 0,
+        "lgbm__max_delta_step": 2.0,
+        "lgbm__verbose": -1,
+        "lgbm": "LGBMClassifier",
+        "prefitted": true,
+        "random_state": 42,
+        "rf__bootstrap": true,
+        "rf__ccp_alpha": 0.0,
+        "rf__class_weight": null,
+        "rf__criterion": "gini",
+        "rf__max_depth": 20,
+        "rf__max_features": "sqrt",
+        "rf__max_leaf_nodes": null,
+        "rf__max_samples": 0.25,
+        "rf__min_impurity_decrease": 0.0,
+        "rf__min_samples_leaf": 2,
+        "rf__min_samples_split": 2,
+        "rf__min_weight_fraction_leaf": 0.0,
+        "rf__monotonic_cst": null,
+        "rf__n_estimators": 80,
+        "rf__n_jobs": -1,
+        "rf__oob_score": false,
+        "rf__random_state": 42,
+        "rf__verbose": 0,
+        "rf__warm_start": false,
+        "rf": "RandomForestClassifier",
+        "task": "binary",
+        "weights": [
+          0.8,
+          0.2
+        ]
+      },
+      "val_macro_f1": 0.999,
+      "val_benign_fpr": 0.0002,
+      "test_macro_f1": 0.9941,
+      "test_macro_f1_unseen": 0.9966,
+      "delta_macro_f1_unseen_minus_all": 0.0025,
+      "test_weighted_f1": 0.9968,
+      "test_accuracy": 0.9968,
+      "test_benign_fpr": 0.0,
+      "test_benign_fpr_unseen": 0.0001
+    },
+    "metalearner_stacking": {
+      "meta_learner": "LogisticRegression(C=20.0) + per-class Macro-F1 multipliers",
+      "parameters": {
+        "cv_folds": 3,
+        "lgbm__boosting_type": "gbdt",
+        "lgbm__class_weight": null,
+        "lgbm__colsample_bytree": 1.0,
+        "lgbm__importance_type": "split",
+        "lgbm__learning_rate": 0.08,
+        "lgbm__max_depth": -1,
+        "lgbm__min_child_samples": 20,
+        "lgbm__min_child_weight": 0.01,
+        "lgbm__min_split_gain": 0.0,
+        "lgbm__n_estimators": 100,
+        "lgbm__n_jobs": -1,
+        "lgbm__num_leaves": 63,
+        "lgbm__objective": null,
+        "lgbm__random_state": 42,
+        "lgbm__reg_alpha": 0.0,
+        "lgbm__reg_lambda": 1.0,
+        "lgbm__subsample": 1.0,
+        "lgbm__subsample_for_bin": 200000,
+        "lgbm__subsample_freq": 0,
+        "lgbm__max_delta_step": 2.0,
+        "lgbm__verbose": -1,
+        "lgbm": "LGBMClassifier",
+        "meta_learner": null,
+        "random_state": 42,
+        "rf__bootstrap": true,
+        "rf__ccp_alpha": 0.0,
+        "rf__class_weight": null,
+        "rf__criterion": "gini",
+        "rf__max_depth": 20,
+        "rf__max_features": "sqrt",
+        "rf__max_leaf_nodes": null,
+        "rf__max_samples": 0.25,
+        "rf__min_impurity_decrease": 0.0,
+        "rf__min_samples_leaf": 2,
+        "rf__min_samples_split": 2,
+        "rf__min_weight_fraction_leaf": 0.0,
+        "rf__monotonic_cst": null,
+        "rf__n_estimators": 80,
+        "rf__n_jobs": -1,
+        "rf__oob_score": false,
+        "rf__random_state": 42,
+        "rf__verbose": 0,
+        "rf__warm_start": false,
+        "rf": "RandomForestClassifier",
+        "task": "binary"
+      },
+      "learned_contributions": {
+        "rf_share": 0.5494,
+        "lgbm_share": 0.4506
+      },
+      "val_oof_macro_f1": 0.9989,
+      "val_oof_benign_fpr": 0.0003,
+      "test_macro_f1": 0.994,
+      "test_macro_f1_unseen": 0.9966,
+      "delta_macro_f1_unseen_minus_all": 0.0026,
+      "test_weighted_f1": 0.9967,
+      "test_accuracy": 0.9968,
+      "test_benign_fpr": 0.0001,
+      "test_benign_fpr_unseen": 0.0001,
+      "meta_fit_time_sec": 0.44
+    },
+    "comparison_deltas": {
+      "metalearner_minus_fixed_equal_test_macro_f1": -0.0001,
+      "metalearner_minus_fixed_equal_test_macro_f1_unseen": 0.0,
+      "metalearner_minus_fixed_tuned_test_macro_f1": -0.0001,
+      "metalearner_minus_fixed_tuned_test_macro_f1_unseen": 0.0,
+      "metalearner_minus_best_single_test_macro_f1": -0.0001,
+      "fixed_equal_minus_best_single_test_macro_f1": 0.0
+    },
+    "winner_ensemble_test_macro_f1": "fixed_weights",
+    "fixed_weight_val_sweep": [
+      {
+        "w_rf": 0.0,
+        "w_lgbm": 1.0,
+        "macro_f1": 0.99886,
+        "benign_fpr": 0.0003
+      },
+      {
+        "w_rf": 0.05,
+        "w_lgbm": 0.95,
+        "macro_f1": 0.99886,
+        "benign_fpr": 0.0003
+      },
+      {
+        "w_rf": 0.1,
+        "w_lgbm": 0.9,
+        "macro_f1": 0.99886,
+        "benign_fpr": 0.0003
+      },
+      {
+        "w_rf": 0.15,
+        "w_lgbm": 0.85,
+        "macro_f1": 0.99885,
+        "benign_fpr": 0.0003
+      },
+      {
+        "w_rf": 0.2,
+        "w_lgbm": 0.8,
+        "macro_f1": 0.99885,
+        "benign_fpr": 0.0003
+      },
+      {
+        "w_rf": 0.25,
+        "w_lgbm": 0.75,
+        "macro_f1": 0.99885,
+        "benign_fpr": 0.0003
+      },
+      {
+        "w_rf": 0.3,
+        "w_lgbm": 0.7,
+        "macro_f1": 0.99884,
+        "benign_fpr": 0.0003
+      },
+      {
+        "w_rf": 0.35,
+        "w_lgbm": 0.65,
+        "macro_f1": 0.99884,
+        "benign_fpr": 0.0003
+      },
+      {
+        "w_rf": 0.4,
+        "w_lgbm": 0.6,
+        "macro_f1": 0.99885,
+        "benign_fpr": 0.0003
+      },
+      {
+        "w_rf": 0.45,
+        "w_lgbm": 0.55,
+        "macro_f1": 0.99887,
+        "benign_fpr": 0.00029
+      },
+      {
+        "w_rf": 0.5,
+        "w_lgbm": 0.5,
+        "macro_f1": 0.9989,
+        "benign_fpr": 0.00029
+      },
+      {
+        "w_rf": 0.55,
+        "w_lgbm": 0.45,
+        "macro_f1": 0.99889,
+        "benign_fpr": 0.00029
+      },
+      {
+        "w_rf": 0.6,
+        "w_lgbm": 0.4,
+        "macro_f1": 0.99891,
+        "benign_fpr": 0.00028
+      },
+      {
+        "w_rf": 0.65,
+        "w_lgbm": 0.35,
+        "macro_f1": 0.99891,
+        "benign_fpr": 0.00027
+      },
+      {
+        "w_rf": 0.7,
+        "w_lgbm": 0.3,
+        "macro_f1": 0.99892,
+        "benign_fpr": 0.00025
+      },
+      {
+        "w_rf": 0.75,
+        "w_lgbm": 0.25,
+        "macro_f1": 0.99892,
+        "benign_fpr": 0.00025
+      },
+      {
+        "w_rf": 0.8,
+        "w_lgbm": 0.2,
+        "macro_f1": 0.99895,
+        "benign_fpr": 0.00023
+      },
+      {
+        "w_rf": 0.85,
+        "w_lgbm": 0.15,
+        "macro_f1": 0.99894,
+        "benign_fpr": 0.00023
+      },
+      {
+        "w_rf": 0.9,
+        "w_lgbm": 0.1,
+        "macro_f1": 0.99892,
+        "benign_fpr": 0.00023
+      },
+      {
+        "w_rf": 0.95,
+        "w_lgbm": 0.05,
+        "macro_f1": 0.99894,
+        "benign_fpr": 0.00021
+      },
+      {
+        "w_rf": 1.0,
+        "w_lgbm": 0.0,
+        "macro_f1": 0.99891,
+        "benign_fpr": 0.00024
+      }
+    ],
+    "per_class_comparison": {
+      "attack": {
+        "support": 102797,
+        "unseen_support": 48633,
+        "pct_twins": 52.69,
+        "fixed_05_05_f1": 0.9901,
+        "fixed_05_05_f1_unseen": 0.9942,
+        "fixed_tuned_f1": 0.9901,
+        "fixed_tuned_f1_unseen": 0.9942,
+        "metalearner_f1": 0.99,
+        "metalearner_f1_unseen": 0.9942,
+        "delta_meta_minus_fixed_05_05": -0.0001,
+        "delta_meta_minus_fixed_tuned": -0.0001
+      },
+      "benign": {
+        "support": 527384,
+        "unseen_support": 271722,
+        "pct_twins": 48.48,
+        "fixed_05_05_f1": 0.9981,
+        "fixed_05_05_f1_unseen": 0.999,
+        "fixed_tuned_f1": 0.9981,
+        "fixed_tuned_f1_unseen": 0.999,
+        "metalearner_f1": 0.9981,
+        "metalearner_f1_unseen": 0.999,
+        "delta_meta_minus_fixed_05_05": 0.0,
+        "delta_meta_minus_fixed_tuned": 0.0
+      }
+    }
+  },
+  {
+    "task": "binary",
+    "dst_port": false,
+    "n_features": 55,
+    "data_version": "nfs2023te-v1",
+    "code_commit": "ea21e85",
+    "train_twin_summary": {
+      "n_test_rows": 630181,
+      "n_feature_twins": 361887,
+      "pct_feature_twins": 57.43,
+      "n_unseen_rows": 268294
+    },
+    "base_models": {
+      "random_forest_test_macro_f1": 0.9933,
+      "random_forest_test_macro_f1_unseen": 0.9975,
+      "random_forest_test_benign_fpr": 0.0001,
+      "lightgbm_test_macro_f1": 0.9934,
+      "lightgbm_test_macro_f1_unseen": 0.9976,
+      "lightgbm_test_benign_fpr": 0.0001
+    },
+    "fixed_weights_equal_05_05": {
+      "weights": {
+        "rf": 0.5,
+        "lgbm": 0.5
+      },
+      "parameters": {
+        "lgbm__boosting_type": "gbdt",
+        "lgbm__class_weight": null,
+        "lgbm__colsample_bytree": 1.0,
+        "lgbm__importance_type": "split",
+        "lgbm__learning_rate": 0.08,
+        "lgbm__max_depth": -1,
+        "lgbm__min_child_samples": 20,
+        "lgbm__min_child_weight": 0.01,
+        "lgbm__min_split_gain": 0.0,
+        "lgbm__n_estimators": 100,
+        "lgbm__n_jobs": -1,
+        "lgbm__num_leaves": 63,
+        "lgbm__objective": null,
+        "lgbm__random_state": 42,
+        "lgbm__reg_alpha": 0.0,
+        "lgbm__reg_lambda": 1.0,
+        "lgbm__subsample": 1.0,
+        "lgbm__subsample_for_bin": 200000,
+        "lgbm__subsample_freq": 0,
+        "lgbm__max_delta_step": 2.0,
+        "lgbm__verbose": -1,
+        "lgbm": "LGBMClassifier",
+        "prefitted": true,
+        "random_state": 42,
+        "rf__bootstrap": true,
+        "rf__ccp_alpha": 0.0,
+        "rf__class_weight": null,
+        "rf__criterion": "gini",
+        "rf__max_depth": 20,
+        "rf__max_features": "sqrt",
+        "rf__max_leaf_nodes": null,
+        "rf__max_samples": 0.25,
+        "rf__min_impurity_decrease": 0.0,
+        "rf__min_samples_leaf": 2,
+        "rf__min_samples_split": 2,
+        "rf__min_weight_fraction_leaf": 0.0,
+        "rf__monotonic_cst": null,
+        "rf__n_estimators": 80,
+        "rf__n_jobs": -1,
+        "rf__oob_score": false,
+        "rf__random_state": 42,
+        "rf__verbose": 0,
+        "rf__warm_start": false,
+        "rf": "RandomForestClassifier",
+        "task": "binary",
+        "weights": [
+          0.5,
+          0.5
+        ]
+      },
+      "val_macro_f1": 0.9983,
+      "val_benign_fpr": 0.0004,
+      "test_macro_f1": 0.9937,
+      "test_macro_f1_unseen": 0.9982,
+      "delta_macro_f1_unseen_minus_all": 0.0045,
+      "test_weighted_f1": 0.9966,
+      "test_accuracy": 0.9966,
+      "test_benign_fpr": 0.0,
+      "test_benign_fpr_unseen": 0.0
+    },
+    "fixed_weights_val_tuned": {
+      "weights": {
+        "rf": 0.85,
+        "lgbm": 0.15
+      },
+      "parameters": {
+        "lgbm__boosting_type": "gbdt",
+        "lgbm__class_weight": null,
+        "lgbm__colsample_bytree": 1.0,
+        "lgbm__importance_type": "split",
+        "lgbm__learning_rate": 0.08,
+        "lgbm__max_depth": -1,
+        "lgbm__min_child_samples": 20,
+        "lgbm__min_child_weight": 0.01,
+        "lgbm__min_split_gain": 0.0,
+        "lgbm__n_estimators": 100,
+        "lgbm__n_jobs": -1,
+        "lgbm__num_leaves": 63,
+        "lgbm__objective": null,
+        "lgbm__random_state": 42,
+        "lgbm__reg_alpha": 0.0,
+        "lgbm__reg_lambda": 1.0,
+        "lgbm__subsample": 1.0,
+        "lgbm__subsample_for_bin": 200000,
+        "lgbm__subsample_freq": 0,
+        "lgbm__max_delta_step": 2.0,
+        "lgbm__verbose": -1,
+        "lgbm": "LGBMClassifier",
+        "prefitted": true,
+        "random_state": 42,
+        "rf__bootstrap": true,
+        "rf__ccp_alpha": 0.0,
+        "rf__class_weight": null,
+        "rf__criterion": "gini",
+        "rf__max_depth": 20,
+        "rf__max_features": "sqrt",
+        "rf__max_leaf_nodes": null,
+        "rf__max_samples": 0.25,
+        "rf__min_impurity_decrease": 0.0,
+        "rf__min_samples_leaf": 2,
+        "rf__min_samples_split": 2,
+        "rf__min_weight_fraction_leaf": 0.0,
+        "rf__monotonic_cst": null,
+        "rf__n_estimators": 80,
+        "rf__n_jobs": -1,
+        "rf__oob_score": false,
+        "rf__random_state": 42,
+        "rf__verbose": 0,
+        "rf__warm_start": false,
+        "rf": "RandomForestClassifier",
+        "task": "binary",
+        "weights": [
+          0.85,
+          0.15
+        ]
+      },
+      "val_macro_f1": 0.9984,
+      "val_benign_fpr": 0.0003,
+      "test_macro_f1": 0.9934,
+      "test_macro_f1_unseen": 0.9975,
+      "delta_macro_f1_unseen_minus_all": 0.0041,
+      "test_weighted_f1": 0.9964,
+      "test_accuracy": 0.9964,
+      "test_benign_fpr": 0.0001,
+      "test_benign_fpr_unseen": 0.0
+    },
+    "metalearner_stacking": {
+      "meta_learner": "LogisticRegression(C=20.0) + per-class Macro-F1 multipliers",
+      "parameters": {
+        "cv_folds": 3,
+        "lgbm__boosting_type": "gbdt",
+        "lgbm__class_weight": null,
+        "lgbm__colsample_bytree": 1.0,
+        "lgbm__importance_type": "split",
+        "lgbm__learning_rate": 0.08,
+        "lgbm__max_depth": -1,
+        "lgbm__min_child_samples": 20,
+        "lgbm__min_child_weight": 0.01,
+        "lgbm__min_split_gain": 0.0,
+        "lgbm__n_estimators": 100,
+        "lgbm__n_jobs": -1,
+        "lgbm__num_leaves": 63,
+        "lgbm__objective": null,
+        "lgbm__random_state": 42,
+        "lgbm__reg_alpha": 0.0,
+        "lgbm__reg_lambda": 1.0,
+        "lgbm__subsample": 1.0,
+        "lgbm__subsample_for_bin": 200000,
+        "lgbm__subsample_freq": 0,
+        "lgbm__max_delta_step": 2.0,
+        "lgbm__verbose": -1,
+        "lgbm": "LGBMClassifier",
+        "meta_learner": null,
+        "random_state": 42,
+        "rf__bootstrap": true,
+        "rf__ccp_alpha": 0.0,
+        "rf__class_weight": null,
+        "rf__criterion": "gini",
+        "rf__max_depth": 20,
+        "rf__max_features": "sqrt",
+        "rf__max_leaf_nodes": null,
+        "rf__max_samples": 0.25,
+        "rf__min_impurity_decrease": 0.0,
+        "rf__min_samples_leaf": 2,
+        "rf__min_samples_split": 2,
+        "rf__min_weight_fraction_leaf": 0.0,
+        "rf__monotonic_cst": null,
+        "rf__n_estimators": 80,
+        "rf__n_jobs": -1,
+        "rf__oob_score": false,
+        "rf__random_state": 42,
+        "rf__verbose": 0,
+        "rf__warm_start": false,
+        "rf": "RandomForestClassifier",
+        "task": "binary"
+      },
+      "learned_contributions": {
+        "rf_share": 0.5269,
+        "lgbm_share": 0.4731
+      },
+      "val_oof_macro_f1": 0.9987,
+      "val_oof_benign_fpr": 0.0001,
+      "test_macro_f1": 0.9928,
+      "test_macro_f1_unseen": 0.9964,
+      "delta_macro_f1_unseen_minus_all": 0.0036,
+      "test_weighted_f1": 0.9961,
+      "test_accuracy": 0.9961,
+      "test_benign_fpr": 0.0,
+      "test_benign_fpr_unseen": 0.0,
+      "meta_fit_time_sec": 0.42
+    },
+    "comparison_deltas": {
+      "metalearner_minus_fixed_equal_test_macro_f1": -0.0009,
+      "metalearner_minus_fixed_equal_test_macro_f1_unseen": -0.0018,
+      "metalearner_minus_fixed_tuned_test_macro_f1": -0.0006,
+      "metalearner_minus_fixed_tuned_test_macro_f1_unseen": -0.0011,
+      "metalearner_minus_best_single_test_macro_f1": -0.0006,
+      "fixed_equal_minus_best_single_test_macro_f1": 0.0003
+    },
+    "winner_ensemble_test_macro_f1": "fixed_weights",
+    "fixed_weight_val_sweep": [
+      {
+        "w_rf": 0.0,
+        "w_lgbm": 1.0,
+        "macro_f1": 0.99822,
+        "benign_fpr": 0.00048
+      },
+      {
+        "w_rf": 0.05,
+        "w_lgbm": 0.95,
+        "macro_f1": 0.99822,
+        "benign_fpr": 0.00048
+      },
+      {
+        "w_rf": 0.1,
+        "w_lgbm": 0.9,
+        "macro_f1": 0.99824,
+        "benign_fpr": 0.00047
+      },
+      {
+        "w_rf": 0.15,
+        "w_lgbm": 0.85,
+        "macro_f1": 0.99824,
+        "benign_fpr": 0.00047
+      },
+      {
+        "w_rf": 0.2,
+        "w_lgbm": 0.8,
+        "macro_f1": 0.99827,
+        "benign_fpr": 0.00044
+      },
+      {
+        "w_rf": 0.25,
+        "w_lgbm": 0.75,
+        "macro_f1": 0.99827,
+        "benign_fpr": 0.00044
+      },
+      {
+        "w_rf": 0.3,
+        "w_lgbm": 0.7,
+        "macro_f1": 0.99828,
+        "benign_fpr": 0.00043
+      },
+      {
+        "w_rf": 0.35,
+        "w_lgbm": 0.65,
+        "macro_f1": 0.9983,
+        "benign_fpr": 0.00042
+      },
+      {
+        "w_rf": 0.4,
+        "w_lgbm": 0.6,
+        "macro_f1": 0.99829,
+        "benign_fpr": 0.00042
+      },
+      {
+        "w_rf": 0.45,
+        "w_lgbm": 0.55,
+        "macro_f1": 0.99828,
+        "benign_fpr": 0.00043
+      },
+      {
+        "w_rf": 0.5,
+        "w_lgbm": 0.5,
+        "macro_f1": 0.99831,
+        "benign_fpr": 0.00041
+      },
+      {
+        "w_rf": 0.55,
+        "w_lgbm": 0.45,
+        "macro_f1": 0.99832,
+        "benign_fpr": 0.0004
+      },
+      {
+        "w_rf": 0.6,
+        "w_lgbm": 0.4,
+        "macro_f1": 0.9983,
+        "benign_fpr": 0.00041
+      },
+      {
+        "w_rf": 0.65,
+        "w_lgbm": 0.35,
+        "macro_f1": 0.99831,
+        "benign_fpr": 0.00041
+      },
+      {
+        "w_rf": 0.7,
+        "w_lgbm": 0.3,
+        "macro_f1": 0.99839,
+        "benign_fpr": 0.00035
+      },
+      {
+        "w_rf": 0.75,
+        "w_lgbm": 0.25,
+        "macro_f1": 0.99839,
+        "benign_fpr": 0.00035
+      },
+      {
+        "w_rf": 0.8,
+        "w_lgbm": 0.2,
+        "macro_f1": 0.9984,
+        "benign_fpr": 0.00035
+      },
+      {
+        "w_rf": 0.85,
+        "w_lgbm": 0.15,
+        "macro_f1": 0.9984,
+        "benign_fpr": 0.00034
+      },
+      {
+        "w_rf": 0.9,
+        "w_lgbm": 0.1,
+        "macro_f1": 0.9984,
+        "benign_fpr": 0.00034
+      },
+      {
+        "w_rf": 0.95,
+        "w_lgbm": 0.05,
+        "macro_f1": 0.99839,
+        "benign_fpr": 0.00034
+      },
+      {
+        "w_rf": 1.0,
+        "w_lgbm": 0.0,
+        "macro_f1": 0.99838,
+        "benign_fpr": 0.00034
+      }
+    ],
+    "per_class_comparison": {
+      "attack": {
+        "support": 102797,
+        "unseen_support": 48165,
+        "pct_twins": 53.15,
+        "fixed_05_05_f1": 0.9894,
+        "fixed_05_05_f1_unseen": 0.997,
+        "fixed_tuned_f1": 0.9888,
+        "fixed_tuned_f1_unseen": 0.9959,
+        "metalearner_f1": 0.988,
+        "metalearner_f1_unseen": 0.9942,
+        "delta_meta_minus_fixed_05_05": -0.0014,
+        "delta_meta_minus_fixed_tuned": -0.0008
+      },
+      "benign": {
+        "support": 527384,
+        "unseen_support": 220129,
+        "pct_twins": 58.26,
+        "fixed_05_05_f1": 0.998,
+        "fixed_05_05_f1_unseen": 0.9993,
+        "fixed_tuned_f1": 0.9979,
+        "fixed_tuned_f1_unseen": 0.9991,
+        "metalearner_f1": 0.9977,
+        "metalearner_f1_unseen": 0.9987,
+        "delta_meta_minus_fixed_05_05": -0.0003,
+        "delta_meta_minus_fixed_tuned": -0.0002
+      }
+    }
+  },
+  {
+    "task": "multiclass",
+    "dst_port": true,
+    "n_features": 56,
+    "data_version": "nfs2023te-v1",
+    "code_commit": "ea21e85",
+    "train_twin_summary": {
+      "n_test_rows": 630181,
+      "n_feature_twins": 309826,
+      "pct_feature_twins": 49.16,
+      "n_unseen_rows": 320355
+    },
+    "base_models": {
+      "random_forest_test_macro_f1": 0.8855,
+      "random_forest_test_macro_f1_unseen": 0.8185,
+      "random_forest_test_benign_fpr": 0.0,
+      "lightgbm_test_macro_f1": 0.8868,
+      "lightgbm_test_macro_f1_unseen": 0.8413,
+      "lightgbm_test_benign_fpr": 0.0
+    },
+    "fixed_weights_equal_05_05": {
+      "weights": {
+        "rf": 0.5,
+        "lgbm": 0.5
+      },
+      "parameters": {
+        "lgbm__boosting_type": "gbdt",
+        "lgbm__class_weight": null,
+        "lgbm__colsample_bytree": 1.0,
+        "lgbm__importance_type": "split",
+        "lgbm__learning_rate": 0.05,
+        "lgbm__max_depth": -1,
+        "lgbm__min_child_samples": 20,
+        "lgbm__min_child_weight": 1.0,
+        "lgbm__min_split_gain": 0.0,
+        "lgbm__n_estimators": 100,
+        "lgbm__n_jobs": -1,
+        "lgbm__num_leaves": 31,
+        "lgbm__objective": null,
+        "lgbm__random_state": 42,
+        "lgbm__reg_alpha": 0.0,
+        "lgbm__reg_lambda": 10.0,
+        "lgbm__subsample": 1.0,
+        "lgbm__subsample_for_bin": 200000,
+        "lgbm__subsample_freq": 0,
+        "lgbm__max_delta_step": 2.0,
+        "lgbm__verbose": -1,
+        "lgbm": "LGBMClassifier",
+        "prefitted": true,
+        "random_state": 42,
+        "rf__bootstrap": true,
+        "rf__ccp_alpha": 0.0,
+        "rf__class_weight": null,
+        "rf__criterion": "gini",
+        "rf__max_depth": 20,
+        "rf__max_features": "sqrt",
+        "rf__max_leaf_nodes": null,
+        "rf__max_samples": 0.25,
+        "rf__min_impurity_decrease": 0.0,
+        "rf__min_samples_leaf": 2,
+        "rf__min_samples_split": 2,
+        "rf__min_weight_fraction_leaf": 0.0,
+        "rf__monotonic_cst": null,
+        "rf__n_estimators": 80,
+        "rf__n_jobs": -1,
+        "rf__oob_score": false,
+        "rf__random_state": 42,
+        "rf__verbose": 0,
+        "rf__warm_start": false,
+        "rf": "RandomForestClassifier",
+        "task": "multiclass",
+        "weights": [
+          0.5,
+          0.5
+        ]
+      },
+      "val_macro_f1": 0.9541,
+      "val_benign_fpr": 0.0001,
+      "test_macro_f1": 0.8901,
+      "test_macro_f1_unseen": 0.8481,
+      "delta_macro_f1_unseen_minus_all": -0.042,
+      "test_weighted_f1": 0.9966,
+      "test_accuracy": 0.9967,
+      "test_benign_fpr": 0.0,
+      "test_benign_fpr_unseen": 0.0
+    },
+    "fixed_weights_val_tuned": {
+      "weights": {
+        "rf": 0.9,
+        "lgbm": 0.1
+      },
+      "parameters": {
+        "lgbm__boosting_type": "gbdt",
+        "lgbm__class_weight": null,
+        "lgbm__colsample_bytree": 1.0,
+        "lgbm__importance_type": "split",
+        "lgbm__learning_rate": 0.05,
+        "lgbm__max_depth": -1,
+        "lgbm__min_child_samples": 20,
+        "lgbm__min_child_weight": 1.0,
+        "lgbm__min_split_gain": 0.0,
+        "lgbm__n_estimators": 100,
+        "lgbm__n_jobs": -1,
+        "lgbm__num_leaves": 31,
+        "lgbm__objective": null,
+        "lgbm__random_state": 42,
+        "lgbm__reg_alpha": 0.0,
+        "lgbm__reg_lambda": 10.0,
+        "lgbm__subsample": 1.0,
+        "lgbm__subsample_for_bin": 200000,
+        "lgbm__subsample_freq": 0,
+        "lgbm__max_delta_step": 2.0,
+        "lgbm__verbose": -1,
+        "lgbm": "LGBMClassifier",
+        "prefitted": true,
+        "random_state": 42,
+        "rf__bootstrap": true,
+        "rf__ccp_alpha": 0.0,
+        "rf__class_weight": null,
+        "rf__criterion": "gini",
+        "rf__max_depth": 20,
+        "rf__max_features": "sqrt",
+        "rf__max_leaf_nodes": null,
+        "rf__max_samples": 0.25,
+        "rf__min_impurity_decrease": 0.0,
+        "rf__min_samples_leaf": 2,
+        "rf__min_samples_split": 2,
+        "rf__min_weight_fraction_leaf": 0.0,
+        "rf__monotonic_cst": null,
+        "rf__n_estimators": 80,
+        "rf__n_jobs": -1,
+        "rf__oob_score": false,
+        "rf__random_state": 42,
+        "rf__verbose": 0,
+        "rf__warm_start": false,
+        "rf": "RandomForestClassifier",
+        "task": "multiclass",
+        "weights": [
+          0.9,
+          0.1
+        ]
+      },
+      "val_macro_f1": 0.9596,
+      "val_benign_fpr": 0.0001,
+      "test_macro_f1": 0.8896,
+      "test_macro_f1_unseen": 0.8276,
+      "delta_macro_f1_unseen_minus_all": -0.062,
+      "test_weighted_f1": 0.9963,
+      "test_accuracy": 0.9963,
+      "test_benign_fpr": 0.0,
+      "test_benign_fpr_unseen": 0.0001
+    },
+    "metalearner_stacking": {
+      "meta_learner": "LogisticRegression(C=20.0) + per-class Macro-F1 multipliers",
+      "parameters": {
+        "cv_folds": 3,
+        "lgbm__boosting_type": "gbdt",
+        "lgbm__class_weight": null,
+        "lgbm__colsample_bytree": 1.0,
+        "lgbm__importance_type": "split",
+        "lgbm__learning_rate": 0.05,
+        "lgbm__max_depth": -1,
+        "lgbm__min_child_samples": 20,
+        "lgbm__min_child_weight": 1.0,
+        "lgbm__min_split_gain": 0.0,
+        "lgbm__n_estimators": 100,
+        "lgbm__n_jobs": -1,
+        "lgbm__num_leaves": 31,
+        "lgbm__objective": null,
+        "lgbm__random_state": 42,
+        "lgbm__reg_alpha": 0.0,
+        "lgbm__reg_lambda": 10.0,
+        "lgbm__subsample": 1.0,
+        "lgbm__subsample_for_bin": 200000,
+        "lgbm__subsample_freq": 0,
+        "lgbm__max_delta_step": 2.0,
+        "lgbm__verbose": -1,
+        "lgbm": "LGBMClassifier",
+        "meta_learner": null,
+        "random_state": 42,
+        "rf__bootstrap": true,
+        "rf__ccp_alpha": 0.0,
+        "rf__class_weight": null,
+        "rf__criterion": "gini",
+        "rf__max_depth": 20,
+        "rf__max_features": "sqrt",
+        "rf__max_leaf_nodes": null,
+        "rf__max_samples": 0.25,
+        "rf__min_impurity_decrease": 0.0,
+        "rf__min_samples_leaf": 2,
+        "rf__min_samples_split": 2,
+        "rf__min_weight_fraction_leaf": 0.0,
+        "rf__monotonic_cst": null,
+        "rf__n_estimators": 80,
+        "rf__n_jobs": -1,
+        "rf__oob_score": false,
+        "rf__random_state": 42,
+        "rf__verbose": 0,
+        "rf__warm_start": false,
+        "rf": "RandomForestClassifier",
+        "task": "multiclass"
+      },
+      "learned_contributions": {
+        "rf_share": 0.5417,
+        "lgbm_share": 0.4583
+      },
+      "val_oof_macro_f1": 0.9744,
+      "val_oof_benign_fpr": 0.0002,
+      "test_macro_f1": 0.9107,
+      "test_macro_f1_unseen": 0.8637,
+      "delta_macro_f1_unseen_minus_all": -0.047,
+      "test_weighted_f1": 0.9966,
+      "test_accuracy": 0.9966,
+      "test_benign_fpr": 0.0001,
+      "test_benign_fpr_unseen": 0.0001,
+      "meta_fit_time_sec": 2.84
+    },
+    "comparison_deltas": {
+      "metalearner_minus_fixed_equal_test_macro_f1": 0.0206,
+      "metalearner_minus_fixed_equal_test_macro_f1_unseen": 0.0156,
+      "metalearner_minus_fixed_tuned_test_macro_f1": 0.0211,
+      "metalearner_minus_fixed_tuned_test_macro_f1_unseen": 0.0361,
+      "metalearner_minus_best_single_test_macro_f1": 0.0239,
+      "fixed_equal_minus_best_single_test_macro_f1": 0.0033
+    },
+    "winner_ensemble_test_macro_f1": "metalearner",
+    "fixed_weight_val_sweep": [
+      {
+        "w_rf": 0.0,
+        "w_lgbm": 1.0,
+        "macro_f1": 0.95182,
+        "benign_fpr": 0.00012
+      },
+      {
+        "w_rf": 0.05,
+        "w_lgbm": 0.95,
+        "macro_f1": 0.95179,
+        "benign_fpr": 0.00012
+      },
+      {
+        "w_rf": 0.1,
+        "w_lgbm": 0.9,
+        "macro_f1": 0.95182,
+        "benign_fpr": 0.00011
+      },
+      {
+        "w_rf": 0.15,
+        "w_lgbm": 0.85,
+        "macro_f1": 0.95384,
+        "benign_fpr": 0.00011
+      },
+      {
+        "w_rf": 0.2,
+        "w_lgbm": 0.8,
+        "macro_f1": 0.95383,
+        "benign_fpr": 0.00011
+      },
+      {
+        "w_rf": 0.25,
+        "w_lgbm": 0.75,
+        "macro_f1": 0.95417,
+        "benign_fpr": 0.00011
+      },
+      {
+        "w_rf": 0.3,
+        "w_lgbm": 0.7,
+        "macro_f1": 0.95413,
+        "benign_fpr": 0.00011
+      },
+      {
+        "w_rf": 0.35,
+        "w_lgbm": 0.65,
+        "macro_f1": 0.95414,
+        "benign_fpr": 0.00011
+      },
+      {
+        "w_rf": 0.4,
+        "w_lgbm": 0.6,
+        "macro_f1": 0.95414,
+        "benign_fpr": 0.00011
+      },
+      {
+        "w_rf": 0.45,
+        "w_lgbm": 0.55,
+        "macro_f1": 0.95414,
+        "benign_fpr": 0.00011
+      },
+      {
+        "w_rf": 0.5,
+        "w_lgbm": 0.5,
+        "macro_f1": 0.95415,
+        "benign_fpr": 0.00011
+      },
+      {
+        "w_rf": 0.55,
+        "w_lgbm": 0.45,
+        "macro_f1": 0.95415,
+        "benign_fpr": 0.00011
+      },
+      {
+        "w_rf": 0.6,
+        "w_lgbm": 0.4,
+        "macro_f1": 0.95415,
+        "benign_fpr": 0.00011
+      },
+      {
+        "w_rf": 0.65,
+        "w_lgbm": 0.35,
+        "macro_f1": 0.95413,
+        "benign_fpr": 0.00011
+      },
+      {
+        "w_rf": 0.7,
+        "w_lgbm": 0.3,
+        "macro_f1": 0.95419,
+        "benign_fpr": 0.00011
+      },
+      {
+        "w_rf": 0.75,
+        "w_lgbm": 0.25,
+        "macro_f1": 0.95417,
+        "benign_fpr": 0.00011
+      },
+      {
+        "w_rf": 0.8,
+        "w_lgbm": 0.2,
+        "macro_f1": 0.95416,
+        "benign_fpr": 0.00012
+      },
+      {
+        "w_rf": 0.85,
+        "w_lgbm": 0.15,
+        "macro_f1": 0.95264,
+        "benign_fpr": 0.00012
+      },
+      {
+        "w_rf": 0.9,
+        "w_lgbm": 0.1,
+        "macro_f1": 0.95956,
+        "benign_fpr": 0.00014
+      },
+      {
+        "w_rf": 0.95,
+        "w_lgbm": 0.05,
+        "macro_f1": 0.95953,
+        "benign_fpr": 0.00015
+      },
+      {
+        "w_rf": 1.0,
+        "w_lgbm": 0.0,
+        "macro_f1": 0.95948,
+        "benign_fpr": 0.00017
+      }
+    ],
+    "per_class_comparison": {
+      "BENIGN": {
+        "support": 527384,
+        "unseen_support": 271722,
+        "pct_twins": 48.48,
+        "fixed_05_05_f1": 0.9982,
+        "fixed_05_05_f1_unseen": 0.9992,
+        "fixed_tuned_f1": 0.998,
+        "fixed_tuned_f1_unseen": 0.9989,
+        "metalearner_f1": 0.9982,
+        "metalearner_f1_unseen": 0.9992,
+        "delta_meta_minus_fixed_05_05": 0.0,
+        "delta_meta_minus_fixed_tuned": 0.0002
+      },
+      "Bot": {
+        "support": 148,
+        "unseen_support": 106,
+        "pct_twins": 28.38,
+        "fixed_05_05_f1": 0.9966,
+        "fixed_05_05_f1_unseen": 0.9953,
+        "fixed_tuned_f1": 0.9966,
+        "fixed_tuned_f1_unseen": 0.9953,
+        "metalearner_f1": 0.9966,
+        "metalearner_f1_unseen": 0.9953,
+        "delta_meta_minus_fixed_05_05": 0.0,
+        "delta_meta_minus_fixed_tuned": 0.0
+      },
+      "DDoS": {
+        "support": 19139,
+        "unseen_support": 15085,
+        "pct_twins": 21.18,
+        "fixed_05_05_f1": 0.9991,
+        "fixed_05_05_f1_unseen": 0.9989,
+        "fixed_tuned_f1": 0.9991,
+        "fixed_tuned_f1_unseen": 0.9988,
+        "metalearner_f1": 0.999,
+        "metalearner_f1_unseen": 0.9987,
+        "delta_meta_minus_fixed_05_05": -0.0001,
+        "delta_meta_minus_fixed_tuned": -0.0001
+      },
+      "DoS GoldenEye": {
+        "support": 1585,
+        "unseen_support": 1528,
+        "pct_twins": 3.6,
+        "fixed_05_05_f1": 0.9823,
+        "fixed_05_05_f1_unseen": 0.9827,
+        "fixed_tuned_f1": 0.9758,
+        "fixed_tuned_f1_unseen": 0.9759,
+        "metalearner_f1": 0.9839,
+        "metalearner_f1_unseen": 0.9842,
+        "delta_meta_minus_fixed_05_05": 0.0016,
+        "delta_meta_minus_fixed_tuned": 0.0081
+      },
+      "DoS Hulk": {
+        "support": 31711,
+        "unseen_support": 29092,
+        "pct_twins": 8.26,
+        "fixed_05_05_f1": 0.9999,
+        "fixed_05_05_f1_unseen": 0.9999,
+        "fixed_tuned_f1": 0.9999,
+        "fixed_tuned_f1_unseen": 0.9999,
+        "metalearner_f1": 0.9999,
+        "metalearner_f1_unseen": 0.9999,
+        "delta_meta_minus_fixed_05_05": 0.0,
+        "delta_meta_minus_fixed_tuned": 0.0
+      },
+      "DoS Slowhttptest": {
+        "support": 594,
+        "unseen_support": 285,
+        "pct_twins": 52.02,
+        "fixed_05_05_f1": 0.8625,
+        "fixed_05_05_f1_unseen": 0.7625,
+        "fixed_tuned_f1": 0.6918,
+        "fixed_tuned_f1_unseen": 0.3857,
+        "metalearner_f1": 0.838,
+        "metalearner_f1_unseen": 0.723,
+        "delta_meta_minus_fixed_05_05": -0.0245,
+        "delta_meta_minus_fixed_tuned": 0.1462
+      },
+      "DoS slowloris": {
+        "support": 1039,
+        "unseen_support": 524,
+        "pct_twins": 49.57,
+        "fixed_05_05_f1": 0.9213,
+        "fixed_05_05_f1_unseen": 0.8465,
+        "fixed_tuned_f1": 0.8927,
+        "fixed_tuned_f1_unseen": 0.7786,
+        "metalearner_f1": 0.8983,
+        "metalearner_f1_unseen": 0.7927,
+        "delta_meta_minus_fixed_05_05": -0.023,
+        "delta_meta_minus_fixed_tuned": 0.0056
+      },
+      "FTP-Patator": {
+        "support": 1593,
+        "unseen_support": 797,
+        "pct_twins": 49.97,
+        "fixed_05_05_f1": 1.0,
+        "fixed_05_05_f1_unseen": 1.0,
+        "fixed_tuned_f1": 1.0,
+        "fixed_tuned_f1_unseen": 1.0,
+        "metalearner_f1": 1.0,
+        "metalearner_f1_unseen": 1.0,
+        "delta_meta_minus_fixed_05_05": 0.0,
+        "delta_meta_minus_fixed_tuned": 0.0
+      },
+      "PortScan": {
+        "support": 46343,
+        "unseen_support": 581,
+        "pct_twins": 98.75,
+        "fixed_05_05_f1": 0.9804,
+        "fixed_05_05_f1_unseen": 0.6434,
+        "fixed_tuned_f1": 0.9806,
+        "fixed_tuned_f1_unseen": 0.6489,
+        "metalearner_f1": 0.9806,
+        "metalearner_f1_unseen": 0.629,
+        "delta_meta_minus_fixed_05_05": 0.0002,
+        "delta_meta_minus_fixed_tuned": 0.0
+      },
+      "Rare attack": {
+        "support": 18,
+        "unseen_support": 18,
+        "pct_twins": 0.0,
+        "fixed_05_05_f1": 0.0,
+        "fixed_05_05_f1_unseen": 0.0,
+        "fixed_tuned_f1": 0.2,
+        "fixed_tuned_f1_unseen": 0.2,
+        "metalearner_f1": 0.2927,
+        "metalearner_f1_unseen": 0.2927,
+        "delta_meta_minus_fixed_05_05": 0.2927,
+        "delta_meta_minus_fixed_tuned": 0.0927
+      },
+      "SSH-Patator": {
+        "support": 596,
+        "unseen_support": 586,
+        "pct_twins": 1.68,
+        "fixed_05_05_f1": 0.9571,
+        "fixed_05_05_f1_unseen": 0.9656,
+        "fixed_tuned_f1": 0.9571,
+        "fixed_tuned_f1_unseen": 0.9656,
+        "metalearner_f1": 0.9571,
+        "metalearner_f1_unseen": 0.9656,
+        "delta_meta_minus_fixed_05_05": 0.0,
+        "delta_meta_minus_fixed_tuned": 0.0
+      },
+      "Web Attack - Brute Force": {
+        "support": 31,
+        "unseen_support": 31,
+        "pct_twins": 0.0,
+        "fixed_05_05_f1": 0.9836,
+        "fixed_05_05_f1_unseen": 0.9836,
+        "fixed_tuned_f1": 0.9836,
+        "fixed_tuned_f1_unseen": 0.9836,
+        "metalearner_f1": 0.9836,
+        "metalearner_f1_unseen": 0.9836,
+        "delta_meta_minus_fixed_05_05": 0.0,
+        "delta_meta_minus_fixed_tuned": 0.0
+      }
+    }
+  },
+  {
+    "task": "multiclass",
+    "dst_port": false,
+    "n_features": 55,
+    "data_version": "nfs2023te-v1",
+    "code_commit": "ea21e85",
+    "train_twin_summary": {
+      "n_test_rows": 630181,
+      "n_feature_twins": 361887,
+      "pct_feature_twins": 57.43,
+      "n_unseen_rows": 268294
+    },
+    "base_models": {
+      "random_forest_test_macro_f1": 0.8633,
+      "random_forest_test_macro_f1_unseen": 0.7959,
+      "random_forest_test_benign_fpr": 0.0001,
+      "lightgbm_test_macro_f1": 0.8799,
+      "lightgbm_test_macro_f1_unseen": 0.8317,
+      "lightgbm_test_benign_fpr": 0.0001
+    },
+    "fixed_weights_equal_05_05": {
+      "weights": {
+        "rf": 0.5,
+        "lgbm": 0.5
+      },
+      "parameters": {
+        "lgbm__boosting_type": "gbdt",
+        "lgbm__class_weight": null,
+        "lgbm__colsample_bytree": 1.0,
+        "lgbm__importance_type": "split",
+        "lgbm__learning_rate": 0.05,
+        "lgbm__max_depth": -1,
+        "lgbm__min_child_samples": 20,
+        "lgbm__min_child_weight": 1.0,
+        "lgbm__min_split_gain": 0.0,
+        "lgbm__n_estimators": 100,
+        "lgbm__n_jobs": -1,
+        "lgbm__num_leaves": 31,
+        "lgbm__objective": null,
+        "lgbm__random_state": 42,
+        "lgbm__reg_alpha": 0.0,
+        "lgbm__reg_lambda": 10.0,
+        "lgbm__subsample": 1.0,
+        "lgbm__subsample_for_bin": 200000,
+        "lgbm__subsample_freq": 0,
+        "lgbm__max_delta_step": 2.0,
+        "lgbm__verbose": -1,
+        "lgbm": "LGBMClassifier",
+        "prefitted": true,
+        "random_state": 42,
+        "rf__bootstrap": true,
+        "rf__ccp_alpha": 0.0,
+        "rf__class_weight": null,
+        "rf__criterion": "gini",
+        "rf__max_depth": 20,
+        "rf__max_features": "sqrt",
+        "rf__max_leaf_nodes": null,
+        "rf__max_samples": 0.25,
+        "rf__min_impurity_decrease": 0.0,
+        "rf__min_samples_leaf": 2,
+        "rf__min_samples_split": 2,
+        "rf__min_weight_fraction_leaf": 0.0,
+        "rf__monotonic_cst": null,
+        "rf__n_estimators": 80,
+        "rf__n_jobs": -1,
+        "rf__oob_score": false,
+        "rf__random_state": 42,
+        "rf__verbose": 0,
+        "rf__warm_start": false,
+        "rf": "RandomForestClassifier",
+        "task": "multiclass",
+        "weights": [
+          0.5,
+          0.5
+        ]
+      },
+      "val_macro_f1": 0.9519,
+      "val_benign_fpr": 0.0003,
+      "test_macro_f1": 0.8774,
+      "test_macro_f1_unseen": 0.828,
+      "delta_macro_f1_unseen_minus_all": -0.0494,
+      "test_weighted_f1": 0.996,
+      "test_accuracy": 0.9961,
+      "test_benign_fpr": 0.0001,
+      "test_benign_fpr_unseen": 0.0001
+    },
+    "fixed_weights_val_tuned": {
+      "weights": {
+        "rf": 0.55,
+        "lgbm": 0.45
+      },
+      "parameters": {
+        "lgbm__boosting_type": "gbdt",
+        "lgbm__class_weight": null,
+        "lgbm__colsample_bytree": 1.0,
+        "lgbm__importance_type": "split",
+        "lgbm__learning_rate": 0.05,
+        "lgbm__max_depth": -1,
+        "lgbm__min_child_samples": 20,
+        "lgbm__min_child_weight": 1.0,
+        "lgbm__min_split_gain": 0.0,
+        "lgbm__n_estimators": 100,
+        "lgbm__n_jobs": -1,
+        "lgbm__num_leaves": 31,
+        "lgbm__objective": null,
+        "lgbm__random_state": 42,
+        "lgbm__reg_alpha": 0.0,
+        "lgbm__reg_lambda": 10.0,
+        "lgbm__subsample": 1.0,
+        "lgbm__subsample_for_bin": 200000,
+        "lgbm__subsample_freq": 0,
+        "lgbm__max_delta_step": 2.0,
+        "lgbm__verbose": -1,
+        "lgbm": "LGBMClassifier",
+        "prefitted": true,
+        "random_state": 42,
+        "rf__bootstrap": true,
+        "rf__ccp_alpha": 0.0,
+        "rf__class_weight": null,
+        "rf__criterion": "gini",
+        "rf__max_depth": 20,
+        "rf__max_features": "sqrt",
+        "rf__max_leaf_nodes": null,
+        "rf__max_samples": 0.25,
+        "rf__min_impurity_decrease": 0.0,
+        "rf__min_samples_leaf": 2,
+        "rf__min_samples_split": 2,
+        "rf__min_weight_fraction_leaf": 0.0,
+        "rf__monotonic_cst": null,
+        "rf__n_estimators": 80,
+        "rf__n_jobs": -1,
+        "rf__oob_score": false,
+        "rf__random_state": 42,
+        "rf__verbose": 0,
+        "rf__warm_start": false,
+        "rf": "RandomForestClassifier",
+        "task": "multiclass",
+        "weights": [
+          0.55,
+          0.45
+        ]
+      },
+      "val_macro_f1": 0.9519,
+      "val_benign_fpr": 0.0003,
+      "test_macro_f1": 0.8774,
+      "test_macro_f1_unseen": 0.8285,
+      "delta_macro_f1_unseen_minus_all": -0.0489,
+      "test_weighted_f1": 0.996,
+      "test_accuracy": 0.9961,
+      "test_benign_fpr": 0.0001,
+      "test_benign_fpr_unseen": 0.0001
+    },
+    "metalearner_stacking": {
+      "meta_learner": "LogisticRegression(C=20.0) + per-class Macro-F1 multipliers",
+      "parameters": {
+        "cv_folds": 3,
+        "lgbm__boosting_type": "gbdt",
+        "lgbm__class_weight": null,
+        "lgbm__colsample_bytree": 1.0,
+        "lgbm__importance_type": "split",
+        "lgbm__learning_rate": 0.05,
+        "lgbm__max_depth": -1,
+        "lgbm__min_child_samples": 20,
+        "lgbm__min_child_weight": 1.0,
+        "lgbm__min_split_gain": 0.0,
+        "lgbm__n_estimators": 100,
+        "lgbm__n_jobs": -1,
+        "lgbm__num_leaves": 31,
+        "lgbm__objective": null,
+        "lgbm__random_state": 42,
+        "lgbm__reg_alpha": 0.0,
+        "lgbm__reg_lambda": 10.0,
+        "lgbm__subsample": 1.0,
+        "lgbm__subsample_for_bin": 200000,
+        "lgbm__subsample_freq": 0,
+        "lgbm__max_delta_step": 2.0,
+        "lgbm__verbose": -1,
+        "lgbm": "LGBMClassifier",
+        "meta_learner": null,
+        "random_state": 42,
+        "rf__bootstrap": true,
+        "rf__ccp_alpha": 0.0,
+        "rf__class_weight": null,
+        "rf__criterion": "gini",
+        "rf__max_depth": 20,
+        "rf__max_features": "sqrt",
+        "rf__max_leaf_nodes": null,
+        "rf__max_samples": 0.25,
+        "rf__min_impurity_decrease": 0.0,
+        "rf__min_samples_leaf": 2,
+        "rf__min_samples_split": 2,
+        "rf__min_weight_fraction_leaf": 0.0,
+        "rf__monotonic_cst": null,
+        "rf__n_estimators": 80,
+        "rf__n_jobs": -1,
+        "rf__oob_score": false,
+        "rf__random_state": 42,
+        "rf__verbose": 0,
+        "rf__warm_start": false,
+        "rf": "RandomForestClassifier",
+        "task": "multiclass"
+      },
+      "learned_contributions": {
+        "rf_share": 0.5501,
+        "lgbm_share": 0.4499
+      },
+      "val_oof_macro_f1": 0.9706,
+      "val_oof_benign_fpr": 0.0004,
+      "test_macro_f1": 0.9189,
+      "test_macro_f1_unseen": 0.882,
+      "delta_macro_f1_unseen_minus_all": -0.0369,
+      "test_weighted_f1": 0.9963,
+      "test_accuracy": 0.9964,
+      "test_benign_fpr": 0.0001,
+      "test_benign_fpr_unseen": 0.0003,
+      "meta_fit_time_sec": 2.74
+    },
+    "comparison_deltas": {
+      "metalearner_minus_fixed_equal_test_macro_f1": 0.0415,
+      "metalearner_minus_fixed_equal_test_macro_f1_unseen": 0.054,
+      "metalearner_minus_fixed_tuned_test_macro_f1": 0.0415,
+      "metalearner_minus_fixed_tuned_test_macro_f1_unseen": 0.0535,
+      "metalearner_minus_best_single_test_macro_f1": 0.039,
+      "fixed_equal_minus_best_single_test_macro_f1": -0.0025
+    },
+    "winner_ensemble_test_macro_f1": "metalearner",
+    "fixed_weight_val_sweep": [
+      {
+        "w_rf": 0.0,
+        "w_lgbm": 1.0,
+        "macro_f1": 0.94511,
+        "benign_fpr": 0.00034
+      },
+      {
+        "w_rf": 0.05,
+        "w_lgbm": 0.95,
+        "macro_f1": 0.94514,
+        "benign_fpr": 0.00034
+      },
+      {
+        "w_rf": 0.1,
+        "w_lgbm": 0.9,
+        "macro_f1": 0.94514,
+        "benign_fpr": 0.00034
+      },
+      {
+        "w_rf": 0.15,
+        "w_lgbm": 0.85,
+        "macro_f1": 0.94514,
+        "benign_fpr": 0.00034
+      },
+      {
+        "w_rf": 0.2,
+        "w_lgbm": 0.8,
+        "macro_f1": 0.94507,
+        "benign_fpr": 0.00034
+      },
+      {
+        "w_rf": 0.25,
+        "w_lgbm": 0.75,
+        "macro_f1": 0.94507,
+        "benign_fpr": 0.00033
+      },
+      {
+        "w_rf": 0.3,
+        "w_lgbm": 0.7,
+        "macro_f1": 0.94361,
+        "benign_fpr": 0.00033
+      },
+      {
+        "w_rf": 0.35,
+        "w_lgbm": 0.65,
+        "macro_f1": 0.94384,
+        "benign_fpr": 0.00032
+      },
+      {
+        "w_rf": 0.4,
+        "w_lgbm": 0.6,
+        "macro_f1": 0.95181,
+        "benign_fpr": 0.00032
+      },
+      {
+        "w_rf": 0.45,
+        "w_lgbm": 0.55,
+        "macro_f1": 0.95181,
+        "benign_fpr": 0.00032
+      },
+      {
+        "w_rf": 0.5,
+        "w_lgbm": 0.5,
+        "macro_f1": 0.95185,
+        "benign_fpr": 0.00032
+      },
+      {
+        "w_rf": 0.55,
+        "w_lgbm": 0.45,
+        "macro_f1": 0.9519,
+        "benign_fpr": 0.00032
+      },
+      {
+        "w_rf": 0.6,
+        "w_lgbm": 0.4,
+        "macro_f1": 0.95186,
+        "benign_fpr": 0.00032
+      },
+      {
+        "w_rf": 0.65,
+        "w_lgbm": 0.35,
+        "macro_f1": 0.95189,
+        "benign_fpr": 0.00032
+      },
+      {
+        "w_rf": 0.7,
+        "w_lgbm": 0.3,
+        "macro_f1": 0.9518,
+        "benign_fpr": 0.00032
+      },
+      {
+        "w_rf": 0.75,
+        "w_lgbm": 0.25,
+        "macro_f1": 0.95116,
+        "benign_fpr": 0.00032
+      },
+      {
+        "w_rf": 0.8,
+        "w_lgbm": 0.2,
+        "macro_f1": 0.95113,
+        "benign_fpr": 0.00032
+      },
+      {
+        "w_rf": 0.85,
+        "w_lgbm": 0.15,
+        "macro_f1": 0.95084,
+        "benign_fpr": 0.00032
+      },
+      {
+        "w_rf": 0.9,
+        "w_lgbm": 0.1,
+        "macro_f1": 0.94929,
+        "benign_fpr": 0.00032
+      },
+      {
+        "w_rf": 0.95,
+        "w_lgbm": 0.05,
+        "macro_f1": 0.94915,
+        "benign_fpr": 0.00031
+      },
+      {
+        "w_rf": 1.0,
+        "w_lgbm": 0.0,
+        "macro_f1": 0.94809,
+        "benign_fpr": 0.00032
+      }
+    ],
+    "per_class_comparison": {
+      "BENIGN": {
+        "support": 527384,
+        "unseen_support": 220129,
+        "pct_twins": 58.26,
+        "fixed_05_05_f1": 0.9978,
+        "fixed_05_05_f1_unseen": 0.999,
+        "fixed_tuned_f1": 0.9978,
+        "fixed_tuned_f1_unseen": 0.999,
+        "metalearner_f1": 0.998,
+        "metalearner_f1_unseen": 0.9994,
+        "delta_meta_minus_fixed_05_05": 0.0002,
+        "delta_meta_minus_fixed_tuned": 0.0002
+      },
+      "Bot": {
+        "support": 148,
+        "unseen_support": 106,
+        "pct_twins": 28.38,
+        "fixed_05_05_f1": 0.9966,
+        "fixed_05_05_f1_unseen": 0.9953,
+        "fixed_tuned_f1": 0.9966,
+        "fixed_tuned_f1_unseen": 0.9953,
+        "metalearner_f1": 0.9966,
+        "metalearner_f1_unseen": 0.9953,
+        "delta_meta_minus_fixed_05_05": 0.0,
+        "delta_meta_minus_fixed_tuned": 0.0
+      },
+      "DDoS": {
+        "support": 19139,
+        "unseen_support": 15084,
+        "pct_twins": 21.19,
+        "fixed_05_05_f1": 0.999,
+        "fixed_05_05_f1_unseen": 0.9988,
+        "fixed_tuned_f1": 0.999,
+        "fixed_tuned_f1_unseen": 0.9988,
+        "metalearner_f1": 0.999,
+        "metalearner_f1_unseen": 0.9987,
+        "delta_meta_minus_fixed_05_05": 0.0,
+        "delta_meta_minus_fixed_tuned": 0.0
+      },
+      "DoS GoldenEye": {
+        "support": 1585,
+        "unseen_support": 1500,
+        "pct_twins": 5.36,
+        "fixed_05_05_f1": 0.9525,
+        "fixed_05_05_f1_unseen": 0.9615,
+        "fixed_tuned_f1": 0.9525,
+        "fixed_tuned_f1_unseen": 0.9615,
+        "metalearner_f1": 0.9651,
+        "metalearner_f1_unseen": 0.9707,
+        "delta_meta_minus_fixed_05_05": 0.0126,
+        "delta_meta_minus_fixed_tuned": 0.0126
+      },
+      "DoS Hulk": {
+        "support": 31711,
+        "unseen_support": 29091,
+        "pct_twins": 8.26,
+        "fixed_05_05_f1": 0.9999,
+        "fixed_05_05_f1_unseen": 0.9999,
+        "fixed_tuned_f1": 0.9999,
+        "fixed_tuned_f1_unseen": 0.9999,
+        "metalearner_f1": 0.9998,
+        "metalearner_f1_unseen": 0.9999,
+        "delta_meta_minus_fixed_05_05": -0.0001,
+        "delta_meta_minus_fixed_tuned": -0.0001
+      },
+      "DoS Slowhttptest": {
+        "support": 594,
+        "unseen_support": 285,
+        "pct_twins": 52.02,
+        "fixed_05_05_f1": 0.8254,
+        "fixed_05_05_f1_unseen": 0.6916,
+        "fixed_tuned_f1": 0.8254,
+        "fixed_tuned_f1_unseen": 0.6916,
+        "metalearner_f1": 0.8456,
+        "metalearner_f1_unseen": 0.7422,
+        "delta_meta_minus_fixed_05_05": 0.0202,
+        "delta_meta_minus_fixed_tuned": 0.0202
+      },
+      "DoS slowloris": {
+        "support": 1039,
+        "unseen_support": 524,
+        "pct_twins": 49.57,
+        "fixed_05_05_f1": 0.8377,
+        "fixed_05_05_f1_unseen": 0.6354,
+        "fixed_tuned_f1": 0.8377,
+        "fixed_tuned_f1_unseen": 0.6354,
+        "metalearner_f1": 0.9138,
+        "metalearner_f1_unseen": 0.8319,
+        "delta_meta_minus_fixed_05_05": 0.0761,
+        "delta_meta_minus_fixed_tuned": 0.0761
+      },
+      "FTP-Patator": {
+        "support": 1593,
+        "unseen_support": 797,
+        "pct_twins": 49.97,
+        "fixed_05_05_f1": 0.9997,
+        "fixed_05_05_f1_unseen": 0.9994,
+        "fixed_tuned_f1": 0.9997,
+        "fixed_tuned_f1_unseen": 0.9994,
+        "metalearner_f1": 1.0,
+        "metalearner_f1_unseen": 1.0,
+        "delta_meta_minus_fixed_05_05": 0.0003,
+        "delta_meta_minus_fixed_tuned": 0.0003
+      },
+      "PortScan": {
+        "support": 46343,
+        "unseen_support": 143,
+        "pct_twins": 99.69,
+        "fixed_05_05_f1": 0.9792,
+        "fixed_05_05_f1_unseen": 0.7059,
+        "fixed_tuned_f1": 0.9792,
+        "fixed_tuned_f1_unseen": 0.7117,
+        "metalearner_f1": 0.9792,
+        "metalearner_f1_unseen": 0.708,
+        "delta_meta_minus_fixed_05_05": 0.0,
+        "delta_meta_minus_fixed_tuned": 0.0
+      },
+      "Rare attack": {
+        "support": 18,
+        "unseen_support": 18,
+        "pct_twins": 0.0,
+        "fixed_05_05_f1": 0.0,
+        "fixed_05_05_f1_unseen": 0.0,
+        "fixed_tuned_f1": 0.0,
+        "fixed_tuned_f1_unseen": 0.0,
+        "metalearner_f1": 0.3889,
+        "metalearner_f1_unseen": 0.3889,
+        "delta_meta_minus_fixed_05_05": 0.3889,
+        "delta_meta_minus_fixed_tuned": 0.3889
+      },
+      "SSH-Patator": {
+        "support": 596,
+        "unseen_support": 586,
+        "pct_twins": 1.68,
+        "fixed_05_05_f1": 0.9571,
+        "fixed_05_05_f1_unseen": 0.9656,
+        "fixed_tuned_f1": 0.9571,
+        "fixed_tuned_f1_unseen": 0.9656,
+        "metalearner_f1": 0.9571,
+        "metalearner_f1_unseen": 0.9656,
+        "delta_meta_minus_fixed_05_05": 0.0,
+        "delta_meta_minus_fixed_tuned": 0.0
+      },
+      "Web Attack - Brute Force": {
+        "support": 31,
+        "unseen_support": 31,
+        "pct_twins": 0.0,
+        "fixed_05_05_f1": 0.9836,
+        "fixed_05_05_f1_unseen": 0.9836,
+        "fixed_tuned_f1": 0.9836,
+        "fixed_tuned_f1_unseen": 0.9836,
+        "metalearner_f1": 0.9836,
+        "metalearner_f1_unseen": 0.9836,
+        "delta_meta_minus_fixed_05_05": 0.0,
+        "delta_meta_minus_fixed_tuned": 0.0
+      }
+    }
+  }
+]

@@ -7,6 +7,9 @@ import pytest
 
 from sentinel_ml.baselines import (
     ID_COLS,
+    SEED,
+    USE_WANDB,
+    WANDB_PROJECT,
     canonicalize_labels,
     leakage_flags,
     run_baselines,
@@ -41,8 +44,13 @@ def test_dst_port_toggle(tmp_path):
     assert "dst_port" not in X_without.columns
 
 
-def test_majority_baseline_is_weak_and_metrics_are_sane(tmp_path):
-    """Verify all 8 baseline combinations run, save JSON output, and produce valid metrics."""
+def test_majority_baseline_is_weak_and_metrics_are_sane(tmp_path, monkeypatch):
+    """Verify all 8 baseline combinations run, log to W&B by default, save JSON output, and produce valid metrics."""
+    assert USE_WANDB is True
+    assert WANDB_PROJECT == "Sentinel"
+    assert SEED == 42
+    monkeypatch.setenv("WANDB_MODE", "offline")
+    monkeypatch.setenv("WANDB_DIR", str(tmp_path))
     # Synthetic data has 4 ad-hoc classes, not the canonical 12. We pass the
     # synthetic class set so the SEN-FR-05 canonical check doesn't fail here.
     # n=4000 keeps each attack class above RARE_MIN_FLOWS=100 in the train split.
@@ -51,7 +59,6 @@ def test_majority_baseline_is_weak_and_metrics_are_sane(tmp_path):
     results = run_baselines(
         data_dir=tmp_path,
         eval_split="val",
-        use_wandb=False,
         out_dir=tmp_path / "results",
         canonical_labels=synth_labels,
     )
@@ -62,6 +69,10 @@ def test_majority_baseline_is_weak_and_metrics_are_sane(tmp_path):
     for r in results:
         assert 0 <= r["macro_f1"] <= 1
         assert 0 <= r["benign_fpr"] <= 1
+        assert isinstance(r["parameters"], dict) and len(r["parameters"]) > 0
+        assert r["seed"] == 42
+        assert r["data_version"] == "nfs2023te-v1"
+        assert isinstance(r["code_commit"], str) and len(r["code_commit"]) > 0
         if r["model"] == "majority":
             assert r["benign_fpr"] == 0.0  # always predicts benign
             assert r["macro_f1"] < 0.6

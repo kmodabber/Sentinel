@@ -13,16 +13,37 @@ from sklearn.preprocessing import StandardScaler
 
 from sentinel_ml.eval_template import (
     SEED,
+    USE_WANDB,
+    WANDB_ENTITY,
+    WANDB_PROJECT,
     evaluate_single,
     get_top_features,
+    get_wandb_init_kwargs,
     prep_xy,
     run_eval_template,
 )
 from sentinel_ml.make_synthetic import generate_parquet_splits
 
 
-def test_blueprint_auto_fits_with_and_without_port(tmp_path):
-    """Verify passing an unfitted estimator blueprint trains and evaluates both port variants."""
+def test_blueprint_auto_fits_with_and_without_port(tmp_path, monkeypatch):
+    """Verify passing an unfitted estimator blueprint trains, logs to W&B by default, and evaluates both port variants."""
+    assert USE_WANDB is True
+    assert WANDB_PROJECT == "Sentinel"
+    assert WANDB_ENTITY == "wcs-sentinel"
+    assert SEED == 42
+    monkeypatch.setenv("WANDB_MODE", "offline")
+    monkeypatch.setenv("WANDB_DIR", str(tmp_path))
+
+    logged_init_kwargs = []
+    orig_get_wandb_init_kwargs = get_wandb_init_kwargs
+
+    def _spy_wandb_init_kwargs(job_type: str, name: str, config: dict) -> dict:
+        kw = orig_get_wandb_init_kwargs(job_type=job_type, name=name, config=config)
+        logged_init_kwargs.append(kw)
+        return kw
+
+    monkeypatch.setattr("sentinel_ml.eval_template.get_wandb_init_kwargs", _spy_wandb_init_kwargs)
+
     generate_parquet_splits(out_dir=tmp_path, n=1000, seed=0)
     rf = RandomForestClassifier(n_estimators=20, class_weight="balanced", random_state=42)
     results = run_eval_template(
@@ -33,21 +54,32 @@ def test_blueprint_auto_fits_with_and_without_port(tmp_path):
         out_dir=tmp_path / "results",
     )
     assert len(results) == 2
+    assert len(logged_init_kwargs) == 2
     assert results[0]["dst_port"] is True
     assert results[1]["dst_port"] is False
     assert results[0]["n_features"] == results[1]["n_features"] + 1
     assert (tmp_path / "results" / "eval_random_forest_multiclass.json").exists()
-    for r in results:
+    for r, kw in zip(results, logged_init_kwargs):
         assert 0 <= r["macro_f1"] <= 1
         assert 0 <= r["benign_fpr"] <= 1
         assert len(r["top_features"]) > 0
+        assert isinstance(r["parameters"], dict) and r["parameters"]["n_estimators"] == 20
+        assert isinstance(r["model_params"], dict) and r["model_params"]["n_estimators"] == 20
         assert r["seed"] == SEED == 42
-        assert r["code_commit"]
-        assert "data_version" in r
+        assert r["data_version"] == "nfs2023te-v1"
+        assert isinstance(r["code_commit"], str) and len(r["code_commit"]) > 0
+        assert kw["project"] == "Sentinel"
+        assert kw["config"]["seed"] == 42
+        assert kw["config"]["data_version"] == "nfs2023te-v1"
+        assert kw["config"]["code_commit"] == r["code_commit"]
+        assert kw["config"]["parameters"]["n_estimators"] == 20
+        assert kw["config"]["model_params"]["n_estimators"] == 20
 
 
-def test_pretrained_pair_inference_only(tmp_path):
+def test_pretrained_pair_inference_only(tmp_path, monkeypatch):
     """Verify passing a dictionary of pre-trained models runs test inference without refitting."""
+    monkeypatch.setenv("WANDB_MODE", "offline")
+    monkeypatch.setenv("WANDB_DIR", str(tmp_path))
     generate_parquet_splits(out_dir=tmp_path, n=1000, seed=0)
     train_df = pd.read_parquet(tmp_path / "train.parquet")
 
@@ -88,6 +120,39 @@ def test_three_tier_feature_importance_fallback(tmp_path):
 
     metrics = evaluate_single(dummy, X, y, benign_name, top_k=3)
     assert metrics["benign_fpr"] == 0.0
+
+
+def test_train_twin_analysis_counts_and_unseen_scores(tmp_path, monkeypatch):
+    """Verify run_eval_template reports exact train twin counts and score changes without them."""
+    monkeypatch.setenv("WANDB_MODE", "offline")
+    monkeypatch.setenv("WANDB_DIR", str(tmp_path))
+    generate_parquet_splits(out_dir=tmp_path, n=600, seed=7)
+    train_df = pd.read_parquet(tmp_path / "train.parquet")
+    test_df = pd.read_parquet(tmp_path / "test.parquet")
+
+    # Inject 50 exact copies of training rows into test.parquet so twin count >= 50
+    cloned_rows = train_df.iloc[:50].copy()
+    test_with_twins = pd.concat([test_df, cloned_rows], ignore_index=True)
+    test_with_twins.to_parquet(tmp_path / "test.parquet", index=False)
+
+    rf = RandomForestClassifier(n_estimators=15, class_weight="balanced", random_state=42)
+    results = run_eval_template(
+        rf,
+        data_dir=tmp_path,
+        task="binary",
+        model_name="rf_twins",
+        out_dir=tmp_path / "results",
+    )
+    for r in results:
+        assert "train_twin_analysis" in r
+        tw = r["train_twin_analysis"]
+        assert tw["n_test_rows"] == len(test_with_twins)
+        assert tw["n_feature_twins"] >= 50
+        assert tw["n_exact_twins"] >= 50
+        assert tw["n_unseen_rows"] == tw["n_test_rows"] - tw["n_feature_twins"]
+        assert 0.0 <= tw["macro_f1_unseen"] <= 1.0
+        assert tw["delta_macro_f1_unseen_minus_all"] == round(tw["macro_f1_unseen"] - r["macro_f1"], 4)
+        assert "per_class_breakdown" in tw
 
 
 def test_run_eval_template_records_and_logs_commit_data_version_seed(tmp_path, monkeypatch):
