@@ -11,6 +11,13 @@
 # one line to CHECK_LOG as the rota record.
 # Exit codes: 0 honeypot OK, 1 problem found, 2 config error.
 
+# declare -A needs bash 4+. Stock macOS ships bash 3.2 (see README "Requirements").
+if [ -z "${BASH_VERSINFO:-}" ] || [ "${BASH_VERSINFO[0]}" -lt 4 ]; then
+  echo "ERROR: needs bash 4 or newer (this is ${BASH_VERSION:-not bash})." >&2
+  echo "       On macOS: brew install bash coreutils, then run it with that bash." >&2
+  exit 2
+fi
+
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/common.sh

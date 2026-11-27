@@ -114,6 +114,42 @@ check "unfilled config refused"                       '[[ $rc == 2 ]] && grep -q
 rc=$(PULL "$(conf "SOURCES+=(\"gone|$VM/no/such/dir|*|0\")")")
 check "missing source dir warns, pull exits 1"        '[[ $rc == 1 ]] && grep -q "not found on VM" "$T/out"'
 
+echo "== hostile VM: bad paths in the file listing"
+H="$T/hostile"; mkdir -p "$H"
+oc="$VM/var/tmp/opencanary.log"
+printf '%s\t%s\t%s\t%s\n' \
+  opencanary "$VM/var/tmp/../../../etc/passwd" 10 100 \
+  opencanary "/etc/passwd" 10 100 \
+  pcap "$VM/var/log/honeypot/pcap/sub/x.pcap" 10 100 \
+  "../../evil" "$oc" 10 100 \
+  opencanary "var/tmp/opencanary.log" 10 100 \
+  opencanary "$oc" abc 100 \
+  opencanary "$oc" "$(stat -c %s "$oc")" "$(stat -c %Y "$oc")" >"$H/listing"
+rc=$(HOSTILE_LISTING="$H/listing" PATH="$HERE/tests/hostile/find_stub:$PATH" \
+     PULL "$(conf "PULL_DEST=\"$H/store\"")")
+check "6 bad listing lines rejected"                  '[[ $(grep -c "rejected listing line" "$T/out") == 6 ]]'
+check "each rule fires" 'for r in "path contains .." "not directly inside" "unknown source name" "not an absolute path" "malformed line"; do grep -q "$r" "$T/out" || exit 1; done'
+check "the one good line is still pulled, exit 1"     '[[ $rc == 1 ]] && grep -q "new=1 " "$T/out"'
+check "nothing written outside PULL_DEST"             '[[ ! -e $T/evil && ! -e $H/evil && $(find "$H/store" -mindepth 1 -maxdepth 1 -type d ! -name ".*" -printf "%f\n") == opencanary ]]'
+
+echo "== hostile VM: tar stream plants a symlink"
+echo "do not touch" >"$H/outside_secret"
+rc=$(HOSTILE_TARGET="$H/outside_secret" REAL_TAR="$(command -v tar)" \
+     PATH="$HERE/tests/hostile/tar_stub:$PATH" PULL "$(conf "PULL_DEST=\"$H/store2\"")")
+check "symlink rejected, pull exits 1"                '[[ $rc == 1 ]] && grep -q "extracted as a symlink" "$T/out"'
+check "file it pointed at untouched and not copied"   '[[ $(cat "$H/outside_secret") == "do not touch" ]] && ! grep -rqs "do not touch" "$H/store2" --exclude-dir=".staging*"'
+check "no symlinks or staging left in storage"        '[[ -z $(find "$H/store2" -type l) && -z $(find "$H/store2" -maxdepth 1 -name ".staging*") ]]'
+
+echo "== overlapping SOURCES entries"
+rc=$(PULL "$(conf "SOURCES+=(\"cowrie-again|$VM/home/cowrie/cowrie/var/log/cowrie|cowrie.json*|0\")" "PULL_DEST=\"$T/overlap\"")")
+check "a file matched twice is pulled once, no warnings" '[[ $rc == 0 ]] && grep -q "warnings=0" "$T/out" && [[ $(find "$T/overlap" -name "*__cowrie.json" | wc -l) == 1 ]]'
+
+echo "== bash version guard"
+for s in health_check.sh pull_data.sh; do
+  rc=$(sh "$HERE/$s" "$T/base.conf" >"$T/out" 2>&1; echo $?)
+  check "$s refuses to run outside bash 4+"         '[[ $rc == 2 ]] && grep -q "needs bash 4 or newer" "$T/out"'
+done
+
 echo
 echo "$passed passed, $failed failed"
 (( failed == 0 ))

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Test stub: acts like a compromised VM. The first call prints the listing in
+# $HOSTILE_LISTING whatever find was asked for; later calls print nothing.
+[[ -e "$HOSTILE_LISTING.done" ]] && exit 0
+touch "$HOSTILE_LISTING.done"
+cat "$HOSTILE_LISTING"

@@ -9,7 +9,11 @@ These scripts do the weekly health check (plan section 9) and the daily data pul
 | `honeypot.conf.example` | Config template. Copy it to `honeypot.conf` and fill in the TODOs. |
 | `tests/` | Fake-day generator and test suite (`bash tests/run_tests.sh`). No VM needed. |
 
-Requirements: Linux, WSL, or macOS with GNU coreutils, plus `bash`, `ssh`, `tar` and `sha256sum`. The VM needs only `find`, `tar`, `df`, `systemctl` and `curl`, which a standard Ubuntu image already has.
+Requirements: **bash 4 or newer**, plus `ssh`, `tar`, `sha256sum` and GNU `stat`, `date` and `realpath`. Linux and WSL have all of these. The scripts check the bash version first and stop with a message if it's older than 4.
+
+- **macOS:** the built-in bash is 3.2, which lacks the associative arrays (`declare -A`) both scripts use, and the built-in `stat` and `date` are BSD versions. Run `brew install bash coreutils`, put Homebrew's `bin` and coreutils' `gnubin` ahead of `/bin` in `PATH` (the scripts use `#!/usr/bin/env bash`, so they pick up the first `bash` on `PATH`), and check with `bash --version`.
+
+The VM needs only `find`, `tar`, `df`, `systemctl` and `curl`, which a standard Ubuntu image already has.
 
 ### What the scripts assume about the VM
 
@@ -107,20 +111,24 @@ PULL_DEST/
 - Files with identical content are stored once. The pcap tcpdump is still writing, and files changed in the last 10 minutes, wait for the next pull.
 - Storage is created with mode 700, and files with umask 077.
 - **Not pulled: Cowrie `downloads/`.** That directory holds files attackers upload, which may be malware, so it stays on the VM unless Kam approves copying it to a team machine.
+- **Nothing the VM sends is trusted.** The VM faces the internet, so the pull treats its file listing and tar stream as hostile. A listed file is copied only if it names a configured source and sits directly inside that source's configured directory. Paths containing `..`, `.` or `//`, relative paths, subfolders, unknown source names and malformed lines are rejected with a `WARN`. After extraction, any file that arrived as a symlink, or that resolves outside the staging folder, is rejected before anything is moved or deleted.
 - This is raw, private data. Anonymisation (SEN-FR-31, section 8) runs on it afterwards. None of it goes in git.
 
 ## Testing
 
-`bash tests/run_tests.sh` builds a fake VM tree from one day of fake data (`tests/make_fake_day.py`), runs both scripts against it in local mode, and checks 29 cases:
+`bash tests/run_tests.sh` builds a fake VM tree from one day of fake data (`tests/make_fake_day.py`), runs both scripts against it in local mode, and checks 39 cases:
 
 - a clean pull and a re-pull, with byte-for-byte copies
 - the active pcap skipped
 - a growing log replacing its copy, a wrapped pcap kept as a second version, and duplicate content stored once
+- a hostile VM: a listing with `..`, outside, subfolder, relative and unknown-source paths, and a tar stream that plants a symlink, all rejected with nothing written outside storage
+- overlapping `SOURCES` entries pulling a file once, and both scripts refusing to run outside bash 4+
 - each failure the health check should catch: service down, disk full, ring over cap, outbound open, broken outbound test, stale log, old pull, unreachable VM, unfilled config, and a missing source dir
 
 Not covered by the tests (first real run on the VM):
 
 - real SSH
 - `sudo -n` reading the service users' files
+- running under real macOS bash 3.2 (the version guard is tested by running the scripts under `sh`)
 - real systemd unit names
 - the `az` NSG check

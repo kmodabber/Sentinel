@@ -20,6 +20,13 @@
 # wraps) is kept alongside the old copy. Files with the same content are stored once.
 # Exit codes: 0 ok, 1 pulled with problems, 2 config/connection error.
 
+# declare -A needs bash 4+. Stock macOS ships bash 3.2 (see README "Requirements").
+if [ -z "${BASH_VERSINFO:-}" ] || [ "${BASH_VERSINFO[0]}" -lt 4 ]; then
+  echo "ERROR: needs bash 4 or newer (this is ${BASH_VERSION:-not bash})." >&2
+  echo "       On macOS: brew install bash coreutils, then run it with that bash." >&2
+  exit 2
+fi
+
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=lib/common.sh
@@ -62,15 +69,41 @@ while IFS=$'\t' read -r p s m sha rel _at; do
   SHA_REL["$sha"]="$rel"
 done <"$STATE"
 
+# The listing comes from the VM, which faces the internet, so nothing in it is
+# trusted: each line must name a configured source and a plain file directly
+# inside that source's configured directory, or it is rejected.
+declare -A ALLOWED_DIR=()
+for src in "${SOURCES[@]}"; do
+  parse_source "$src"
+  ALLOWED_DIR["$SRC_NAME"]="${SRC_DIR%/}"
+done
+reject() { echo "WARN  rejected listing line from VM ($1): $2" >&2; warnings=$((warnings + 1)); }
+
 NEW_PATH=() NEW_SRC=()
+declare -A QUEUED=()
 new_bytes=0 warnings=0
-while IFS=$'\t' read -r name path size mtime; do
+while IFS=$'\t' read -r name path size mtime extra; do
   [[ -n "${name:-}" ]] || continue
   if [[ "$name" == MISSING ]]; then
     echo "WARN  source '$path' directory not found on VM: $size" >&2
     warnings=$((warnings + 1)); continue
   fi
+  line="$name $path"
+  if [[ -z "${ALLOWED_DIR[$name]+set}" ]]; then reject "unknown source name" "$line"; continue; fi
+  if [[ -n "${extra:-}" || ! "$size" =~ ^[0-9]+$ || ! "$mtime" =~ ^[0-9]+$ ]]; then
+    reject "malformed line" "$line"; continue
+  fi
+  if [[ "$path" != /* ]]; then reject "not an absolute path" "$line"; continue; fi
+  if [[ "/$path/" == *"/../"* || "/$path/" == *"/./"* || "$path" == *//* ]]; then
+    reject "path contains .. or . or //" "$line"; continue
+  fi
+  base="${path##*/}"
+  if [[ "${path%/*}" != "${ALLOWED_DIR[$name]}" || -z "$base" ]]; then
+    reject "not directly inside ${ALLOWED_DIR[$name]}" "$line"; continue
+  fi
   [[ -n "${SEEN["$path|$size|$mtime"]:-}" ]] && continue
+  [[ -n "${QUEUED[$path]:-}" ]] && continue   # two SOURCES entries matched the same file
+  QUEUED["$path"]=1
   NEW_PATH+=("$path"); NEW_SRC+=("$name")
   new_bytes=$((new_bytes + size))
 done <<<"$LISTING"
@@ -84,6 +117,7 @@ fi
 LOCK="$PULL_DEST/.pull.lock"
 mkdir "$LOCK" 2>/dev/null || die "another pull is running (delete $LOCK if it is stale)"
 STAGING="$(mktemp -d "$PULL_DEST/.staging.XXXXXX")"
+STAGING_REAL="$(realpath -- "$STAGING")"
 trap 'rm -rf "$LOCK" "$STAGING"' EXIT
 
 now="$(date +%s)"
@@ -109,7 +143,18 @@ if (( ${#NEW_PATH[@]} > 0 )); then
   for i in "${!NEW_PATH[@]}"; do
     path="${NEW_PATH[$i]}"; name="${NEW_SRC[$i]}"
     f="$STAGING$path"
+    # Second guard, on the extracted file itself: it must be a regular file (not
+    # a symlink a hostile tar stream could plant) that resolves inside staging.
+    if [[ -L "$f" ]]; then
+      echo "WARN  rejected $path: extracted as a symlink" >&2
+      warnings=$((warnings + 1)); continue
+    fi
     if [[ ! -f "$f" ]]; then missing=$((missing + 1)); continue; fi
+    case "$(realpath -- "$f")" in
+      "$STAGING_REAL"/*) ;;
+      *) echo "WARN  rejected $path: resolves outside staging" >&2
+         warnings=$((warnings + 1)); continue ;;
+    esac
     size="$(stat -c %s "$f")"; mtime="$(stat -c %Y "$f")"
     sha="$(sha256sum "$f" | cut -d' ' -f1)"
 

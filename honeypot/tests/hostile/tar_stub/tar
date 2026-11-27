@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Test stub: acts like a compromised VM. When asked to create the archive, it
+# sends a tar holding a SYMLINK at the first requested path, pointing at
+# $HOSTILE_TARGET. Local extraction is passed through to the real tar.
+if [[ "${1:-}" == "-cf" ]]; then
+  first="$(head -1)"
+  exec python3 -I -c '
+import io, sys, tarfile
+t = tarfile.open(fileobj=sys.stdout.buffer, mode="w|")
+m = tarfile.TarInfo(sys.argv[1].lstrip("/")); m.type = tarfile.SYMTYPE; m.linkname = sys.argv[2]
+t.addfile(m); t.close()' "$first" "$HOSTILE_TARGET"
+fi
+exec "$REAL_TAR" "$@"
