@@ -11,6 +11,45 @@ These scripts do the weekly health check (plan section 9) and the daily data pul
 
 Requirements: Linux, WSL, or macOS with GNU coreutils, plus `bash`, `ssh`, `tar` and `sha256sum`. The VM needs only `find`, `tar`, `df`, `systemctl` and `curl`, which a standard Ubuntu image already has.
 
+### What the scripts assume about the VM
+
+Check these against the build. If one doesn't match, change the config, not the scripts.
+
+| Assumption | Config setting | If your build differs |
+|---|---|---|
+| The admin user has **passwordless sudo** (the Azure default), so it can read files owned by the cowrie and tcpdump users | `REMOTE_SUDO="sudo -n"` | Give the admin user read access to every source and set `REMOTE_SUDO=""` |
+| Cowrie, OpenCanary and the tcpdump ring each run as a **systemd service** | `SERVICES=(cowrie opencanary honeypot-tcpdump)` | Put your real unit names here. If Cowrie is started with `bin/cowrie start` and not systemd, the service check will always fail, so make it a systemd unit (recommended, so it restarts after a reboot) |
+| Cowrie is installed in `/home/cowrie/cowrie` | `cowrie`, `cowrie-text`, `cowrie-tty` lines in `SOURCES` | Change the directory in those three lines |
+| OpenCanary logs to `/var/tmp/opencanary.log` (its default) | `opencanary` line in `SOURCES` | Use the path in `/etc/opencanaryd/opencanary.conf` |
+| tcpdump writes `capture.pcapNN` (gzipped to `.gz`) in `/var/log/honeypot/pcap`, for example `tcpdump -i eth0 -C 100 -W 50 -w /var/log/honeypot/pcap/capture.pcap 'not port <admin port>'` | `pcap` line in `SOURCES` | Change the directory or glob to match your tcpdump command |
+| The data sits on the root disk | `DATA_MOUNT="/"` | Set it to the data disk's mount point if you add one |
+
+## First run on the VM (do this once before go-live)
+
+This is the "tested once" step for SEN-87. Run it from your own machine after Cowrie, OpenCanary and tcpdump are running (the dry run in plan section 11 is a good time: it also proves step 7 there, a pull working with outbound blocked).
+
+1. **Fill in `honeypot.conf`** (see setup below), then check you can log in at all:
+   `ssh -p <admin port> -i <key> <admin user>@<VM>`
+2. **Dry-run the pull.** It only lists files and copies nothing:
+   `./pull_data.sh --dry-run honeypot.conf`
+   Expect `NEW ...` lines for each source and a final `PENDING <files> <bytes>`. A `WARN ... directory not found` line means that source's path is wrong; fix it in `SOURCES`.
+3. **Pull for real:** `./pull_data.sh honeypot.conf`. Expect `pull new=<n> ... warnings=0`. Open a couple of the copied files under `PULL_DEST` to check they look right.
+4. **Pull again.** Expect `new=0` (or only files that changed since step 3).
+5. **Run the health check:** `./health_check.sh honeypot.conf`. Every line should be `PASS`, ending in `honeypot OK`. Before outbound is denied, item 4 will (correctly) FAIL.
+6. **Send Hossane** the output of steps 2, 3 and 5, plus any config lines you changed, so the defaults can be fixed for everyone.
+
+## Troubleshooting
+
+| You see | Cause and fix |
+|---|---|
+| `config still has TODO values` | Fill in `HP_HOST`, `HP_USER`, `HP_PORT`, `PULL_DEST` in `honeypot.conf` |
+| `FAIL 1 VM up` / `could not list files on the VM` | SSH failed. Check the VM is running, your current IP is on the admin NSG rule (`Allow-Admin-SSH`), and the port and key are right. Try the plain `ssh` command from step 1 |
+| `sudo: a password is required` | The admin user lacks passwordless sudo; see the first row of the assumptions table |
+| `WARN source '<name>' directory not found on VM` | That `SOURCES` path doesn't exist on the VM; fix the path |
+| `FAIL service <x> is unknown` | Wrong unit name in `SERVICES` (`systemctl list-units --type=service` on the VM shows the real ones), or the service isn't run by systemd |
+| `FAIL 4 outbound denied: test command could not run` | `curl` is missing on the VM. Install it before the outbound deny goes on, or change `OUTBOUND_TEST_CMD` |
+| `another pull is running` | A pull is already running, or one crashed. If none is running, delete `PULL_DEST/.pull.lock` |
+
 ## One-time setup (Tareq, at build)
 
 1. `cp honeypot.conf.example honeypot.conf` and fill in the values the plan left open (section 13):
@@ -21,7 +60,7 @@ Requirements: Linux, WSL, or macOS with GNU coreutils, plus `bash`, `ssh`, `tar`
 2. **Never commit `honeypot.conf`.** It names the host and key. Add it to `.gitignore`.
 3. Do a dry run from your machine: `./pull_data.sh --dry-run honeypot.conf`. It should list files and print `PENDING n bytes`.
 4. Run one real pull and one health check. Both should end cleanly (`honeypot OK` once data exists).
-5. Schedule the daily pull on whichever machine owns `PULL_DEST`, for example with cron:
+5. Schedule the daily pull on a machine that is **on every day over the break**, since a pull that doesn't run lets old captures be overwritten. If that's a laptop, the rota person each week should run it (or check its cron job) while their laptop is on. For example with cron:
    ```
    15 6 * * *  /path/to/sen-87/pull_data.sh /path/to/honeypot.conf >>/path/to/pull-cron.log 2>&1
    ```

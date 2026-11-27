@@ -17,6 +17,7 @@ logs/
 *.pcapng
 *.cap
 demo/slices/
+honeypot/honeypot.conf
 
 .env
 *.csv
