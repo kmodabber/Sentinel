@@ -1,0 +1,3 @@
+*.sh text eol=lf
+honeypot/tests/bin/systemctl text eol=lf
+honeypot/tests/hostile/** text eol=lf

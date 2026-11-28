@@ -1,0 +1,53 @@
+# SEN-87 honeypot admin config. Copy to honeypot.conf and fill in the TODOs.
+# This file is sourced by bash. Keep it OUT of git (it names the host and key).
+
+# --- Connection (admin SSH, key-only, team IPs) -----------------------------
+HP_HOST="TODO_VM_IP_OR_DNS"      # set to "local" only for tests / running on the VM itself
+HP_USER="TODO_admin_user"
+HP_PORT="TODO_admin_port"        # undecided in the plan; Tareq fills in
+HP_KEY="$HOME/.ssh/sentinel_honeypot"
+# Cowrie, OpenCanary and tcpdump files belong to their own service users, so the
+# admin user reads them through sudo (the Azure admin user has passwordless sudo
+# by default). Set to "" if the admin user can already read every source.
+REMOTE_SUDO="sudo -n"
+
+# --- Services that must be active (systemd unit names on the VM) ------------
+SERVICES=(cowrie opencanary honeypot-tcpdump)
+
+# --- Data sources on the VM ---------------------------------------------------
+# One entry per source:  name|directory|filename glob|stable minutes
+# "stable minutes": skip files modified more recently than this (use for the
+# pcap file tcpdump is still writing). 0 = copy even if still growing; a file
+# that changed since the last pull is copied again next time.
+# Paths follow plan section 6. Pulled copies are versioned, so a pcap that
+# tcpdump overwrites after the ring wraps never replaces an earlier pulled copy,
+# while a log that has only grown replaces its older, shorter copy.
+SOURCES=(
+  "cowrie|/home/cowrie/cowrie/var/log/cowrie|cowrie.json*|0"
+  "cowrie-text|/home/cowrie/cowrie/var/log/cowrie|cowrie.log*|0"
+  "cowrie-tty|/home/cowrie/cowrie/var/lib/cowrie/tty|*|10"
+  "opencanary|/var/tmp|opencanary.log*|0"
+  "pcap|/var/log/honeypot/pcap|*.pcap*|10"
+)
+# Not pulled by default: /home/cowrie/cowrie/var/lib/cowrie/downloads holds files
+# attackers upload (SCP/SFTP still lands there with wget downloads off), which
+# may be malware. Ask Kam before copying those onto a team machine.
+
+# --- Health thresholds (from the honeypot plan) -------------------------------
+DATA_MOUNT="/"               # filesystem the logs and pcaps live on
+DISK_MAX_PCT=70              # disk must be under this
+PCAP_SOURCE="pcap"           # which SOURCES entry is the tcpdump ring buffer
+PCAP_CAP_MB=5120             # ~5 GB tcpdump cap
+FRESH_HOURS=24               # every source must have a file written in this window
+
+# Outbound must be DENIED. This command must FAIL on the VM for the check to pass.
+OUTBOUND_TEST_CMD="curl -sS --max-time 5 -o /dev/null https://1.1.1.1"
+
+# --- Private storage (where pulls land; undecided in the plan) ---------------
+PULL_DEST="TODO_private_storage_path"
+# The plan wants a DAILY pull (section 7) before the ~5 GB ring wraps, so the
+# weekly check fails if the last good pull is older than this.
+PULL_MAX_AGE_DAYS=2
+
+# Where health_check.sh appends one line per run (the rota record).
+CHECK_LOG="$PULL_DEST/health_checks.log"

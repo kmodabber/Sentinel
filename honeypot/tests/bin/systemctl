@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Test stub: every unit is "active" unless listed in $FAKE_DOWN.
+[[ "${1:-}" == is-active ]] || { echo "stub systemctl only supports is-active" >&2; exit 1; }
+for d in ${FAKE_DOWN:-}; do [[ "$2" == "$d" ]] && { echo inactive; exit 3; }; done
+echo active
