@@ -1,0 +1,390 @@
+﻿{
+    "annotations":  {
+                        "list":  [
+                                     {
+                                         "builtIn":  1,
+                                         "datasource":  {
+                                                            "type":  "grafana",
+                                                            "uid":  "-- Grafana --"
+                                                        },
+                                         "enable":  true,
+                                         "hide":  true,
+                                         "iconColor":  "rgba(0, 211, 255, 1)",
+                                         "name":  "Annotations \u0026 Alerts",
+                                         "type":  "dashboard"
+                                     }
+                                 ]
+                    },
+    "editable":  true,
+    "fiscalYearStartMonth":  0,
+    "graphTooltip":  0,
+    "id":  1,
+    "links":  [
+
+              ],
+    "panels":  [
+                   {
+                       "datasource":  {
+                                          "type":  "postgres",
+                                          "uid":  "${DS_SENTINEL_POSTGRESQL}"
+                                      },
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "color":  {
+                                                                          "mode":  "thresholds"
+                                                                      },
+                                                            "custom":  {
+                                                                           "align":  "auto",
+                                                                           "cellOptions":  {
+                                                                                               "type":  "auto"
+                                                                                           },
+                                                                           "inspect":  false
+                                                                       },
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "green"
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  80
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "gridPos":  {
+                                       "h":  19,
+                                       "w":  23,
+                                       "x":  0,
+                                       "y":  0
+                                   },
+                       "id":  3,
+                       "options":  {
+                                       "cellHeight":  "sm",
+                                       "footer":  {
+                                                      "countRows":  false,
+                                                      "fields":  "",
+                                                      "reducer":  [
+                                                                      "sum"
+                                                                  ],
+                                                      "show":  false
+                                                  },
+                                       "showHeader":  true
+                                   },
+                       "pluginVersion":  "11.6.0",
+                       "targets":  [
+                                       {
+                                           "datasource":  {
+                                                              "type":  "postgres",
+                                                              "uid":  "${DS_SENTINEL_POSTGRESQL}"
+                                                          },
+                                           "editorMode":  "code",
+                                           "format":  "table",
+                                           "rawQuery":  true,
+                                           "rawSql":  "SELECT\r\n    d.created_at AS \"Time\",\r\n    f.src_ip AS \"Source IP\",\r\n    f.dst_ip AS \"Destination IP\",\r\n    d.predicted_class AS \"Attack Type\",\r\n    ROUND(d.confidence::numeric, 3) AS \"Confidence\",\r\n    d.model_version AS \"Model Version\"\r\nFROM detections d\r\nJOIN flows f ON d.flow_id = f.id\r\nWHERE d.is_alert = TRUE\r\n  AND d.model_version = \u0027synthetic-fr20-v1\u0027\r\n  AND $__timeFilter(d.created_at)\r\nORDER BY d.created_at DESC\r\nLIMIT 100;",
+                                           "refId":  "A",
+                                           "sql":  {
+                                                       "columns":  [
+                                                                       {
+                                                                           "parameters":  [
+
+                                                                                          ],
+                                                                           "type":  "function"
+                                                                       }
+                                                                   ],
+                                                       "groupBy":  [
+                                                                       {
+                                                                           "property":  {
+                                                                                            "type":  "string"
+                                                                                        },
+                                                                           "type":  "groupBy"
+                                                                       }
+                                                                   ],
+                                                       "limit":  50
+                                                   }
+                                       }
+                                   ],
+                       "title":  "Live Alerts",
+                       "type":  "table"
+                   },
+                   {
+                       "datasource":  {
+                                          "type":  "postgres",
+                                          "uid":  "${DS_SENTINEL_POSTGRESQL}"
+                                      },
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "color":  {
+                                                                          "mode":  "palette-classic"
+                                                                      },
+                                                            "custom":  {
+                                                                           "axisBorderShow":  false,
+                                                                           "axisCenteredZero":  false,
+                                                                           "axisColorMode":  "text",
+                                                                           "axisLabel":  "",
+                                                                           "axisPlacement":  "auto",
+                                                                           "fillOpacity":  80,
+                                                                           "gradientMode":  "none",
+                                                                           "hideFrom":  {
+                                                                                            "legend":  false,
+                                                                                            "tooltip":  false,
+                                                                                            "viz":  false
+                                                                                        },
+                                                                           "lineWidth":  1,
+                                                                           "scaleDistribution":  {
+                                                                                                     "type":  "linear"
+                                                                                                 },
+                                                                           "thresholdsStyle":  {
+                                                                                                   "mode":  "off"
+                                                                                               }
+                                                                       },
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "green"
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  80
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "gridPos":  {
+                                       "h":  8,
+                                       "w":  12,
+                                       "x":  0,
+                                       "y":  19
+                                   },
+                       "id":  2,
+                       "options":  {
+                                       "barRadius":  0,
+                                       "barWidth":  0.97,
+                                       "fullHighlight":  false,
+                                       "groupWidth":  0.7,
+                                       "legend":  {
+                                                      "calcs":  [
+
+                                                                ],
+                                                      "displayMode":  "list",
+                                                      "placement":  "bottom",
+                                                      "showLegend":  true
+                                                  },
+                                       "orientation":  "auto",
+                                       "showValue":  "auto",
+                                       "stacking":  "none",
+                                       "tooltip":  {
+                                                       "hideZeros":  false,
+                                                       "mode":  "single",
+                                                       "sort":  "none"
+                                                   },
+                                       "xTickLabelRotation":  0,
+                                       "xTickLabelSpacing":  0
+                                   },
+                       "pluginVersion":  "11.6.0",
+                       "targets":  [
+                                       {
+                                           "datasource":  {
+                                                              "type":  "postgres",
+                                                              "uid":  "${DS_SENTINEL_POSTGRESQL}"
+                                                          },
+                                           "editorMode":  "code",
+                                           "format":  "table",
+                                           "rawQuery":  true,
+                                           "rawSql":  "SELECT\r\n    predicted_class AS attack_type,\r\n    COUNT(*) AS detections\r\nFROM detections\r\nWHERE model_version = \u0027synthetic-fr20-v1\u0027\r\nGROUP BY predicted_class\r\nORDER BY detections DESC;",
+                                           "refId":  "A",
+                                           "sql":  {
+                                                       "columns":  [
+                                                                       {
+                                                                           "parameters":  [
+
+                                                                                          ],
+                                                                           "type":  "function"
+                                                                       }
+                                                                   ],
+                                                       "groupBy":  [
+                                                                       {
+                                                                           "property":  {
+                                                                                            "type":  "string"
+                                                                                        },
+                                                                           "type":  "groupBy"
+                                                                       }
+                                                                   ],
+                                                       "limit":  50
+                                                   }
+                                       }
+                                   ],
+                       "title":  "Detections by Attack Type",
+                       "type":  "barchart"
+                   },
+                   {
+                       "datasource":  {
+                                          "type":  "postgres",
+                                          "uid":  "${DS_SENTINEL_POSTGRESQL}"
+                                      },
+                       "fieldConfig":  {
+                                           "defaults":  {
+                                                            "color":  {
+                                                                          "mode":  "palette-classic"
+                                                                      },
+                                                            "custom":  {
+                                                                           "axisBorderShow":  false,
+                                                                           "axisCenteredZero":  false,
+                                                                           "axisColorMode":  "text",
+                                                                           "axisLabel":  "",
+                                                                           "axisPlacement":  "auto",
+                                                                           "barAlignment":  0,
+                                                                           "barWidthFactor":  0.6,
+                                                                           "drawStyle":  "line",
+                                                                           "fillOpacity":  0,
+                                                                           "gradientMode":  "none",
+                                                                           "hideFrom":  {
+                                                                                            "legend":  false,
+                                                                                            "tooltip":  false,
+                                                                                            "viz":  false
+                                                                                        },
+                                                                           "insertNulls":  false,
+                                                                           "lineInterpolation":  "linear",
+                                                                           "lineWidth":  1,
+                                                                           "pointSize":  5,
+                                                                           "scaleDistribution":  {
+                                                                                                     "type":  "linear"
+                                                                                                 },
+                                                                           "showPoints":  "auto",
+                                                                           "spanNulls":  false,
+                                                                           "stacking":  {
+                                                                                            "group":  "A",
+                                                                                            "mode":  "none"
+                                                                                        },
+                                                                           "thresholdsStyle":  {
+                                                                                                   "mode":  "off"
+                                                                                               }
+                                                                       },
+                                                            "mappings":  [
+
+                                                                         ],
+                                                            "thresholds":  {
+                                                                               "mode":  "absolute",
+                                                                               "steps":  [
+                                                                                             {
+                                                                                                 "color":  "green"
+                                                                                             },
+                                                                                             {
+                                                                                                 "color":  "red",
+                                                                                                 "value":  80
+                                                                                             }
+                                                                                         ]
+                                                                           }
+                                                        },
+                                           "overrides":  [
+
+                                                         ]
+                                       },
+                       "gridPos":  {
+                                       "h":  8,
+                                       "w":  12,
+                                       "x":  0,
+                                       "y":  27
+                                   },
+                       "id":  1,
+                       "options":  {
+                                       "legend":  {
+                                                      "calcs":  [
+
+                                                                ],
+                                                      "displayMode":  "list",
+                                                      "placement":  "bottom",
+                                                      "showLegend":  true
+                                                  },
+                                       "tooltip":  {
+                                                       "hideZeros":  false,
+                                                       "mode":  "single",
+                                                       "sort":  "none"
+                                                   }
+                                   },
+                       "pluginVersion":  "11.6.0",
+                       "targets":  [
+                                       {
+                                           "datasource":  {
+                                                              "type":  "postgres",
+                                                              "uid":  "${DS_SENTINEL_POSTGRESQL}"
+                                                          },
+                                           "editorMode":  "code",
+                                           "format":  "time_series",
+                                           "rawQuery":  true,
+                                           "rawSql":  "SELECT\r\n    $__timeGroupAlias(seen_at, \u00271m\u0027),\r\n    COUNT(*) AS flows\r\nFROM flows\r\nWHERE $__timeFilter(seen_at)\r\nGROUP BY 1\r\nORDER BY 1;",
+                                           "refId":  "A",
+                                           "sql":  {
+                                                       "columns":  [
+                                                                       {
+                                                                           "parameters":  [
+
+                                                                                          ],
+                                                                           "type":  "function"
+                                                                       }
+                                                                   ],
+                                                       "groupBy":  [
+                                                                       {
+                                                                           "property":  {
+                                                                                            "type":  "string"
+                                                                                        },
+                                                                           "type":  "groupBy"
+                                                                       }
+                                                                   ],
+                                                       "limit":  50
+                                                   }
+                                       }
+                                   ],
+                       "title":  "Network Flows Over Time",
+                       "type":  "timeseries"
+                   }
+               ],
+    "preload":  false,
+    "refresh":  "5s",
+    "schemaVersion":  41,
+    "tags":  [
+
+             ],
+    "templating":  {
+                       "list":  [
+
+                                ]
+                   },
+    "time":  {
+                 "from":  "now-6h",
+                 "to":  "now"
+             },
+    "timepicker":  {
+
+                   },
+    "timezone":  "browser",
+    "title":  "Sentinel â€” Network Security Overview",
+    "uid":  "fg5bg4usus0lcd",
+    "version":  6,
+    "__inputs":  [
+                     {
+                         "pluginId":  "postgres",
+                         "name":  "DS_SENTINEL_POSTGRESQL",
+                         "description":  "Select the Sentinel PostgreSQL data source",
+                         "type":  "datasource",
+                         "label":  "Sentinel PostgreSQL",
+                         "pluginName":  "PostgreSQL"
+                     }
+                 ]
+}
