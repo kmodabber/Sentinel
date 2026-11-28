@@ -9,3 +9,4 @@ lightgbm==4.7.0
 wandb==0.31.0
 ruff==0.17.4
 nfstream==6.6.0
+psycopg[binary]==3.2.3
